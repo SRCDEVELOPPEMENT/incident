@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="main-content">
-    <div class="container-fluid">
+    <div class="container-fluid" style="font-family: 'Century Gothic';">
         <div class="row justify-content-center">
             <div class="col-12">
                     <div class="card-header py-3">
@@ -19,8 +19,7 @@
                                         data-backdrop="static" 
                                         data-keyboard="false"
                                         title="Ajout D'une Catégorie" 
-                                        style="background-color: #345B86;" 
-                                        class="btn btn-icon-split"
+                                        class="btn btn-icon-split btn-primary"
                                         data-toggle="modal" 
                                         data-target="#modal_add_categorie">
                                         <span class="icon text-white-80">
@@ -39,7 +38,7 @@
                                 <div class="card-body">
                                     <!-- table -->
                                     <table class="table datatables" id="dataTable-1">
-                                        <thead>
+                                        <thead class="bg-dark">
                                         <tr>
                                             <th></th>
                                             <th>#</th>
@@ -59,7 +58,7 @@
                                                 </td>
                                                 <td>{{ $key+1 }}</td>
                                                 <td>{{ $cat->name }}</td>
-                                                <td>{{ $cat->departements->name }}</td>
+                                                <td>{{ $cat->departements ? $cat->departements->name : $cat->type }}</td>
                                                 <td>
                                                     <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         <span class="text-muted sr-only">Action</span>
@@ -74,6 +73,7 @@
                                                         data-target="#categ"
                                                         href="#"
                                                         data-cat="{{ $cat }}">
+                                                        <span class="fe fe-edit-2 mr-4"></span>
                                                         Editer
                                                     </a>
                                                     <a 
@@ -81,7 +81,9 @@
                                                         data-incidents="{{ $incidents }}" 
                                                         data-categorie="{{ $cat }}" 
                                                         class="dropdown-item" 
-                                                        href="#">Supprimer
+                                                        href="#">
+                                                        <span class="fe fe-x mr-4"></span>
+                                                        Supprimer
                                                     </a>
                                                 </div>
                                                 </td>
@@ -99,7 +101,7 @@
 </div>
 
 <!-- Modal Add Catégorie -->
-<div style="font-family: Century Gothic; font-size:15px;" class="modal" id="modal_add_categorie" tabindex="-1" role="dialog" aria-labelledby="verticalModalTitle" aria-hidden="true">
+<div style="font-family: Century Gothic;" class="modal" id="modal_add_categorie" tabindex="-1" role="dialog" aria-labelledby="verticalModalTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                           <div class="modal-content">
                                 <div class="modal-header">
@@ -117,21 +119,29 @@
                                                     <form id="frmaddcati">
                                                             @csrf
                                                             @method('POST')
-                                                        <div class="form-group mb-3">
-                                                            <label for="task"> <span class="fe fe-edit mr-1"></span> Catégorie</label>
-                                                            <input type="text" style="font-family: Century Gothic;" class="form-control" id="cat_name" name="name" placeholder="Veuillez Entrer Une Catégorie."/>
-                                                            <div class="invalid-feedback"> Please enter a message in the textarea. </div>
-                                                        </div>
-                                                        <div class="mb-4">
-                                                            <label for="dept">Département</label>
-                                                            <select class="custom-select" name="departement_id" id="dept">
-                                                                <option selected value="">Choisissez...</option>
-                                                                @foreach($departements as $dept)
-                                                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                                                                @endforeach
+                                                        <div class="my-3">
+                                                            <label for="dept">Département <span style="color:red;"> *</span></label>
+                                                            <select style="font-family: Century Gothic; font-size:20px;" class="custom-select" name="departement_id" id="dept">
+                                                                <optgroup label="Liste Département">
+                                                                    <option selected value="">Choisissez...</option>
+                                                                    @foreach($departements as $dept)
+                                                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                                                    @endforeach
+                                                                </optgroup>
+                                                                <optgroup label="Liste Type">
+                                                                    @foreach($types as $type)
+                                                                    <option value="{{ $type->name }}">{{ $type->name }}</option>
+                                                                    @endforeach
+                                                                </optgroup>
                                                             </select>
                                                             <div class="invalid-feedback"> Please select a valid state. </div>
                                                         </div>
+                                                        <div class="form-group my-4">
+                                                            <label for="task"> <span class="fe fe-edit mr-1"></span>Nom Catégorie <span style="color:red;"> *</span></label>
+                                                            <input type="text" style="font-family: Century Gothic; font-size:20px;" class="form-control" id="cat_name" name="name" placeholder="Veuillez Entrer Une Catégorie."/>
+                                                            <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                                        </div>
+
                                                     </form>
                                                 </div>
                                         </div>
@@ -151,7 +161,7 @@
 </div>
 
 <!-- Modal Edit Catégorie -->
-<div style="font-family: Century Gothic; font-size:15px;" class="modal" id="categ" tabindex="-1" role="dialog" aria-labelledby="verticalModalTitle" aria-hidden="true">
+<div style="font-family: Century Gothic;" class="modal" id="categ" tabindex="-1" role="dialog" aria-labelledby="verticalModalTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                           <div class="modal-content">
                                 <div class="modal-header">
@@ -172,17 +182,24 @@
                                                         @method('POST')
                                                         <input type="hidden" value="" name="id" id="id_cat">
                                                         <div class="form-group mb-3">
-                                                            <label for="task"> <span class="fe fe-edit mr-1"></span> Catégorie</label>
-                                                            <input type="text" style="font-family: Century Gothic;" class="form-control" id="cat_names" name="name" placeholder="Veuillez Entrer Une Catégorie."/>
+                                                            <label for="task"> <span class="fe fe-edit mr-1"></span> Catégorie <span style="color:red;"> *</span></label>
+                                                            <input type="text" style="font-family: Century Gothic; font-size:20px;" class="form-control" id="cat_names" name="name" placeholder="Veuillez Entrer Une Catégorie."/>
                                                             <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                                         </div>
                                                         <div class="mb-4">
-                                                            <label for="dept">Département</label>
-                                                            <select class="custom-select" name="departement_id" id="depts">
-                                                                <option selected value="">Choisissez...</option>
-                                                                @foreach($departements as $dept)
-                                                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                                                                @endforeach
+                                                            <label for="dept">Département <span style="color:red;"> *</span></label>
+                                                            <select style="font-family: Century Gothic; font-size:20px;" class="custom-select" name="departement_id" id="depts">
+                                                                <optgroup label="Liste Département">
+                                                                    <option selected value="">Choisissez...</option>
+                                                                    @foreach($departements as $dept)
+                                                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                                                    @endforeach
+                                                                </optgroup>
+                                                                <optgroup label="Liste Type">
+                                                                    @foreach($types as $type)
+                                                                    <option value="{{ $type->name }}">{{ $type->name }}</option>
+                                                                    @endforeach
+                                                                </optgroup>
                                                             </select>
                                                             <div class="invalid-feedback"> Please select a valid state. </div>
                                                         </div>
@@ -194,7 +211,7 @@
                                             <div class="col-md-12 text-left">
                                                 <button type="button" id="btn_edite_cate" class="btn btn-sm btn-info">
                                                     <span class="fe fe-airplay fe-16"></span>
-                                                    <span class="fe fe-save mr-2"></span> 
+                                                    <span class="fe fe-edit-2 mr-2"></span> 
                                                     <span class="text-lg">Editer La Catégorie</span>
                                                 </button>
                                             </div>
@@ -214,7 +231,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validation" disabled style="width:100%; height:7em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="validation" disabled style="width:100%; height:7em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -233,7 +250,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validationedito" disabled style="width:100%; height:7em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="validationedito" disabled style="width:100%; height:7em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -252,7 +269,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validation_et" disabled style="width:100%; height:7em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="validation_et" disabled style="width:100%; height:7em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -271,7 +288,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validation_tara" disabled style="width:100%; height:7em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="validation_tara" disabled style="width:100%; height:7em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">

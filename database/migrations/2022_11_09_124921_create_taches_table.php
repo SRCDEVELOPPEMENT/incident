@@ -19,7 +19,8 @@ class CreateTachesTable extends Migration
             $table->string('description')->lenght(300);
             $table->string('status')->lenght(50);
             $table->string('maturity_date');
-            $table->string('resolution_degree')->nullable()->lenght(50);
+            $table->string('commentaire')->nullable()->lenght(250);
+            $table->integer('resolution_degree')->nullable();
             $table->unsignedBigInteger('departement_solving_id');
             $table->foreign('departement_solving_id')->references('id')->on('departements')->onUpdate(\DB::raw('NO ACTION'));
             $table->string('incident_number', 15);

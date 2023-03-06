@@ -6,15 +6,13 @@
     <meta name="author" content="">
     <link rel="icon" href="favicon.ico">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- <script src="{{ asset('js/app.js') }}" defer></script> -->
+
     <title>TRACKING-INCIDENT</title>
 
     <!-- Simple bar CSS -->
     
     <link rel="stylesheet" href="{{ url('css/simplebar.css') }}">
-    <!-- Fonts CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <!-- Icons CSS -->
+    
     <script src="{{ url('jquery/jquery.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url('css/feather.css') }}">
     <link rel="stylesheet" href="{{ url('css/select2.css') }}">
@@ -25,7 +23,44 @@
     <link rel="stylesheet" href="{{ url('css/quill.snow.css') }}">
     <!-- Date Range Picker CSS -->
     <link rel="stylesheet" href="{{ url('css/daterangepicker.css') }}">
+    <style>
+      .container{
+        width: 500px;
+        height: 400px;
+        overflow: hidden;
+        position: relative;
+        margin:50px auto;
+      }
 
+      .barcontainer{
+        background-color: #343A40;
+        position: relative;
+        transform: translateY(-50%);
+        top: 50%;
+        margin-left: 50px;
+        width: 1em;
+        height: 320px;
+        float: left;
+        //border darken(#98AFC7, 40%) 3px solid
+      }
+        
+      .bar{
+        background-color: #9BC9C7;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 80%;
+        //border-top: 6px solid #FFF;
+        box-sizing: border-box;
+        animation: grow 1.5s ease-out forwards;
+        transform-origin: bottom;
+      }
+      @keyframes grow{
+        from{
+          transform: scaleY(0);
+        }
+      }
+    </style>
     <link rel="stylesheet" href="{{ url('css/dataTables.bootstrap4.css') }}">
     <!-- Date Range Picker CSS -->
     <link rel="stylesheet" href="{{ url('css/daterangepicker.css') }}">
@@ -38,8 +73,8 @@
  <body class="vertical dark">
     <div class="wrapper">
       <!-- Topbar -->
-        <nav class="topnav navbar navbar-light">
-          <button type="button" class="navbar-toggler text-muted mt-2 p-0 mr-3 collapseSidebar">
+        <nav style="font-family: Century Gothic;" class="topnav navbar navbar-light">
+          <button style="visibility: hidden;" disabled type="button" class="navbar-toggler text-muted mt-2 p-0 mr-3 collapseSidebar">
             <i class="fe fe-menu"></i>
           </button>
           <ul class="nav">
@@ -48,17 +83,6 @@
               <i class="fe fe-sun fe-16"></i>
             </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link text-muted my-2" href="./#" data-toggle="modal" data-target=".modal-shortcut">
-                <span class="fe fe-grid fe-16"></span>
-              </a>
-            </li>
-            <li class="nav-item nav-notif">
-              <a class="nav-link text-muted my-2" href="#" data-toggle="modal" data-target=".modal-notif">
-                <span class="fe fe-bell fe-16"></span>
-                <span class="dot dot-md bg-success"></span>
-              </a>
-            </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle text-muted pr-0" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="avatar avatar-sm mt-2">
@@ -66,43 +90,44 @@
                 </span>
               </a>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                <a class="dropdown-item" href="#">Profile</a>
-                <a class="dropdown-item" href="#">Settings</a>
-                <a class="dropdown-item" href="#">Activities</a>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal" data-backdrop="static" data-keyboard="false">Déconnexion</a>
+                <a 
+                    class="dropdown-item"
+                    href="#!"
+                    id="btnProfil"
+                    data-user="{{ json_encode(Auth::user()) }}"
+                    data-toggle="modal"
+                    data-target="#resetModal"
+                    data-backdrop="static"
+                    data-keyboard="false"><span class="fe fe-16 fe-refresh-cw mr-3"></span> Reinitialisation
+                </a>
+
+                <a class="dropdown-item" href="#!" data-toggle="modal" data-target="#logoutModal" data-backdrop="static" data-keyboard="false">
+                <span class="fe fe-16 fe-log-out mr-3"></span> Déconnexion</a>
               </div>
             </li>
           </ul>
         </nav>
-      <!-- End of Topbar -->
 
-      <!-- Sidebar -->
+        
         <aside class="sidebar-left border-right bg-white shadow" id="leftSidebar" data-simplebar>
           <a href="#" class="btn collapseSidebar toggle-btn d-lg-none text-muted ml-2 mt-3" data-toggle="toggle">
             <i class="fe fe-x"><span class="sr-only"></span></i>
           </a>
-          <nav class="vertnav navbar navbar-light">
-            <!-- nav bar -->
-            <div class="w-100 mb-4 d-flex">
-              <a class="navbar-brand mx-auto mt-2 flex-fill text-center" href="./index.html">
-                <!-- <svg version="1.1" id="logo" class="navbar-brand-img brand-sm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 120 120" xml:space="preserve">
-                  <g>
-                    <polygon class="st0" points="78,105 15,105 24,87 87,87 	" />
-                    <polygon class="st0" points="96,69 33,69 42,51 105,51 	" />
-                    <polygon class="st0" points="78,33 15,33 24,15 87,15 	" />
-                  </g>
-                </svg> -->
-                <i class="fe fe-layers fe-32"></i>
-              </a>
+          <nav class="vertnav navbar navbar-light" style="font-family: Century Gothic;">
+
+            <div style="margin: 0 auto;" class="w-50 my-4 d-flex">
+              <img src="{{ asset('img/sorepco.jpg') }}" alt="..." class="avatar-img rounded-circle">
             </div>
+
             <ul class="navbar-nav flex-fill w-100 mb-2">
               <li class="nav-item w-100">
-                <a class="nav-link" href="{{ URL::to('dashboard') }}">
+                <a class="nav-link mb-2" href="{{ URL::to('dashboard') }}">
                   <i class="fe fe-home fe-16"></i>
-                  <span class="ml-3 item-text">Tableau De Bord</span>
+                  <span class="item-text text-lg ml-3">Tableau De Bord</span>
                 </a>
               </li>
             </ul>
+            @can('parametrage')
             <p class="text-muted nav-heading mt-4 mb-1">
               <span>Gestion Extra</span>
             </p>
@@ -110,248 +135,152 @@
               <li class="nav-item dropdown">
                 <a href="#ui-elements" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
                   <i class="fe fe-settings fe-16"></i>
-                  <span class="ml-3 item-text">Paramétrage</span>
+                  <span class="ml-3 item-text text-xl">Paramétrage</span>
                 </a>
                 <ul class="collapse list-unstyled pl-4 w-100" id="ui-elements">
+                  @can('lister-departement')
                   <li class="nav-item">
-                    <a class="nav-link pl-3" href="{{ URL::to('departements') }}"><span class="ml-1 item-text">Département</span>
+                    <a class="nav-link pl-3" href="{{ URL::to('departements') }}"><span class="ml-1 item-text"><i class="fe fe-home fe-16 mr-3"></i>Département</span>
                     </a>
                   </li>
+                  @endcan
+                  @can('lister-categorie')
                   <li class="nav-item">
-                    <a class="nav-link pl-3" href="{{ URL::to('categories') }}"><span class="ml-1 item-text">Catégorie</span></a>
+                    <a class="nav-link pl-3" href="{{ URL::to('categories') }}"><span class="ml-1 item-text"><i class="fe fe-airplay fe-16 mr-3"></i>Catégorie</span></a>
                   </li>
+                  @endcan
+                  @can('lister-processus')
                   <li class="nav-item">
-                    <a class="nav-link pl-3" href="{{ URL::to('processus') }}"><span class="ml-1 item-text">Procéssus</span></a>
+                    <a class="nav-link pl-3" href="{{ URL::to('processus') }}"><span class="ml-1 item-text"><i class="fe fe-activity fe-16 mr-3"></i>Procéssus</span></a>
                   </li>
-                </ul>
-              </li>
-              <!-- <li class="nav-item dropdown">
-                <a href="#forms" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-credit-card fe-16"></i>
-                  <span class="ml-3 item-text">Forms</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="forms">
+                  @endcan
+
+                  @can('lister-site')
                   <li class="nav-item">
-                    <a class="nav-link pl-3" href="./form_elements.html"><span class="ml-1 item-text">Basic Elements</span></a>
+                    <a class="nav-link pl-3" href="{{ URL::to('sites') }}"><span class="ml-1 item-text"><i class="fe fe-home fe-16 mr-3"></i>Site</span></a>
                   </li>
+                  @endcan
                   <li class="nav-item">
-                    <a class="nav-link pl-3" href="./form_advanced.html"><span class="ml-1 item-text">Advanced Elements</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./form_validation.html"><span class="ml-1 item-text">Validation</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./form_wizard.html"><span class="ml-1 item-text">Wizard</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./form_layouts.html"><span class="ml-1 item-text">Layouts</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./form_upload.html"><span class="ml-1 item-text">File upload</span></a>
+                    <a class="nav-link pl-3" href="{{ URL::to('types') }}"><span class="ml-1 item-text"><i class="fe fe-type fe-16 mr-2"></i>Type De Site</span></a>
                   </li>
                 </ul>
               </li>
-              <li class="nav-item dropdown">
-                <a href="#tables" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-grid fe-16"></i>
-                  <span class="ml-3 item-text">Tables</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="tables">
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./table_basic.html"><span class="ml-1 item-text">Basic Tables</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./table_advanced.html"><span class="ml-1 item-text">Advanced Tables</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./table_datatables.html"><span class="ml-1 item-text">Data Tables</span></a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a href="#charts" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-pie-chart fe-16"></i>
-                  <span class="ml-3 item-text">Charts</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="charts">
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./chart-inline.html"><span class="ml-1 item-text">Inline Chart</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./chart-chartjs.html"><span class="ml-1 item-text">Chartjs</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./chart-apexcharts.html"><span class="ml-1 item-text">ApexCharts</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./datamaps.html"><span class="ml-1 item-text">Datamaps</span></a>
-                  </li>
-                </ul>
-              </li> -->
             </ul>
+            @endcan
+            @can('gestion-utilisateur')
             <p class="text-muted nav-heading mt-4 mb-1">
               <span>Gestion Utilisateur</span>
             </p>
             <ul class="navbar-nav flex-fill w-100 mb-2">
-              <!-- <li class="nav-item w-100">
-                <a class="nav-link" href="calendar.html">
-                  <i class="fe fe-calendar fe-16"></i>
-                  <span class="ml-3 item-text">Calendar</span>
-                </a>
-              </li>
-              <li class="nav-item dropdown">
-                <a href="#contact" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-book fe-16"></i>
-                  <span class="ml-3 item-text">Contacts</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="contact">
-                  <a class="nav-link pl-3" href="./contacts-list.html"><span class="ml-1">Contact List</span></a>
-                  <a class="nav-link pl-3" href="./contacts-grid.html"><span class="ml-1">Contact Grid</span></a>
-                  <a class="nav-link pl-3" href="./contacts-new.html"><span class="ml-1">New Contact</span></a>
-                </ul>
-              </li> -->
               <li class="nav-item dropdown">
                 <a href="#profile" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
                   <i class="fe fe-user fe-16"></i>
-                  <span class="ml-3 item-text ">Profile</span>
+                  <span class="ml-3 item-text text-xl">Profile</span>
                 </a>
                 <ul class="collapse list-unstyled pl-4 w-100" id="profile">
-                  <a class="nav-link pl-3" href="{{ URL::to('roles') }}"><span class="ml-1">Rôle</span></a>
-                  <a class="nav-link pl-3" href="{{ URL::to('permissions') }}"><span class="ml-1">Permissions</span></a>
-                  <a class="nav-link pl-3" href="{{ URL::to('users') }}"><span class="ml-1">Utilisateur</span></a>
+                  @can('lister-role')
+                  <a class="nav-link pl-3" href="{{ URL::to('roles') }}"><span class="ml-1"><i class="fe fe-lock fe-16 mr-3"></i>Rôle</span></a>
+                  @endcan
+                  @can('lister-permission')
+                  <a class="nav-link pl-3" href="{{ URL::to('permissions') }}"><span class="ml-1"><i class="fe fe-unlock fe-16 mr-3"></i>Permission</span></a>
+                  @endcan
+                  @can('lister-utilisateur')
+                  <a class="nav-link pl-3" href="{{ URL::to('users') }}"><span class="ml-1"><i class="fe fe-user fe-16 mr-3"></i>Utilisateur</span></a>
+                  @endcan
                 </ul>
               </li>
-              <!-- <li class="nav-item dropdown">
-                <a href="#fileman" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-folder fe-16"></i>
-                  <span class="ml-3 item-text">File Manager</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="fileman">
-                  <a class="nav-link pl-3" href="./files-list.html"><span class="ml-1">Files List</span></a>
-                  <a class="nav-link pl-3" href="./files-grid.html"><span class="ml-1">Files Grid</span></a>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a href="#support" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-compass fe-16"></i>
-                  <span class="ml-3 item-text">Help Desk</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="support">
-                  <a class="nav-link pl-3" href="./support-center.html"><span class="ml-1">Home</span></a>
-                  <a class="nav-link pl-3" href="./support-tickets.html"><span class="ml-1">Tickets</span></a>
-                  <a class="nav-link pl-3" href="./support-ticket-detail.html"><span class="ml-1">Ticket Detail</span></a>
-                  <a class="nav-link pl-3" href="./support-faqs.html"><span class="ml-1">FAQs</span></a>
-                </ul>
-              </li> -->
             </ul>
+            @endcan
+            @can('gestion-incident')
             <p class="text-muted nav-heading mt-4 mb-1">
               <span>Gestion Incident</span>
             </p>
+            
             <ul class="navbar-nav flex-fill w-100 mb-2">
               <li class="nav-item w-100">
-                <a class="nav-link" href="{{ URL::to('incidents') }}">
-                  <i class="fe fe-layers fe-16"></i>
-                  <span class="ml-3 item-text">Incident</span>
-                  <span class="badge badge-pill badge-primary"><i class="fe fe-info fe-16"></i></span>
+                <a class="nav-link mb-2" href="{{ URL::to('incidents') }}">
+                  <i class="fe fe-bell fe-16"></i>
+                  <span class="ml-3 item-text text-xl">Incident</span>
                 </a>
+
+                <a class="nav-link" href="{{ URL::to('archivage') }}">
+                  <i class="fe fe-archive fe-16"></i>
+                  <span class="ml-3 item-text text-lg">Incident Archivé</span>
+                </a>
+
+                <a class="nav-link mb-2" href="{{ URL::to('tasks') }}">
+                  <i class="fe fe-anchor fe-16"></i>
+                  <span class="ml-3 item-text text-xl">Suivi Tâche(s)</span>
+                </a>
+
+                @if(
+                    Auth::user()->roles[0]->name == "COORDONATEUR" ||
+                    Auth::user()->roles[0]->name == "SuperAdmin" ||
+                    Auth::user()->roles[0]->name == "CONTROLLEUR"
+                  )
+                  <a class="nav-link mb-2" href="{{ URL::to('tableau_statistique') }}">
+                    <i class="fe fe-columns fe-12"></i>
+                    <span class="ml-2 item-text text-lg">Tableau Statistique</span>
+                  </a>
+                @endif
               </li>
             </ul>
-            <!-- <p class="text-muted nav-heading mt-4 mb-1">
-              <span>Extra</span>
-            </p>
-            <ul class="navbar-nav flex-fill w-100 mb-2">
-              <li class="nav-item dropdown">
-                <a href="#pages" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-file fe-16"></i>
-                  <span class="ml-3 item-text">Pages</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100 w-100" id="pages">
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./page-orders.html">
-                      <span class="ml-1 item-text">Orders</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./page-timeline.html">
-                      <span class="ml-1 item-text">Timeline</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./page-invoice.html">
-                      <span class="ml-1 item-text">Invoice</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./page-404.html">
-                      <span class="ml-1 item-text">Page 404</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./page-500.html">
-                      <span class="ml-1 item-text">Page 500</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./page-blank.html">
-                      <span class="ml-1 item-text">Blank</span>
-                    </a>
-                  </li>
-                </ul>
+            @endcan
+
+            <ul class="navbar-nav flex-fill w-100 text-xl mb-2" style="margin-top: 3em;">
+              <li class="nav-item w-100 text-center my-2">
+                  <span><i style="font-size:3em;" class="fe fe-user"></i></span>
               </li>
-              <li class="nav-item dropdown">
-                <a href="#auth" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-shield fe-16"></i>
-                  <span class="ml-3 item-text">Authentication</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="auth">
-                  <a class="nav-link pl-3" href="./auth-login.html"><span class="ml-1">Login 1</span></a>
-                  <a class="nav-link pl-3" href="./auth-login-half.html"><span class="ml-1">Login 2</span></a>
-                  <a class="nav-link pl-3" href="./auth-register.html"><span class="ml-1">Register</span></a>
-                  <a class="nav-link pl-3" href="./auth-resetpw.html"><span class="ml-1">Reset Password</span></a>
-                  <a class="nav-link pl-3" href="./auth-confirm.html"><span class="ml-1">Confirm Password</span></a>
-                </ul>
+              <li class="nav-item w-100 text-center my-4">
+                  <span class="item-text">{{ Auth::user()->fullname }}</span>
               </li>
-              <li class="nav-item dropdown">
-                <a href="#layouts" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                  <i class="fe fe-layout fe-16"></i>
-                  <span class="ml-3 item-text">Layout</span>
-                </a>
-                <ul class="collapse list-unstyled pl-4 w-100" id="layouts">
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./index.html"><span class="ml-1 item-text">Default</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./index-horizontal.html"><span class="ml-1 item-text">Top Navigation</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="./index-boxed.html"><span class="ml-1 item-text">Boxed</span></a>
-                  </li>
-                </ul>
+              <li class="nav-item text-center my-1" style="margin-right: 4em;">
+                @if(Auth::user()->site_id)
+                <span class="badge badge-pill badge-success">
+                  AGENCE
+                </span>
+                @elseif(Auth::user()->departement_id)
+                <span class="badge badge-pill badge-success">
+                  SERVICE
+                </span>
+                @endif
+              </li>
+              <li class="nav-item text-center w-100">
+                <span>
+                  @if(Auth::user()->site_id)
+
+                      @if(Session::has('sites'))
+                        @if(is_iterable(Session::get('sites')))
+                          @for($i=0; $i< count(Session::get('sites')); $i++)
+                              @if(intval(Session::get('sites')[$i]->id) == intval(Auth::user()->site_id))
+                                  {{ Session::get('sites')[$i]->name }}
+                              @endif
+                          @endfor
+                        @endif
+                      @endif
+                  @elseif(Auth::user()->departement_id)
+
+                    @if(Session::has('departements'))
+                      @if(is_iterable(Session::get('departements')))
+                        @for($i=0; $i< count(Session::get('departements')); $i++)
+                            @if(intval(Session::get('departements')[$i]->id) == intval(Auth::user()->departement_id))
+                                {{ Session::get('departements')[$i]->name }}
+                            @endif
+                        @endfor
+                      @endif
+                    @endif
+                  @else
+                  @endif
+                </span>
               </li>
             </ul>
-            <p class="text-muted nav-heading mt-4 mb-1">
-              <span>Documentation</span>
-            </p>
-            <ul class="navbar-nav flex-fill w-100 mb-2">
-              <li class="nav-item w-100">
-                <a class="nav-link" href="../docs/index.html">
-                  <i class="fe fe-help-circle fe-16"></i>
-                  <span class="ml-3 item-text">Getting Start</span>
-                </a>
-              </li>
-            </ul>
-            <div class="btn-box w-100 mt-4 mb-1">
-              <button type="button" class="btn mb-2 btn-primary btn-lg btn-block">
-                <i class="fe fe-shopping-cart fe-12 mr-2"></i><span class="small">Buy now</span>
-              </button>
-            </div> -->
           </nav>
         </aside>
-      <!-- End of Sidebar -->
 
+        
       @yield('content')
-      <!-- main -->
-    </div> <!-- .wrapper -->
+
+    </div>
 
     <div class="modal fade modal-notif modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-sm" role="document">
@@ -420,6 +349,7 @@
                 </div>
             </div>
     </div>
+
     <div class="modal fade modal-shortcut modal-slide" tabindex="-1" role="dialog" aria-labelledby="defaultModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -477,30 +407,51 @@
             </div>
     </div>
 
+    <!-- Modal error reinitialisation -->
+    <div class="modal" id="error_resete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="font-family:Century Gothic;">
+                                  <div class="modal-dialog modal-xs modal-dialog-centered">
+                                    <div class="modal-content">
+                                      <div class="modal-header bg-danger">
+                                        <h5 class="modal-title text-xl" id="exampleModalLabel" style="color:white;">
+                                        <i class="fe fe-alert-triangle fe-16 mr-2"></i>
+                                        Erreur Réinitialisation Mot De Passe</h5>
+                                      </div>
+                                      <div class="modal-body">
+                                          <div class="form-group">
+                                          <p id="textreset" disabled style="width:100%; height:7em;border-style:none; resize: none; font-size:19px;" class="form-control"></p>
+                                          </div>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button id="btnRezet" type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                                      </div>
+                                    </div>
+                                  </div>
+    </div>
+
     <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div style="font-family:Century Gothic;" class="modal" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
                                 aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
-                                    <div class="modal-header bg-dark text-white">
+                                    <div class="modal-header text-lg">
                                         <h5 class="modal-title" id="exampleModalLabel">
-                                            <i class="fa fa-sign-in-alt fa-2x mr-2"></i>
+                                            <i class="fe fe-log-out mr-2"></i>
                                             Pret A Partir ?
                                         </h5>
                                         <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">×</span>
                                         </button>
                                     </div>
-                                    <div class="modal-body" style="color:white; font-size:17px;">Cliquer Sur Déconnexion méttra Fin à Votre Session. OK ? </div>
+                                    <div class="modal-body text-lg" style="font-size:17px;">Cliquer Sur Déconnexion méttra Fin à Votre Session. </br> OK ? </div>
                                     <div class="modal-footer">
-                                            <button class="btn btn-secondary" type="button" data-dismiss="modal">
-                                                <i class="fas fa-lg fa-times mr-2"></i>    
+                                            <button class="btn btn-secondary btn-icon-split" type="button" data-dismiss="modal">
+                                                <i class="fe fe-x mr-3"></i>    
                                                 Annuler
                                             </button>
                                             <form method="post" action="{{ URL::to('logout') }}">
                                                 @csrf
-                                                <button class="btn btn-primary" type="submit">
-                                                <i class="fas fa-lg fa-sign-out-alt mr-2"></i>    
+                                                <button class="btn btn-primary btn-icon-split" type="submit">
+                                                <i class="fe fe-log-out mr-3"></i>  
                                                 Déconnexion</button>
                                             </form>
                                     </div>
@@ -508,9 +459,122 @@
             </div>
     </div>
     
+    <!-- Modal Reset Password -->
+    <div style="font-family:Century Gothic;" id="resetModal" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-lg" id="verticalModalTitle">
+                                        <i class="fe fe-key mr-3" style="font-size:20px;"></i>
+                                        Réinitialisation Du Mot De Passe</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card shadow" style="padding:2em;">
+                                    <div class="mb-3">
+                                        <div class="form-group mb-3">
+                                            <label for="oldpassword"> <span class="fe fe-key mr-2"></span>Mot De Passe Actuel</label>
+                                            <input type="password" placeholder="Veuillez Renseigner Le Mot De Passe Actuel" class="form-control border-primary" id="oldpassword" name="password">
+                                            <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="newpassword"> <span class="fe fe-key mr-2"></span>Nouveau Mot De Passe</label>
+                                            <input type="password" placeholder="Veuillez Renseigner Le Nouveau Mot De Passe" class="form-control border-primary" id="newpassword" name="password">
+                                            <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                        </div>
+                                        <div class="form-group my-4">
+                                            <label for="confirmpassword"> <span class="fe fe-key mr-2"></span>Confirmer Votre Nouveau Mot De Passe</label>
+                                            <input type="password" placeholder="Veuillez Confirmer Le Nouveau Mot De Passe" class="form-control border-primary" id="confirmpassword" name="password">
+                                            <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                        </div>
+                                        <div class="form-group my-4">
+                                            <button id="resset" data-user="" class="btn btn-sm btn-success btn-block">
+                                                <span class="fe fe-key fe-16 mr-3"></span>
+                                                Réinitialiser
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                          </div>
+                        </div>
+    </div>
+
+    <script>
+      $(document).on('click', '#btnProfil', function(){
+          $('#resset').attr('data-user', $(this).attr('data-user'));
+      });
+
+      $(document).on('click', '#resset', function(){
+        let reg =  /^(?=.*[0-9])(?=.*[a-z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])/;
+        let good = true;
+        let message = "";
+
+        if(!$('#oldpassword').val().trim()){
+            good = false;
+            message+="Veuillez Renseigner Le Mot De Passe Actuel !\n";
+        }
+        if(!$('#newpassword').val().trim()){
+            good = false;
+            message+="Veuillez Renseigner Le Nouveau Mot De Passe !\n";
+        }else{
+          if(!$('#confirmpassword').val().trim()){
+            good = false;
+            message+="Veuillez Confirmer Le Nouveau Mot De Passe !\n";
+          }else{
+            if(!($('#newpassword').val().trim() == $('#confirmpassword').val().trim())){
+                good = false;
+                message+="Veuillez Renseigner Des Mot De Passe Identique !\n";
+            }else{
+                    if($('#newpassword').val().trim().length < 6){
+                        good = false;
+                        message+="Votre Nouveau Mot De Passe Doit Contenir Au Moins 6 Caractères !\n";
+                    }
+                }
+          }
+        }
+        if(!good){
+        good = false;
+        $('#textreset').text(message)
+        $('#resetModal').modal('hide');
+        $('#error_resete').attr('data-backdrop', 'static');
+        $('#error_resete').attr('data-keyboard', false);
+        $('#error_resete').modal('show');
+        }else{
+          $.ajax({
+            type: 'PUT',
+            url: "reset_pass",
+            data: {
+              password: $('#newpassword').val(),
+              id: JSON.parse($(this).attr('data-user'))['id']
+            },
+            headers:{
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(data){
+                if(data.length == 2){
+                  location.reload();
+                }else{
+                  alert('Veuillez Modifier Votre Mot De Passe, Car Déja Existant !');
+                }
+            } 
+          })
+        }
+
+        $(document).on('click', '#btnRezet', function(){
+            $('#error_resete').modal('hide');
+            $('#resetModal').attr('data-backdrop', 'static');
+            $('#resetModal').attr('data-keyboard', false);
+            $('#resetModal').modal('show');
+        });
+
+      });
+    </script>
     <x:notify-messages />
     @notifyJs
-</body>
+  </body>
 
     <script src="{{ url('js/jquery.min.js') }}"></script>
     <script src="{{ url('js/popper.min.js') }}"></script>
@@ -554,18 +618,18 @@
       Chart.defaults.global.defaultFontFamily = base.defaultFontFamily;
       Chart.defaults.global.defaultFontColor = colors.mutedColor;
     </script>
-    <script src="js/gauge.min.js"></script>
-    <script src="js/jquery.sparkline.min.js"></script>
-    <script src="js/apexcharts.min.js"></script>
-    <script src="js/apexcharts.custom.js"></script>
-    <script src='js/jquery.mask.min.js'></script>
-    <script src='js/select2.min.js'></script>
-    <script src='js/jquery.steps.min.js'></script>
-    <script src='js/jquery.validate.min.js'></script>
-    <script src='js/jquery.timepicker.js'></script>
-    <script src='js/dropzone.min.js'></script>
-    <script src='js/uppy.min.js'></script>
-    <script src='js/quill.min.js'></script>
+    <script src="{{ url('js/gauge.min.js') }}"></script>
+    <script src="{{ url('js/jquery.sparkline.min.js') }}"></script>
+    <script src="{{ url('js/apexcharts.min.js') }}"></script>
+    <script src="{{ url('js/apexcharts.custom.js') }}"></script>
+    <script src="{{ url('js/jquery.mask.min.js') }}"></script>
+    <script src="{{ url('js/select2.min.js') }}"></script>
+    <script src="{{ url('js/jquery.steps.min.js') }}"></script>
+    <script src="{{ url('js/jquery.validate.min.js') }}"></script>
+    <script src="{{ url('js/jquery.timepicker.js') }}"></script>
+    <script src="{{ url('js/dropzone.min.js') }}"></script>
+    <script src="{{ url('js/uppy.min.js') }}"></script>
+    <script src="{{ url('js/quill.min.js') }}"></script>
     <script>
       $('.select2').select2(
       {
@@ -768,7 +832,7 @@
           plugins: ['Webcam']
         }).use(Uppy.Tus,
         {
-          endpoint: 'https://master.tus.io/files/'
+
         });
         uppy.on('complete', (result) =>
         {
@@ -776,5 +840,5 @@
         });
       }
     </script>
-    <script src="js/apps.js"></script>
+    <script src="{{ url('js/apps.js') }}"></script>
 </html>

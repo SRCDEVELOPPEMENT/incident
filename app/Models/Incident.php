@@ -8,6 +8,7 @@ use App\Models\Pros;
 use App\Models\Categorie;
 use App\Models\Tache;
 use App\Models\Battle;
+use App\Models\Site;
 use App\Models\Users_incident;
 
 class Incident extends Model
@@ -18,6 +19,7 @@ class Incident extends Model
         'number', 
         'description',
         'closure_date',
+        'due_date',
         'status',
         'cause',
         'perimeter',
@@ -26,6 +28,10 @@ class Incident extends Model
         'proces_id',
         'created_at',
         'battles',
+        'site_id',
+        'deja_pris_en_compte',
+        'observation_rex',
+        'comment',
     ];
 
     public function categories()
@@ -33,12 +39,18 @@ class Incident extends Model
         return $this->belongsTo(Categorie::class, 'categorie_id');
     }
 
+    public function sites()
+    {
+        return $this->belongsTo(Site::class, 'site_id');
+    }
+
+
     public function processus()
     {
         return $this->belongsTo(Pros::class, 'proces_id');
     }
 
-    public function task()
+    public function tasks()
     {
         return $this->hasMany(Tache::class);
     }

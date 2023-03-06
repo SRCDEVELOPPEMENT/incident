@@ -30,7 +30,7 @@ class CreatePermissionTables extends Migration
             $table->bigIncrements('id');
             $table->string('name');       // For MySQL 8.0 use string('name', 125);
             $table->string('guard_name'); // For MySQL 8.0 use string('guard_name', 125);
-
+            $table->string('description');
             $table->unique(['name', 'guard_name']);
             $table->string('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->string('updated_at')->nullable();

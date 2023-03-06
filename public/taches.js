@@ -2,8 +2,22 @@ $(document).on('click', '#btnExitModalTask', function(){
     location.reload();
 });
 
+$(document).on('click', '#close_page_chargement_fichier', function(){
+    $('#inputfile').val('');
+    $('#btn_uploads').prop('disabled', true);
+});
+
+
 $(document).on('click', '#btn_clear_fields', function(){
     $('#frmtasks')[0].reset();
+});
+
+$(document).on('click', '#btn_clear_fields_edit', function(){
+    $('#frmedittasks')[0].reset();
+});
+
+$(document).on('click', '#btnKali', function(){
+    location.reload();
 });
 
 
@@ -14,6 +28,28 @@ $(document).on('click', '#btn_tach_err_ok', function(){
     $('#modal_task').modal('show');
 });
 
+$(document).on('click', '#toto', function(){
+
+    let incident = JSON.parse($(this).attr('data-incident'));
+
+    $('#txt_num_i').replaceWith(`<span id="txt_num_i" style="margin-left: 13em;" class="text-xl badge badge-success">${incident.number}</span>`);
+    $('#inco').val(incident.number);
+
+    if(incident.status == "ENCOURS"){
+        $('#modal_task').attr('data-backdrop', 'static');
+        $('#modal_task').attr('data-keyboard', 'false');
+        $('#modal_task').attr('data-toggle', 'modal');
+        $('#modal_task').modal('show');
+
+    }else{
+
+        $('#eror_task_add_in').attr('data-backdrop', 'static');
+        $('#eror_task_add_in').attr('data-keyboard', 'false');
+        $('#validat_tsk').val("Vous Ne Pouvez Pas Ajoutez De Tâche A Un Incident Clôturé !");
+        $('#eror_task_add_in').modal('show');
+
+    }
+});
 
 $(document).on('click', '#btn_add_unique_task', function(){
     let good = true;
@@ -23,13 +59,38 @@ $(document).on('click', '#btn_add_unique_task', function(){
         good = false;
         message+="Veuillez Renseigner La Description Où Le But De La Tâche !\n";
     }
+
+    if(!$('#obs_task').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Une Observation De La Tâche !\n";
+    }
+
     if(!$('#date_echeance_unique').val()){
         good = false;
         message+="Veuillez Renseigner La Date D'échéance De La Tâche !\n";
+    }else{
+        let today = parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""));
+        let date_saisi = parseInt($('#date_echeance_unique').val().replaceAll("-", ""));
+        if(date_saisi < today){
+            good = false;
+            message +="Veuillez Renseigner Une Date D\'échéance Qui Est Supérieur Où Egale A La Date D'aujourd'huit ! \n";
+        }
     }
-    if(!$('#user_task_unique').val()){
+
+    if($('#deepartes').val()){
+
+        if($('#deepartes').val() && isNaN($('#deepartes').val())){
+
+            if(!$('#sity').val()){
+                good = false;
+                message += "Veuillez Choisir Un Site ! \n";        
+            }
+            
+        }
+
+    }else{
         good = false;
-        message+="Veuillez Assigner Un Département A La Tâche !\n";
+        message += "Veuillez Choisir Le Département Ou Le Site Chargé De Resoudre L'incident ! \n";
     }
 
     if(!good){
@@ -41,16 +102,37 @@ $(document).on('click', '#btn_add_unique_task', function(){
         $('#tache_error_validations').modal('show');
     }else{
         $('#decrit_conf').replaceWith(`
-        <textarea style="color:white; background-color: #33393F;" disabled name="" id="decrit_conf" cols="30" rows="4">
+        <textarea class="text-lg bg-light" style="resize:none;" disabled name="" id="decrit_conf" rows="8">
             ${$('#desc_unique').val()}
         </textarea>`);
-        $('#eche_conf').replaceWith(`<span style="color: white; font-size: 20px;" id="eche_conf">${$('#date_echeance_unique').val()}</span>`);
-        $('#gerant_conf').replaceWith(`<span style="color: white; font-size: 20px;" id="gerant_conf">${$('#user_task_unique option:selected').text()}</span>`);
+
+        $('#obss_conf').replaceWith(`
+            <textarea class="bg-light" style="resize:none;" disabled name="" id="obss_conf" rows="7">${$('#obs_task').val()}</textarea>
+        `);
+
+        $('#dsis_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="dsis_conf">${$('#number_ds_task').val()}</span>`);
+        $('#eche_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="eche_conf">${$('#date_echeance_unique').val()}</span>`);
+        
+        if(isNaN($('#deepartes').val())){
+            $('#gerant_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="gerant_conf">${$('#sity option:selected').text()}</span>`);
+        }else{
+            $('#gerant_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="gerant_conf">${$('#deepartes option:selected').text()}</span>`);
+        }
+
         $('#modalConfirmationSaveTask').attr('data-backdrop', 'static');
         $('#modalConfirmationSaveTask').attr('data-keyboard', false);
+        $('#modal_task').modal('hide');
         $('#modalConfirmationSaveTask').modal('show');
     }
 });
+
+
+$(document).on('click', '#infir_save_t', function(){
+    $('#modal_task').attr('data-backdrop', 'static');
+    $('#modal_task').attr('data-keyboard', false);
+    $('#modal_task').modal('show');
+});
+
 
 $(document).on('click', '#conf_save_t', function(){
     $.ajax({
@@ -64,38 +146,29 @@ $(document).on('click', '#conf_save_t', function(){
             if(data.length > 0){
                 let task = data[0];
 
-                $('#dataTable-task .tachsx').prepend(`
+                $('#dataTable-1 .tachsx').prepend(`
                     <tr>
-                        <td>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input">
-                                <label class="custom-control-label"></label>
-                            </div>
-                        </td>
+                        <td></td>
+                        <td></td>
                         <td><p class="mb-0 text-muted">${task.description}</p></td>
-                        <td>
-                                    @if(${task.status} == 'RÉALISÉ')
-                                    <a
-                                    ${task.status} == 'EN-RÉALISATION' ? style="color: #EEA303; text-decoration:none;":${task.status} == 'RÉALISÉ' ? style="color: #3ABF71; text-decoration:none;":style="color: #1B68FF; text-decoration:none;"
-                                    href="#">
-                                    ${task.status}
-                                    </a>
-                                    @else
-                                    <a
-                                    id="modif_stay_tach"
-                                    data-key=""
-                                    ${task.status} == 'EN-RÉALISATION' ? style="color: #EEA303; text-decoration:none;":${task.status} == 'RÉALISÉ' ? style="color: #3ABF71; text-decoration:none;":style="color: #1B68FF; text-decoration:none;"
-                                    href="#"
-                                    data-backdrop="static"
-                                    data-keyboard="false" 
-                                    data-toggle="modal"
-                                    data-target="#change_status">
-                                    ${task.status}
-                                    </a>
-                                    @endif
+                        <td>                            
+                            <a
+                                id="modif_stay_tach"
+                                data-key=""
+                                ${task.status} == 'ENCOURS' ? style="color: #EEA303; text-decoration:none;":${task.status} == 'RÉALISÉE' ? style="color: #3ABF71; text-decoration:none;":style="color: #1B68FF; text-decoration:none;"
+                                href="#"
+                                data-backdrop="static"
+                                data-keyboard="false" 
+                                data-toggle="modal"
+                                data-target="#change_status">
+                                ${task.status}
+                            </a>
                         </td>
+                        <td>${task.created_at}</td>
                         <td>${task.maturity_date}</td>
-                        <td>${task.usdepartementsers ? task.departements.name : ''}</td>
+                        <td></td>
+                        <td></td>
+                        <td>${task.departements ? task.departements.name : task.sites ? task.sites.name : ""}</td>
                         <td>
                             <a
                                 id="set_priority_degr"
@@ -105,7 +178,7 @@ $(document).on('click', '#conf_save_t', function(){
                                 data-keyboard="false"
                                 data-toggle="modal"
                                 data-target="#update_degree">
-                                DÉFINISSEZ UNE RÉALISATION
+                                ${task.resolution_degree}
                             </a>
                         </td>
                         <td><a
@@ -116,18 +189,18 @@ $(document).on('click', '#conf_save_t', function(){
                                     data-target="#defaultModal"
                                     href="/" 
                                     title="Joindre Le Fichier Justificatif" 
-                                    class="fe fe-upload-cloud fe-32 files_id"></a>
+                                    class="fe fe-upload-cloud fe-32 files_id">
+                            </a>
                         </td>
-                        <td><a 
-                                    style="text-decoration:none; color:white;"
-                                    data-backdrop="static"
-                                    data-keyboard="false" 
-                                    data-toggle="modal" 
-                                    data-target="#downloadModal"
-                                    href="/" 
-                                    title="Télécharger Le Fichier De La Tâche"
-                                    class="fe fe-download-cloud fe-32 down_id"></a>
+                        <td>
+                            <a 
+                                style="text-decoration:none; color:white;"
+                                href="#!" 
+                                title="Télécharger Le Fichier De La Tâche"
+                                class="fe fe-download-cloud fe-32">
+                            </a>
                         </td>
+                        <td></td>
                         <td>
                                 <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="text-muted sr-only">Action</span>
@@ -151,36 +224,173 @@ $(document).on('click', '#conf_save_t', function(){
                 `);
             $('#frmtasks')[0].reset();
             $('#modalConfirmationSaveTask').modal('toggle');
+            $('#modal_task').modal('show');
             }
          }
     })
 });
 
 $(document).ready(function() {
-    $("#validationCustom04").on("change", function() {
-      var value = $(this).val().toLowerCase();
-      $(".tachsx tr").filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-      });
+
+    let monthAndDay = new Date().getFullYear() +"-"+ String(new Date().getMonth() + 1).padStart(2, '0');
+
+    table = $('#dataTable-1').DataTable({
+        destroy: true,
+        paging: false,
+        searching: false,
     });
 
-    $("#searchDate").on("change", function() {
+
+    $("#departe").on("change", function() {
+        
+        $('#searchMonth').val('');
+        $('#searchDate').val('');
+        $('#search_text_simple').val('');
+        $('#validationCustom04').val('');
+
         var value = $(this).val().toLowerCase();
         $(".tachsx tr").filter(function() {
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
-      });  
+    });
+  
+    $("#validationCustom04").on("change", function() {
+
+        $('#searchMonth').val('');
+        $('#searchDate').val('');
+        $('#search_text_simple').val('');
+        $('#departe').val('');
+
+        var value = $(this).val().toLowerCase();
+        $(".tachsx tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+
+    $("#searchDate").on("change", function() {
+
+        $('#searchMonth').val('');
+        $('#departe').val('');
+        $('#search_text_simple').val('');
+        $('#validationCustom04').val('');
+
+        var filter = $(this).val();
+        var table = document.getElementById("dataTable-1");
+        var tr = table.getElementsByTagName("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[5];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+        }
+
+    });
+
+    $("#searchMonth").on("change", function() {
+        
+        $('#searchDate').val('');
+        $('#departe').val('');
+        $('#search_text_simple').val('');
+        $('#validationCustom04').val('');
+
+        var filter = $(this).val();
+        var table = document.getElementById("dataTable-1");
+        var tr = table.getElementsByTagName("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[5];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+        }
+    });
+
+    
+    // Chargement Tache Mois Encours
+        $('#searchMonth').val(monthAndDay);
+        var table = document.getElementById("dataTable-1");
+        var tr = table.getElementsByTagName("tr");
+    
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[5];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.indexOf(monthAndDay) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    // Fin Chargement Tache Mois Encours
+    
+    $('#search_text_simple').on('input', function(){
+        $('#departe').val('');
+        $('#searchDate').val('');
+        $('#searchMonth').val('');
+        $('#validationCustom04').val('');
+
+        var value = $(this).val().toLowerCase();
+        $(".tachsx tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+
+    $(document).on('change', '#emis_recus', function(){
+        $('#departe').val('');
+        $('#searchDate').val('');
+        $('#searchMonth').val('');
+        $('#search_text_simple').val('');
+        $('#validationCustom04').val('');
+        $('#year_courant_incident').val('');
+
+
+        var filter = $(this).val();
+        var table = document.getElementById("dataTable-1");
+        var tr = table.getElementsByTagName("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+        }
+
+    });
+
 });
 
 $(document).on('click', '.files_id', function(){
+    let key = $(this).attr('data-key');
     let task = JSON.parse($(this).attr('data-task'));
     $('#id_task').val(task.id);
+    $('.ispad').replaceWith(`<span class="ispad badge badge-success text-lg">${task.incident_number}</span>`);
+    $('.radjad').replaceWith(`<span class="radjad text-xl">${key}</span>`);
 });
 
 $(document).on('click', '.down_id', function(){
+    let key = $(this).attr('data-key');
     let task = JSON.parse($(this).attr('data-task'));
     let files = JSON.parse($(this).attr('data-files'));
     let files_task = [];
+    $('.zaya').replaceWith(`<span class="zaya badge badge-success text-lg">${task.incident_number}</span>`);
+    $('.citedor').replaceWith(`<span class="citedor text-xl">${key}</span>`);
 
     $('#idtach').val(task.id);
 
@@ -192,7 +402,7 @@ $(document).on('click', '.down_id', function(){
     }
 
     if(files_task.length == 0){
-        $('#span_info').replaceWith(`<span id="span_info" style="font-size: 1.1em; text-align: center; margin-bottom:1em;"><i class="fe fe-file fe-32"></i><i class="fe fe-x fe-16 mr-2"></i> Aucun Fichier Charger Pour Cette Tâche</span>`);
+        $('#span_info').replaceWith(`<span id="span_info" style="font-size: 1em; text-align: center; margin-bottom:1em;"><i class="fe fe-file fe-32"></i><i class="fe fe-x fe-16 mr-2"></i> Aucun Fichier Charger Pour Cette Tâche</span>`);
     }else{
         $('#span_info').replaceWith(`<span id="span_info" style="font-size: 1em; text-align: center; margin-bottom:1em;"><i class="fe fe-file fe-32 mr-2"></i> TéléCharger Le(s) Fichier(s) De Réalisation De La Tâche</span>`);
     }
@@ -201,14 +411,71 @@ $(document).on('click', '.down_id', function(){
         const file = files_task[index];
 
         $('#bakugo').append(`
-            <button data-file_id="${file.id}" class="squircle bg-primary border-primary justify-content-center" name="submit_download" type="submit">
-                <span class="fe fe-download fe-32 align-self-center text-white"></span>
-            </button>
-            <button style="margin:0;" type="button" class="fe fe-trash fe-32 align-self-center text-white"></button>
+            <div class="row" id="roys${index}">
+                <div class="col-md-6 text-left" style="margin-top: 3em;">
+                    <span style="font-size:15px;">${file.filename.substring(7)}</span>
+                </div>
+
+                <div class="col-md-4 text-right">
+                    <button title="Télécharger Le Fichier" data-file_id="${file.id}" class="mt-4 squircle bg-primary border-primary justify-content-center" name="submit_download" type="submit">
+                        <span class="fe fe-download fe-32 align-self-center text-white"></span>
+                    </button>
+                </div>
+                <div class="col-md-2" style="margin-top: 3em;">
+                    <span 
+                        id="remove_file_task"
+                        data-index="roys${index}"
+                        data-file="${file.id}"
+                        data-task_id="${file.tache_id}"
+                        title="Supprimer Le Fichier Charger" 
+                        class="fe fe-32 fe-x text-danger" 
+                        style="cursor:pointer;">
+                    </span>
+                </div>
+            </div>
         `);
     }
 });
 
+$(document).on('click', '#remove_file_task', function(){
+    let id_fichier = $(this).attr('data-file');
+    let index_row = $(this).attr('data-index');
+    let id_tache = $(this).attr('data-task_id');
+
+    $.ajax({
+        type: 'DELETE',
+        url: "delete_file",
+        data: {
+            id: id_fichier,
+            id_Task: id_tache,
+        },
+         headers:{
+             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+         },
+         success: function(data){
+            if(data.length > 0){
+                $(`#${index_row}`).remove();
+            }
+         }
+    })    
+
+});
+
+
+$(document).on('click', '#see_task', function(){
+    let numero_ligne = $(this).attr('data-key');
+    let task = JSON.parse($(this).attr('data-task'));
+    $('.obbs_tas').replaceWith(`<span class="text-xl obbs_tas">${task.observation_task}</span>`);
+    $('.nidis').replaceWith(`<span class="nidis badge badge-pill badge-success">${task.incident_number}</span>`);
+    $('#burpi').replaceWith(`<span id="burpi">${numero_ligne}</span>`);
+    $('.creat_dat').replaceWith(`<span class="text-xl creat_dat">${task.created_at.substring(0, 10)}</span>`);
+    $('.due_dat').replaceWith(`<span class="text-xl due_dat">${task.maturity_date}</span>`);
+    $('.desc').replaceWith(`<span class="text-xl desc">${task.description}</span>`);
+    $('.comment_show').replaceWith(`<span class="text-xl comment_show">${task.commentaire ? task.commentaire : ''}</span>`);
+    $('.observation_show').replaceWith(`<span class="text-xl observation_show">${task.observation ? task.observation : ''}</span>`);
+    $('.motif_an').replaceWith(`<span class="text-xl motif_an">${task.motif_annulation ? task.motif_annulation : ''}</span>`);
+    $('.motif_misenatou').replaceWith(`<span class="text-xl motif_misenatou">${task.motif_attente ? task.motif_attente : ''}</span></div>`);
+});
 
 $(document).on('click', 'button[name="submit_download"]', function(){
     $('#midoriya').val($(this).attr('data-file_id'));
@@ -216,7 +483,7 @@ $(document).on('click', 'button[name="submit_download"]', function(){
 
 
 $(document).on('click', '#exit_modal_down', function(){
-    $('#bakugo').empty();
+    location.reload();
 });
 
 $(document).on('click', '#ask_service', function(){
@@ -260,7 +527,7 @@ $(document).on('click', '#btnSaveAskingServie', function(){
 });
 
 $(document).on('click', '#modif_stay_tach', function(){
-    $('#tachi').replaceWith(`<span id="tachi">${$(this).attr('data-key')}</span>`);
+    $('#tachi').replaceWith(`<strong id="tachi">${$(this).attr('data-key')}</strong>`);
     $('#tasch_m').attr('data-task', $(this).attr('data-task'));
 });
 
@@ -274,58 +541,224 @@ $(document).on('click', '#tasch_m', function(){
             elements.push(fichier);
         }
     }
-    console.log(elements)
+
     if($('#statut_e').val()){
-        console.log($('#statut_e').val())
-        if($('#statut_e').val() == "RÉALISÉ"){
+        
+        if($('#statut_e').val() == "RÉALISÉE"){
             if(elements.length > 0){
                 $.ajax({
                     type: 'PUT',
                     url: "updateStatusTask",
                     data: {
-                        status: $('#statut_e').val(),
                         id: task.id,
+                        status: $('#statut_e').val(),
+                        commentaire: $('#realise_comment').val(),
+                        observation: $('#observation').val(),
+                        motif_annulation: $('#motif_annulation').val(),
+                        motif_attente: $('#motif_attente').val(),
                     },
                     headers:{
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(data){
-                        if(data.length > 0){
+                        if(data.length == 1){
                             location.reload();
+                        }else if(data.length == 2){
+                            $('#textstat').val('Veuillez Renseigner Tous Les Champs De Saisis !');
+                            $('#change_status').modal('hide');
+                            $('#stat_task').attr('data-backdrop', 'static');
+                            $('#stat_task').attr('data-keyboard', false);
+                            $('#stat_task').modal('show');                            
                         }
                     }
                 });
             }else{
-                alert('Veuillez D\'abord Charger Le(s) Document(s) De Livraison !');
+                $('#change_status').modal('hide');
+                $('#textstat').val('Veuillez D\'abord Charger Le(s) Document(s) Qui Atteste Que La Tâche Est Bien Réalisé !');
+                $('#stat_task').attr('data-backdrop', 'static');
+                $('#stat_task').attr('data-keyboard', false);
+                $('#stat_task').modal('show');
             }
         }else{
             $.ajax({
                 type: 'PUT',
                 url: "updateStatusTask",
                 data: {
-                    status: $('#statut_e').val(),
                     id: task.id,
+                    status: $('#statut_e').val(),
+                    commentaire: $('#realise_comment').val(),
+                    observation: $('#observation').val(),
+                    motif_annulation: $('#motif_annulation').val(),
+                    motif_attente: $('#motif_attente').val(),
                 },
                 headers:{
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(data){
-                    if(data.length > 0){
+                    if(data.length == 1){
                         location.reload();
+                    }else if(data.length == 2){
+                        $('#textstat').val('Veuillez Renseigner Tous Les Champs De Saisis !');
+                        $('#change_status').modal('hide');
+                        $('#stat_task').attr('data-backdrop', 'static');
+                        $('#stat_task').attr('data-keyboard', false);
+                        $('#stat_task').modal('show');                            
                     }
                 }
             });
-        };  
+        }
     }else{
-        alert('Veuillez Sélèctionner Un Statut !');
+        $('#textstat').val('Veuillez Sélectionner Un Statut !');
+        $('#change_status').modal('hide');
+        $('#stat_task').attr('data-backdrop', 'static');
+        $('#stat_task').attr('data-keyboard', false);
+        $('#stat_task').modal('show');
     }
 });
 
 
+$(document).on('change', '#statut_e', function(){
+    if($(this).val()){
+        if($('#statut_e').val() == "ENCOURS"){
+            $('#realise_comment').val('');
+            $('#motif_annulation').val('');
+            $('#motif_attente').val('');
+
+            $('#segment').empty();
+            $('#segment').append(`
+            <div id="segment">
+                <div class="form-group mb-3">
+                        <label class="text-xl" for="observation"> <span class="fe fe-edit mr-2"></span>Observation <span style="color:red;"> *</span></label>
+                        <textarea style="resize:none;" rows="5" class="form-control" id="observation" name="observation" placeholder="Veuillez Entrer Une Observation."></textarea>
+                        <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                </div>
+            </div>
+            `);
+        }else if($('#statut_e').val() == "RÉALISÉE"){
+            $('#observation').val('');
+            $('#motif_annulation').val('');
+            $('#motif_attente').val('');
+
+            $('#segment').empty();
+            $('#segment').append(`
+            <div id="segment">
+                <div class="form-group mb-3">
+                        <label class="text-xl" for="realise_comment"> <span class="fe fe-edit mr-2"></span>Commentaire De Réalisation <span style="color:red;"> *</span></label>
+                        <textarea style="resize:none;" rows="5" class="form-control" id="realise_comment" name="commentaire" placeholder="Veuillez Entrer Un Commentaire."></textarea>
+                        <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                </div>
+            </div>
+            `)
+        }else if($('#statut_e').val() == "ANNULÉE"){
+            $('#observation').val('');
+            $('#realise_comment').val('');
+            $('#motif_attente').val('');
+
+            $('#segment').empty();
+            $('#segment').append(`
+                <div class="form-group mb-3">
+                    <label class="text-xl" for="motif_annulation"> <span class="fe fe-edit-2 mr-1"></span> Motif D'annulation De Cette Tâche <span style="color:red;"> *</span></label>
+                    <textarea style="resize:none;" rows="5" class="form-control" id="motif_annulation" name="motif_annulation" placeholder="Veuillez Entrer La Raison De L'annulation De La Tâche."></textarea>
+                    <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                </div>
+            `)
+        }else if($('#statut_e').val() == "EN-ATTENTE"){
+            $('#observation').val('');
+            $('#realise_comment').val('');
+            $('#motif_annulation').val('');
+
+            $('#segment').empty();
+            $('#segment').append(`
+                <div class="form-group mb-3">
+                    <label class="text-lg" for="motif_attente"> <span class="fe fe-edit-2 mr-1"></span> Motif De Mise En-Attente De Cette Tâche <span style="color:red;"> *</span></label>
+                    <textarea style="resize:none;" rows="5" class="form-control" id="motif_attente" name="motif_attente" placeholder="Veuillez Entrer La Raison De La Mise En-Attente De Cette Tâche."></textarea>
+                    <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                </div>
+            `)
+        }
+    }else{
+        $('#segment').empty();
+    }
+});
+
+$(document).on('click', '#log_task', function(){
+    let meslogs = [];
+    let task = JSON.parse($(this).attr('data-task'));
+    let logs = JSON.parse($(this).attr('data-logs'));
+    let created_log = JSON.parse($(this).attr('data-created_log'));
+    let tab_id_log = JSON.parse($(this).attr('data-tab_id_log'));
+
+    $('#tekila').replaceWith(`<strong class="text-xl" id="tekila">${$(this).attr('data-key')}</strong>`);
+
+    for (let index = 0; index < logs.length; index++) {
+        const log = logs[index];
+        if(log.tache_id == task.id){
+            meslogs.push(log);
+        }
+    }
+
+    for (let i = 0; i < meslogs.length; i++) {
+        const log = meslogs[i];
+        
+        let index_dateCreateLog = -1;
+        for (let a = 0; a < tab_id_log.length; a++) {
+            const id = tab_id_log[a];
+            if(log.id == id){
+                index_dateCreateLog = a;
+                break;
+            }
+        }
+
+        $('.dubai').append(`
+            <div class="list-group-item">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                    <span class="fe fe-info fe-16"></span>
+                </div>
+                <div class="col">
+                    <small><strong></strong></small>
+                    <div class="my-0 text-lg big"><span>${log.title}</span></div>
+                </div>
+                <div class="col">
+                    <div class="my-0 text-lg big"><span>${created_log[index_dateCreateLog]}</span></div>
+                </div>
+                <div class="col">
+                    <small class="badge badge-pill text-lg badge-light text-uppercase">${log.statut ? log.statut : ''}</small>
+                </div>
+                <div class="col">
+                    <small class="badge badge-pill text-lg badge-light text-uppercase">${log.users ? log.users.fullname : ""}</small>
+                </div>
+            </div>
+        `)
+    }
+});
+
+
+$(document).on('click', '#resetlog', function(){
+    $('.dubai').empty().append(`
+        <div class="row text-xl my-4">
+            <div class="col">
+                <small><strong style="margin-left:4em;">Description</strong></small>
+            </div>
+            <div class="col">
+                <small><strong style="margin-left:3em;"><span class="fe fe-calendar fe-16 mr-2"></span>Date De Modification</strong></small>
+            </div>
+            <div class="col">
+                <small><strong style="margin-left:1.5em;"><span class="fe fe-battery-charging fe-16 mr-2"></span>Nouveau(x) Statu(s)</strong></small>
+            </div>
+            <div class="col">
+                <small><strong><span class="fe fe-user fe-16 mr-2"></span>Utilisateur</strong></small>
+            </div>
+        </div>
+    `);
+});
+
+
 $(document).on('click', '#set_priority_degr', function(){
-    $('#ttach').replaceWith(`<span id="ttach">${$(this).attr('data-key')}</span>`);
+    $('#ttach').replaceWith(`<strong id="ttach">${$(this).attr('data-key')}</strong>`);
     $('#valid_deg').attr('data-tache', $(this).attr('data-task'));
 });
+
 
 $(document).on('click', '#valid_deg', function(){
     let task = JSON.parse($(this).attr('data-tache'));
@@ -348,9 +781,14 @@ $(document).on('click', '#valid_deg', function(){
              }
         });
     }else{
-        alert('Veuillez Sélèctionner Un Dégré De Réalisation De La Tâche !');
+        $('#validation_degree').val('Veuillez Sélectionner Un Dégré De Réalisation De La Tâche !');
+        $('#update_degree').modal('hide');
+        $('#degreerealisation_error').attr('data-backdrop', 'static');
+        $('#degreerealisation_error').attr('data-keyboard', false);
+        $('#degreerealisation_error').modal('show'); 
     }
 });
+
 
 $(document).on('input', '#inputfile', function(){
     if($(this).val()){
@@ -358,7 +796,8 @@ $(document).on('input', '#inputfile', function(){
     }else{
         $('#btn_uploads').prop('disabled', true);
     }
-})
+});
+
 
 $(document).on('click', '#supp_task', function(){
     if(confirm("Voulez-Vous Vraiment Supprimer La Tâche N° : "+ $(this).attr('data-key') +" ?") == true){
@@ -374,16 +813,55 @@ $(document).on('click', '#supp_task', function(){
             }
         })
     }
-})
+});
 
-$(document).on('click', '#edin', function(){
+
+$(document).on('click', '#editions', function(){
+
     let task = JSON.parse($(this).attr('data-task'));
-    console.log(task)
+    
+    let sites = JSON.parse($('#toto').attr('data-sites'));
+    let incident = JSON.parse($('#toto').attr('data-incident'));
+    let departements = JSON.parse($('#toto').attr('data-departements'));
+
+    $('#txt_num_i_edit').replaceWith(`<span id="txt_num_i_edit" style="margin-left: 13em;" class="text-xl badge badge-success">${incident.number}</span>`);
     $('#id_edit').val(task.id);
     $('.form-group #desc_uniques').val(task.description);
+    $('.form-group #obs_task_edit').val(task.observation_task);
+    $('.form-group #degree_realis').val(task.resolution_degree);
     $('.form-group input[id="dateing"]').val(task.maturity_date);
-    $('.form-group #user_task_uniques').val(task.departement_solving_id);
+
+    if(task.departement_id){
+        let mon_departement = departements.find(d => d.id == task.departement_id);
+        $('#deepartes_edit').val(mon_departement.id);
+
+    }else if(task.site_id){
+        $('#nino_edit').remove();
+
+        if(task.sites.types.name == "AGENCE"){
+            $('#deepartes_edit').val(task.sites.types.name);
+        }else if(task.sites.types.name == "MAGASIN"){
+            $('#deepartes_edit').val(task.sites.types.name);
+        }
+        
+        $('#devdocs_edit').append(`
+            <div id="nino_edit" class="form-group my-4">
+                <label for="sity_edit"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident <span style="color:red;"> *</span></label>
+                <select style="font-size: 1.2em;" class="form-control custom-select border-primary" id="sity_edit" name="sity_edit">
+                    <option value="">Choisissez...</option>
+                </select>
+            </div>
+        `);
+
+        for (let i = 0; i < sites.length; i++) {
+            const sit = sites[i];
+            $('#sity_edit').append(`<option value="${sit.id}">${sit.name}</option>`);
+        }
+        console.log(task);
+        $('#sity_edit').val(task.site_id);
+    }
 });
+
 
 $(document).on('click', '#btn_edit_unique_task', function(){
     let good = true;
@@ -393,14 +871,45 @@ $(document).on('click', '#btn_edit_unique_task', function(){
         good = false;
         message+="Veuillez Renseigner La Description Où Le But De La Tâche !\n";
     }
+
+    if(!$('#obs_task_edit').val()){
+        good = false;
+        message+="Veuillez Renseigner L'observation De La Tâche !\n";
+    }
+
     if(!$('#dateing').val()){
         good = false;
         message+="Veuillez Renseigner La Date D'échéance De La Tâche !\n";
+    }else{
+        let today = parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""));
+        let date_saisi = parseInt($('#dateing').val().replaceAll("-", ""));
+        if(date_saisi < today){
+            good = false;
+            message +="Veuillez Renseigner Une Date D\'échéance Qui Est Supérieur Où Egale A La Date D'aujourd'huit ! \n";
+        }
     }
-    if(!$('#user_task_uniques').val()){
+
+    if(!$('#degree_realis').val()){
         good = false;
-        message+="Veuillez Assigner Un Département A La Tâche !\n";
+        message+="Veuillez Choisir Le Dégré De Résolution De La Tâche !\n";
     }
+
+    if($('select[name="deepartes_edit"]').val()){
+
+        if($('select[name="deepartes_edit"]').val() && isNaN($('select[name="deepartes_edit"]').val())){
+
+            if(!$('#sity_edit').val()){
+                good = false;
+                message += "Veuillez Choisir Un Site ! \n";        
+            }
+            
+        }
+
+    }else{
+        good = false;
+        message += "Veuillez Choisir Le Département Ou Le Site Chargé De Resoudre L'incident ! \n";
+    }
+
     if(!good){
         good = false;
         $('#modal_edit_task').modal('hide');
@@ -425,9 +934,307 @@ $(document).on('click', '#btn_edit_unique_task', function(){
     }
 });
 
+
+$(document).on('click', '#set_echeance_time', function(){
+    $('#nibi').replaceWith(`<strong id="nibi">${parseInt($(this).attr('data-key'))+1}</strong>`);
+    $('#echeance_btn_inc').attr('data-task', $(this).attr('data-task'));
+});
+
+
+$(document).on('click', '#echeance_btn_inc', function(){
+    if($('#date_maturity').val()){
+        if(parseInt($('#date_maturity').val().replaceAll("-", "")) >= parseInt((new Date().toISOString().split('T')[0]).replaceAll("-", ""))){
+            $.ajax({
+                type: 'PUT',
+                url: 'set_echeance_date_task',
+                data: {
+                    id: JSON.parse($(this).attr('data-task')).id,
+                    maturity_date: $('#date_maturity').val(),
+                },
+                headers:{
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(data){
+                    if(data.length > 0 ){
+                        location.reload();
+                    }
+                }
+            });
+        }else{
+            $('#define_dat_echean').modal('hide');
+            $('#validation_due_date').val("Veuillez Renseigner Une Date D\'échéance Qui Est Supérieur Où Egale A La Date D\'aujourd\'huit ! \n");
+            $('#echedate').attr('data-backdrop', 'static');
+            $('#echedate').attr('data-keyboard', false);
+            $('#echedate').modal('show');    
+        }
+    }else{
+        $('#define_dat_echean').modal('hide');
+        $('#validation_due_date').val("Veuillez Renseigner Une Date D'échéance !");
+        $('#echedate').attr('data-backdrop', 'static');
+        $('#echedate').attr('data-keyboard', false);
+        $('#echedate').modal('show');
+    }
+});
+
+
+$(document).on('click', '#dismiss_btn_ude', function(){
+    $('#echedate').modal('hide');
+    $('#define_dat_echean').attr('data-backdrop', 'static');
+    $('#define_dat_echean').attr('data-keyboard', false);
+    $('#define_dat_echean').modal('show');
+});
+
+
 $(document).on('click', '#btn_tachedinok', function(){
     $('#tache_error_edit').modal('hide');
     $('#modal_edit_task').attr('data-backdrop', 'static');
     $('#modal_edit_task').attr('data-keyboard', false);
     $('#modal_edit_task').modal('show');
 });
+
+
+$(document).on('click', '#btnStas', function(){
+    $('#stat_task').modal('hide');
+    $('#change_status').attr('data-backdrop', 'static');
+    $('#change_status').attr('data-keyboard', false);
+    $('#change_status').modal('show');
+});
+
+
+$(document).on('click', '#btn_degree', function(){
+    $('#degreerealisation_error').modal('hide');
+    $('#update_degree').attr('data-backdrop', 'static');
+    $('#update_degree').attr('data-keyboard', false);
+    $('#update_degree').modal('show');
+});
+
+$(document).on('change', 'select[name="deepartes"]', function(){
+    let allSites = [];
+    let sites = JSON.parse($(this).attr('data-sites'));
+    let types = JSON.parse($(this).attr('data-types'));
+
+    if($(this).val()){
+        
+        if(isNaN($(this).val())){
+
+            for (let index = 0; index < types.length; index++) {
+                const type = types[index];
+                if(type.name == $(this).val()){
+                    for (let j = 0; j < sites.length; j++) {
+                        const site = sites[j];
+                        if(site.type_id == type.id){
+                            allSites.push(site);
+                        }
+                    }
+                }
+            }
+
+
+            if(allSites.length > 0){
+
+                $('#nino').remove();
+                $('#devdocs').append(`
+                    <div id="nino" class="form-group my-4">
+                        <label for="sity"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident<span style="color:red;"> *</span></label>
+                        <select style="font-size: 1.2em;" data-sites="{{ $sites }}" class="form-control custom-select border-primary" id="sity" name="site_id">
+                            <option selected value="">Choisissez...</option>
+                        </select>
+                    </div>
+                `);
+                for (let i = 0; i < allSites.length; i++) {
+                    const sit = allSites[i];
+                    $('#sity').append(`<option value="${sit.id}">${sit.name}</option>`);
+                }
+
+            }else{
+
+                $('#nino').remove();
+                $('#devdocs').append(`
+                    <div id="nino" class="form-group my-4">
+                        <label for="sity"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident<span style="color:red;"> *</span></label>
+                        <select style="font-size: 1.2em;" data-sites="{{ $sites }}" class="form-control custom-select border-primary" id="sity" name="site_id">
+                            <option selected value="">Choisissez...</option>
+                        </select>
+                    </div>
+                `);
+
+                $('#sity').empty().append(`<option value="">AUCUNE OPTION DISPONIBLE</option>`);
+            } 
+
+        }else{
+            $('#nino').remove();
+        }
+        
+    }else{
+        $('#nino').remove();
+    }
+});
+
+
+$(document).on('change', 'select[name="deepartes_edit"]', function(){
+
+    let allSites = [];
+    let sites = JSON.parse($(this).attr('data-sites'));
+    let types = JSON.parse($(this).attr('data-types'));
+
+    if($(this).val()){
+        
+        if(isNaN($(this).val())){
+
+            for (let index = 0; index < types.length; index++) {
+                const type = types[index];
+                if(type.name == $(this).val()){
+                    for (let j = 0; j < sites.length; j++) {
+                        const site = sites[j];
+                        if(site.type_id == type.id){
+                            allSites.push(site);
+                        }
+                    }
+                }
+            }
+
+
+            if(allSites.length > 0){
+
+                $('#nino_edit').remove();
+                $('#devdocs_edit').append(`
+                    <div id="nino_edit" class="form-group my-4">
+                        <label for="sity"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident<span style="color:red;"> *</span></label>
+                        <select style="font-size: 1.2em;" class="form-control custom-select border-primary" id="sity_edit" name="sity_edit">
+                            <option value="">Choisissez...</option>
+                        </select>
+                    </div>
+                `);
+                for (let i = 0; i < allSites.length; i++) {
+                    const sit = allSites[i];
+                    $('#sity_edit').append(`<option value="${sit.id}">${sit.name}</option>`);
+                }
+
+            }else{
+
+                $('#nino_edit').remove();
+                $('#devdocs_edit').append(`
+                    <div id="nino_edit" class="form-group my-4">
+                        <label for="sity_edit"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident<span style="color:red;"> *</span></label>
+                        <select style="font-size: 1.2em;" class="form-control custom-select border-primary" id="sity_edit" name="sity_edit">
+                            <option value="">Choisissez...</option>
+                        </select>
+                    </div>
+                `);
+
+                $('#sity_edit').empty().append(`<option value="">AUCUNE OPTION DISPONIBLE</option>`);
+            } 
+
+        }else{
+            $('#nino_edit').remove();
+        }
+        
+    }else{
+        $('#nino_edit').remove();
+    }
+});
+
+$(document).on('click', '#InfIncs', function(){
+
+    let nombres_taches = 0;
+    
+    let number = $(this).attr('data-number');
+    let incidents = JSON.parse($(this).attr('data-incidents'));
+    let tasks = JSON.parse($(this).attr('data-tasks'));
+    let dates = JSON.parse($(this).attr('data-created'));
+    let numeros = JSON.parse($(this).attr('data-ids'));
+    let due_dates = JSON.parse($(this).attr('data-exited'));
+    let users_incidents = JSON.parse($(this).attr('data-users_incidents'));
+    let users = JSON.parse($(this).attr('data-users'));
+    let departements = JSON.parse($(this).attr('data-departements'));
+    let sites = JSON.parse($(this).attr('data-sites'));
+
+    
+    for (let we = 0; we < tasks.length; we++) {
+        const tas = tasks[we];
+        
+        if(tas.incident_number == number){
+            nombres_taches +=1;
+        }
+    }
+
+    let index_dateCreation_Inc = -1;
+    for (let fb = 0; fb < numeros.length; fb++) {
+        const numbber = numeros[fb];
+        if(numbber == number){
+            index_dateCreation_Inc = fb;
+        }
+    }
+
+    let incident = incidents.find(i => i.number == number);
+    
+    
+    $('.numero_tasks').replaceWith(`<i class="text-xl numero_tasks">${$(this).attr('data-key')}</i>`);
+    $('.sident').replaceWith(`<i class="text-lg badge badge-pill badge-success sident">${incident.number}</i>`);
+    $('.desc').replaceWith(`<span class="text-xl desc">${incident.description}</span>`);
+    $('.cose').replaceWith(`<span class="text-xl desc">${incident.cause}</span>`);
+    $('.observation_coordos').replaceWith(`<span class="observation_coordos">${incident.observation_rex ? incident.observation_rex : ""}</span>`);
+
+    if(incident.status == "ENCOURS"){
+        $('.stat_inci').replaceWith(`<span class="text-xl text-primary stat_inci">${incident.status}</span>`);
+    }else if(incident.status == "CLÔTURÉ"){
+        $('.stat_inci').replaceWith(`<span class="text-xl text-success stat_inci">${incident.status}</span>`);
+    }else{
+        $('.stat_inci').replaceWith(`<span class="text-xl text-muted stat_inci">${incident.status}</span>`);
+    }
+    $('.perim').replaceWith(`<span class="text-xl perim">${incident.perimeter ? incident.perimeter : ''}</span>`);
+    $('.actions_do').replaceWith(`<span class="text-xl actions_do">${incident.battles ? incident.battles : ''}</span>`);
+    $('.kate').replaceWith(`<span class="text-xl kate">${incident.categories ? incident.categories.name : ""}</span>`);
+    
+    if(incident.due_date){
+        if(parseInt(incident.due_date.replaceAll("-", "")) < parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""))){
+            if(incident.status == "ENCOURS"){
+                $('.due_dat').replaceWith(`<span class="text-warning text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
+            }else{
+                $('.due_dat').replaceWith(`<span class="text-primary text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
+            }
+        }else{
+            $('.due_dat').replaceWith(`<span class="text-primary text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
+        }
+    }else{
+        $('.due_dat').replaceWith(`<span class="due_dat"></span>`);
+    }
+
+    $('.creat_dat').replaceWith(`<span class="text-xl creat_dat">${dates[index_dateCreation_Inc]}</span>`);
+    $('.cloture_daate').replaceWith(`<span class="text-xl cloture_daate">${incident.closure_date ? incident.closure_date : ''}</span>`);
+    $('.tac').replaceWith(`<span class="text-xl tac">${nombres_taches < 10 ? 0 +""+ nombres_taches : nombres_taches}</span>`);
+    
+    
+    //Entité Emetteur Et Récèpteur
+    $('.site_emeter').replaceWith(`<span class="site_emeter"></span>`);
+    $('.syte_receppt').replaceWith('<span class="syte_receppt"></span>');
+
+
+    let mon_user_ince = users_incidents.find(u => u.incident_number == incident.number && u.isDeclar === '1');
+    let mon_user_inci_recepteur = users_incidents.find(u => u.incident_number == incident.number && u.isTrigger === '1' && u.isCoordo === '1' && u.isTriggerPlus === '1');
+    
+    if(mon_user_ince){
+        let Utilisateur = users.find(u => u.id == mon_user_ince.user_id);
+        if(Utilisateur){
+            if(Utilisateur.departement_id){
+                var dept = departements.find(d => d.id == Utilisateur.departement_id);
+            }else if(Utilisateur.site_id){
+                var sit = sites.find(s => s.id == Utilisateur.site_id);
+            }
+        }
+    }
+
+    if(mon_user_inci_recepteur){
+        let user = users.find(u => u.id == mon_user_inci_recepteur.user_id);
+
+        if(user){
+            var dept_recepteur = departements.find(d => d.id == user.departement_id);
+            var sit_recepteur = sites.find(s => s.id == user.site_id);
+        }
+    }
+
+    $('.site_emeter').replaceWith(`<span class="site_emeter">${sit ? sit.name : dept ? dept.name : ""}</span>`);
+    $('.syte_receppt').replaceWith(`<span class="syte_receppt">${dept_recepteur ? dept_recepteur.name : sit_recepteur ? sit_recepteur.name : ""}</span>`);
+
+});
+

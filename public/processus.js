@@ -88,7 +88,7 @@ $(document).on('click', '#btn_edi_po', function(){
     $('#id').val(processus.id);
     $('#p_edit').val(processus.name);
     $('#de_edit').val(processus.description);
-})
+});
 
 
 $('#btn_editpr').on('click', function(){

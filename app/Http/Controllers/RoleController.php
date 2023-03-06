@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Session;
 
 class RoleController extends Controller
 {
@@ -75,22 +76,26 @@ class RoleController extends Controller
             $good = false;
             $message .= "Veuillez Modifier Votre Rôle Car Déja Existant ! \n";
         }
-        if(!$request->input('permission')){
-            $good = false;
-            $message .= "Veuillez Selectionner Une Permission ! \n";
-        }
+        // if(!$request->input('permission')){
+        //     $good = false;
+        //     $message .= "Veuillez Selectionner Une Permission ! \n";
+        // }
         if(!$good){
             $good = false;
             return response()->json([$message]);
         }else{
 
-            $role = Role::create(['name' => $request->input('name')]);
+            $role = Role::create(
+                [
+                    'name' => $request->input('name'),
+                    'description' => $request->input('description'),
+                ]);
             
-            if($request->input('permission')){
-                $role->syncPermissions($request->input('permission'));
-            }
-    
-            smilify('success', 'Rôle Créer Avec Succèss !');
+            // if($request->input('permission')){
+            //     $role->syncPermissions($request->input('permission'));
+            // }
+
+            notify()->success('Rôle Créer Avec Succèss ! ⚡️');
 
             $rol = DB::table('roles')->get()->last();
     
@@ -128,7 +133,6 @@ class RoleController extends Controller
             ->where('role_has_permissions.role_id', $id)
             ->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')
             ->all();
-    
         return view('roles.edit', compact('role', 'permission', 'rolePermissions'));
     }
 
@@ -141,21 +145,33 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'permission' => 'required',
-        ]);
-    
         $role = Role::find($id);
-        $role->name = $request->input('name');
-        $role->save();
 
-        smilify('success', 'Rôle Modifier Avec Succèss !');
-
-        $role->syncPermissions($request->input('permission'));
-    
+        if($request->input('permission')){
+            $role->syncPermissions($request->input('permission'));
+        }
+        
         return redirect()->route('roles.index');
     }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function modify(Request $request)
+    {
+        Role::where('id', '=', $request->id)->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+        
+        return response()->json([1]);
+    }
+
 
     /**
      * Remove the specified resource from storage.

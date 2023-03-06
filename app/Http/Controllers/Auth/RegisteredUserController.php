@@ -54,7 +54,7 @@ class RegisteredUserController extends Controller
                 // 'email.unique' => 'Email Déja Utilier !',
                 'password.confirmed' => 'Mot De Passes Non Identique !',
                 'password.min' => 'Le Mot De Passe Doit avoir Au Minimum 8 Caractères !'
-            ]);
+        ]);
 
         $input = $request->all();
 
@@ -108,11 +108,16 @@ class RegisteredUserController extends Controller
             'editer-tache',
             'supprimer-tache',
             'voir-tache',
-
+            'creer-site',
+            'lister-site',
+            'editer-site',
+            'supprimer-site',
+            'parametrage',
+            'gestion-utilisateur'
         ];
 
         foreach ($permitions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::create(['name' => $permission, 'description' => 'ras']);
         }
 
         $role = Role::create(['name' => $request->input('roles')]);

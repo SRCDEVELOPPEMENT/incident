@@ -44,7 +44,7 @@ $('#btn_add_cate').on('click', function(){
                                     </td>
                                     <td></td>
                                     <td>${categorie.name}</td>
-                                    <td>${categorie.departements.name}</td>
+                                    <td></td>
                                     <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <span class="text-muted sr-only">Action</span>
                                     </button>
@@ -179,7 +179,12 @@ $(document).on('click', '#edit_cati', function(){
     let categorie = JSON.parse($(this).attr('data-cat'));
     $('#id_cat').val(categorie.id);
     $('#cat_names').val(categorie.name);
-    $('#depts').val(categorie.departement_id);
+    if(categorie.departement_id){
+        $('#depts').val(categorie.departement_id);
+    }else{
+        $('#depts').val(categorie.type);
+    }
+    
 });
 
 $(document).on('click', '#btn_edite_cate', function(){

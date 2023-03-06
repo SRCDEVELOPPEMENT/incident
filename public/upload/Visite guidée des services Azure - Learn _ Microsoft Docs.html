@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<!-- saved from url=(0097)https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services -->
+<html class="is-full hasPageActions hasBreadcrumb moduleunit has-default-focus theme-light js-focus-visible" lang="fr-fr" dir="ltr" data-css-variable-support="true" data-authenticated="true" data-auth-status-determined="true" data-target="docs" x-ms-format-detection="none" data-js-focus-visible="" style=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	
+	
+	
+	
+			
+		
+		
+
+	
+
+	
+
+	
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/introduction" rel="canonical">
+	<title>Visite guidée des services Azure - Learn | Microsoft Docs</title>
+
+		<link rel="stylesheet" href="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/c21321ab.site-ltr.css">
+
+	
+
+	<script id="msdocs-script">
+	var msDocs = {
+		data: {
+			timeOrigin: Date.now(),
+			contentLocale: 'fr-fr',
+			contentDir: 'ltr',
+			userLocale: 'fr-fr',
+			userDir: 'ltr',
+			pageTemplate: 'ModuleUnit',
+			brand: '',
+			context: {
+
+			},
+			hasBinaryRating: false,
+			hasGithubIssues: false,
+			showFeedbackReport: false,
+			enableTutorialFeedback: false,
+			feedbackSystem: 'None',
+			feedbackGitHubRepo: '',
+			feedbackProductUrl: '',
+			contentGitUrl: 'https://github.com/MicrosoftDocs/learn-pr.fr-FR/blob/live/learn-pr/azure-fundamentals/intro-to-azure-fundamentals/introduction.yml',
+			extendBreadcrumb: false,
+			isEditDisplayable: false,
+			hideViewSource: false,
+			hasPageActions: true,
+			hasBookmark: true,
+			hasShare: false,
+			hasRecommendations: false,
+			contributors: [
+						{ name: "olprod", url: "https://github.com/olprod" }
+],
+			mathjax: {
+			},
+		},
+		functions:{}
+	};
+	</script>
+	<script src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/wcp-consent.js.télécharger"></script>
+	<script src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/ms.jsll-3.min.js.télécharger"></script>
+
+	<script src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/5cce29c0.deprecation.js.télécharger"></script>
+		<script src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/1912c3a6.index-docs.js.télécharger"></script><style></style>
+<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">
+.vue-modal-resizer {
+  display: block;
+  overflow: hidden;
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  right: 0;
+  bottom: 0;
+  z-index: 9999999;
+  background: transparent;
+  cursor: se-resize;
+}
+.vue-modal-resizer::after {
+  display: block;
+  position: absolute;
+  content: '';
+  background: transparent;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-bottom: 10px solid #ddd;
+  border-left: 10px solid transparent;
+}
+.vue-modal-resizer.clicked::after {
+  border-bottom: 10px solid #369be9;
+}
+</style><style type="text/css">
+.v--modal-block-scroll {
+  overflow: hidden;
+  width: 100vw;
+}
+.v--modal-overlay {
+  position: fixed;
+  box-sizing: border-box;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  opacity: 1;
+}
+.v--modal-overlay.scrollable {
+  height: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.v--modal-overlay .v--modal-background-click {
+  width: 100%;
+  min-height: 100%;
+  height: auto;
+}
+.v--modal-overlay .v--modal-box {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.v--modal-overlay.scrollable .v--modal-box {
+  margin-bottom: 2px;
+}
+.v--modal {
+  background-color: white;
+  text-align: left;
+  border-radius: 3px;
+  box-shadow: 0 20px 60px -2px rgba(27, 33, 58, 0.4);
+  padding: 0;
+}
+.v--modal.v--modal-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  left: 0;
+  top: 0;
+}
+.v--modal-top-right {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.overlay-fade-enter-active,
+.overlay-fade-leave-active {
+  transition: all 0.2s;
+}
+.overlay-fade-enter,
+.overlay-fade-leave-active {
+  opacity: 0;
+}
+.nice-modal-fade-enter-active,
+.nice-modal-fade-leave-active {
+  transition: all 0.4s;
+}
+.nice-modal-fade-enter,
+.nice-modal-fade-leave-active {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+</style><style type="text/css">
+.vue-dialog div {
+  box-sizing: border-box;
+}
+.vue-dialog .dialog-flex {
+  width: 100%;
+  height: 100%;
+}
+.vue-dialog .dialog-content {
+  flex: 1 0 auto;
+  width: 100%;
+  padding: 15px;
+  font-size: 14px;
+}
+.vue-dialog .dialog-c-title {
+  font-weight: 600;
+  padding-bottom: 15px;
+}
+.vue-dialog .dialog-c-text {
+}
+.vue-dialog .vue-dialog-buttons {
+  display: flex;
+  flex: 0 1 auto;
+  width: 100%;
+  border-top: 1px solid #eee;
+}
+.vue-dialog .vue-dialog-buttons-none {
+  width: 100%;
+  padding-bottom: 15px;
+}
+.vue-dialog-button {
+  font-size: 12px !important;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+  line-height: 40px;
+  height: 40px;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+.vue-dialog-button:hover {
+  background: rgba(0, 0, 0, 0.01);
+}
+.vue-dialog-button:active {
+  background: rgba(0, 0, 0, 0.025);
+}
+.vue-dialog-button:not(:first-of-type) {
+  border-left: 1px solid #eee;
+}
+</style><style type="text/css"></style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta property="og:title" content="Visite guidée des services Azure - Learn"><meta property="og:type" content="website"><meta property="og:url" content="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services"><meta property="og:description" content="Dans cette unité, vous suivrez une visite guidée des services Azure."><meta property="og:image" content="https://docs.microsoft.com/en-us/media/logos/logo-ms-social.png"><meta property="og:image:alt" content="Microsoft Logo"><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@docsmsft"><meta name="color-scheme" content="light dark"><meta name="schema" content="ModuleUnit"><meta name="uid" content="learn.azure.intro-to-azure-fundamentals.tour-of-azure-services"><meta name="page_type" content="learn"><meta name="page_kind" content="unit"><meta name="azure_sandbox" content="false"><meta name="sandbox" content="false"><meta name="author" content="wwlpublish"><meta name="breadcrumb_path" content="/learn/breadcrumb/toc.json"><meta name="clicktale" content="true"><meta name="depot_name" content="Docs.learn-pr"><meta name="description" content="Dans cette unité, vous suivrez une visite guidée des services Azure."><meta name="document_id" content="190ef208-2e88-9bbb-364d-3d20ce098872"><meta name="document_version_independent_id" content="b37fa802-c1c6-9e41-a4f3-0f28ffd73bf4"><meta name="gitcommit" content="https://github.com/MicrosoftDocs/learn-pr.fr-FR/blob/ebf90f2f9d96e63a420c0b55597c179aef2b79f3/learn-pr/azure-fundamentals/intro-to-azure-fundamentals/tour-of-azure-services.yml"><meta name="locale" content="fr-fr"><meta name="ms.author" content="rknapp"><meta name="ms.contentlocale" content="fr-FR"><meta name="ms.date" content="09/01/2021"><meta name="ms.lasthandoff" content="09/19/2021"><meta name="ms.locfileid" content="127997741"><meta name="ms.openlocfilehash" content="b533069787b2e22be83613329377d1c93017dec3"><meta name="ms.prod" content="learning-azure"><meta name="ms.sourcegitcommit" content="0956b2c1f1aae9c3126ce8a1ad4c1e03e0c58113"><meta name="ms.topic" content="interactive-tutorial"><meta name="ms.translationtype" content="HT"><meta name="original_content_git_url" content="https://github.com/MicrosoftDocs/learn-pr.fr-FR/blob/live/learn-pr/azure-fundamentals/intro-to-azure-fundamentals/tour-of-azure-services.yml"><meta name="site_name" content="Docs"><meta name="uhfHeaderId" content="MSDocsHeader-Learn"><meta name="updated_at" content="2021-09-24 09:38 PM"><meta name="unit_completion_type" content="view"><meta name="ROBOTS" content="noindex"></head>
+
+<body lang="fr-fr" dir="ltr"><div id="MathJax_Message" style="display: none;"></div>
+	<div class="header-holder has-default-focus">
+		<a href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services#main" class="skip-to-main-link has-outline-color-text visually-hidden-until-focused position-fixed has-inner-focus focus-visible top-0 left-0 right-0 padding-xs has-text-centered has-body-background" tabindex="1">Passer au contenu principal</a>
+
+		<div hidden="" id="cookie-consent-holder"></div>
+
+		<div id="unsupported-browser" style="
+			background-color: white;
+			color: black;
+			padding: 16px;
+			border-bottom: 1px solid grey;" hidden="">
+			<div style="max-width: 800px; margin: 0 auto;">
+				<p style="font-size: 24px">Ce navigateur n’est plus pris en charge.</p>
+				<p style="font-size: 16px; margin-top: 16px;">Effectuez une mise à niveau vers Microsoft Edge pour tirer parti des dernières fonctionnalités, des mises à jour de sécurité et du support technique.</p>
+				<div style="margin-top: 12px;">
+					<a href="https://go.microsoft.com/fwlink/p/?LinkID=2092881" style="
+						background-color: #0078d4;
+						border: 1px solid #0078d4;
+						color: white;
+						padding: 6px 12px;
+						border-radius: 2px;
+						display: inline-block;
+						">
+Télécharger Microsoft Edge					</a>
+					<a href="https://docs.microsoft.com/en-US/lifecycle/faq/internet-explorer-microsoft-edge" style="
+							background-color: white;
+							padding: 6px 12px;
+							border: 1px solid #505050;
+							color: #171717;
+							border-radius: 2px;
+							display: inline-block;
+							">
+Plus d’informations					</a>
+				</div>
+			</div>
+
+		</div>
+		<!-- liquid-tag banners global -->
+		<div id="headerAreaHolder" data-bi-name="header">
+<header role="banner" itemscope="itemscope" itemtype="http://schema.org/Organization"><!----> <div class="nav-bar"><!---->  <div class="nav-bar-brand">
+		<a class="nav-bar-button" itemprop="url" href="https://www.microsoft.com/" aria-label="Microsoft">
+			<div class="nav-bar-logo" role="presentation" aria-hidden="true" itemprop="logo" itemscope="itemscope">
+				<svg xmlns="http://www.w3.org/2000/svg" width="108" height="23" viewBox="72 72 337 74" preserveAspectRatio="xMidYMin slice">
+					<g data-name="MS-symbol">
+						<clippath>
+							<path transform="matrix(1 0 0 -1 0 216)" d="M0 216h482V0H0z"></path>
+						</clippath>
+						<g clip-path="url(#a)">
+							<path class="has-fill-current-color has-text-subtle" d="M394.942 104.59h-10.858v25.003h-7.38V104.59h-5.182v-5.965h5.182v-4.308c0-3.254 1.06-5.92 3.178-7.998 2.12-2.079 4.835-3.118 8.15-3.118.882 0 1.666.045 2.35.135a9.37 9.37 0 011.806.407v6.296c-.24-.14-.663-.31-1.265-.512-.603-.2-1.296-.3-2.078-.3-1.528 0-2.702.476-3.526 1.43-.824.954-1.235 2.365-1.235 4.232v3.736h10.858v-6.959l7.321-2.229v9.188h7.381v5.965h-7.38v14.49c0 1.91.345 3.254 1.038 4.037.693.783 1.782 1.175 3.27 1.175.42 0 .927-.1 1.52-.3a7.178 7.178 0 001.552-.724v6.025c-.463.261-1.23.502-2.305.723a15.742 15.742 0 01-3.178.331c-3.073 0-5.378-.817-6.914-2.455-1.537-1.637-2.305-4.102-2.305-7.396zm-48.407 9.73c0 3.233.733 5.703 2.2 7.411 1.465 1.707 3.564 2.56 6.295 2.56 2.652 0 4.67-.853 6.055-2.56 1.386-1.708 2.08-4.238 2.08-7.592 0-3.334-.719-5.849-2.155-7.547-1.436-1.697-3.45-2.545-6.04-2.545-2.67 0-4.745.888-6.22 2.666-1.477 1.777-2.215 4.313-2.215 7.607m-7.592.24c0-5.12 1.446-9.177 4.338-12.17 2.892-2.993 6.91-4.489 12.05-4.489 4.841 0 8.621 1.441 11.343 4.323 2.721 2.883 4.082 6.774 4.082 11.674 0 5.021-1.447 9.018-4.338 11.99-2.892 2.973-6.829 4.458-11.81 4.458-4.8 0-8.61-1.41-11.432-4.232-2.822-2.82-4.233-6.673-4.233-11.554m-16.417-7.802c0 1.045.331 1.863.994 2.456.662.592 2.128 1.34 4.398 2.243 2.912 1.166 4.956 2.476 6.131 3.932 1.175 1.456 1.762 3.22 1.762 5.287 0 2.912-1.12 5.252-3.359 7.02-2.24 1.767-5.267 2.65-9.083 2.65-1.285 0-2.706-.155-4.263-.467-1.556-.31-2.877-.707-3.96-1.19v-7.169a17.945 17.945 0 004.277 2.198c1.526.543 2.911.814 4.157.814 1.647 0 2.862-.23 3.645-.693.784-.46 1.175-1.235 1.175-2.319 0-1.005-.406-1.853-1.22-2.546-.813-.693-2.355-1.492-4.624-2.395-2.69-1.125-4.599-2.39-5.724-3.796-1.125-1.406-1.687-3.193-1.687-5.362 0-2.792 1.11-5.086 3.33-6.884 2.217-1.797 5.095-2.696 8.63-2.696 1.084 0 2.3.12 3.645.361 1.346.242 2.47.553 3.374.934v6.93c-.964-.644-2.089-1.195-3.374-1.658-1.286-.462-2.56-.693-3.826-.693-1.386 0-2.465.271-3.238.813-.774.543-1.16 1.286-1.16 2.23m-35.066 7.562c0 3.233.733 5.703 2.2 7.411 1.465 1.707 3.564 2.56 6.295 2.56 2.652 0 4.67-.853 6.055-2.56 1.386-1.708 2.08-4.238 2.08-7.592 0-3.334-.719-5.849-2.155-7.547-1.436-1.697-3.449-2.545-6.039-2.545-2.672 0-4.745.888-6.222 2.666-1.476 1.777-2.214 4.313-2.214 7.607m-7.592.24c0-5.12 1.446-9.177 4.338-12.17 2.893-2.993 6.91-4.489 12.051-4.489 4.84 0 8.621 1.441 11.342 4.323 2.721 2.883 4.082 6.774 4.082 11.674 0 5.021-1.446 9.018-4.338 11.99-2.892 2.973-6.828 4.458-11.809 4.458-4.8 0-8.61-1.41-11.433-4.232-2.822-2.82-4.233-6.673-4.233-11.554m-3.136-16.448c.582 0 1.105.041 1.567.121.462.08.853.18 1.175.301v7.38c-.382-.28-.939-.546-1.672-.798-.733-.25-1.622-.376-2.666-.376-1.788 0-3.299.753-4.534 2.26-1.235 1.505-1.853 3.825-1.853 6.958v15.635h-7.29V98.624h7.29v4.88h.12c.663-1.687 1.667-3.007 3.013-3.96 1.346-.954 2.962-1.432 4.85-1.432m-27.956 26.18c1.084 0 2.28-.25 3.585-.754a15.06 15.06 0 003.615-1.988v6.778c-1.165.663-2.485 1.165-3.962 1.506-1.475.342-3.098.512-4.865.512-4.559 0-8.265-1.44-11.116-4.323-2.852-2.88-4.278-6.562-4.278-11.04 0-4.98 1.456-9.083 4.37-12.307 2.91-3.224 7.037-4.835 12.38-4.835 1.366 0 2.746.176 4.143.527 1.395.352 2.504.758 3.328 1.22v6.99c-1.125-.824-2.274-1.462-3.45-1.914a9.966 9.966 0 00-3.599-.678c-2.872 0-5.192.934-6.959 2.802-1.768 1.868-2.652 4.388-2.652 7.562 0 3.132.85 5.573 2.546 7.32 1.697 1.748 4.002 2.621 6.914 2.621m-22.112 5.302h-7.29V98.624h7.29zm-8.044-39.916c0-1.205.437-2.214 1.311-3.028.874-.813 1.913-1.22 3.118-1.22 1.285 0 2.35.417 3.193 1.25.844.834 1.266 1.833 1.266 2.998 0 1.185-.432 2.18-1.296 2.982-.864.804-1.918 1.205-3.163 1.205-1.246 0-2.295-.406-3.148-1.219-.854-.815-1.28-1.803-1.28-2.968m-6.274-3.284v43.2h-7.5v-33.86h-.12l-13.408 33.86h-4.97l-13.738-33.86h-.09v33.86h-6.929v-43.2h10.755l12.412 32.024h.18l13.105-32.024z"></path>
+							<path d="M106.214 106.214H71.996V71.996h34.218z" fill="#f25022"></path>
+							<path d="M143.993 106.214h-34.218V71.996h34.218z" fill="#7fba00"></path>
+							<path d="M106.214 143.993H71.996v-34.218h34.218z" fill="#00a4ef"></path>
+							<path d="M143.993 143.993h-34.218v-34.218h34.218z" fill="#ffb900"></path>
+						</g>
+					</g>
+				</svg>
+			</div>
+		</a>
+	</div> 
+				
+		<div class="nav-bar-item is-hidden-tablet">
+			<div class="nav-bar-menu">
+				<button class="nav-bar-button is-title" title="Navigation globale" aria-expanded="false">
+					<span class="nav-bar-menu-title"><!---->Learn<!----></span>
+					<div class="nav-bar-burger">
+						<span></span>
+						<span></span>
+						<span></span>
+						<span class="nav-bar-burger-label"><!---->Navigation globale<!----></span>
+					</div>
+				</button>
+			</div>
+		</div>
+	
+				
+		<nav class="nav-bar-nav" role="navigation" aria-label="Global">
+			<ul class="nav-bar-nav-list">
+				
+		<li class="nav-bar-item is-category">
+			<a class="nav-bar-button is-title has-hover-underline" itemprop="url" href="https://docs.microsoft.com/fr-fr/">
+				<span><!---->Docs<!----></span>
+			</a>
+		</li>
+	
+				<!----> <li class="nav-bar-item">
+				<a class=" nav-bar-button has-hover-underline " href="https://docs.microsoft.com/fr-fr/documentation">
+					<span><!---->Documentation<!----></span>
+				</a>
+		  </li><!----> <li class="nav-bar-item">
+				<a class=" nav-bar-button has-hover-underline is-active" href="https://docs.microsoft.com/fr-fr/learn/">
+					<span><!---->Learn<!----></span>
+				</a>
+		  </li><!----> <li class="nav-bar-item">
+				<a class=" nav-bar-button has-hover-underline " href="https://docs.microsoft.com/fr-fr/answers/products/">
+					<span><!---->Q&amp;A<!----></span>
+				</a>
+		  </li><!----> <li class="nav-bar-item">
+				<a class=" nav-bar-button has-hover-underline " href="https://docs.microsoft.com/fr-fr/samples/browse/">
+					<span><!---->Exemples de code<!----></span>
+				</a>
+		  </li><!----> <li class="dropdown nav-bar-item" hidden="">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button  has-hover-underline" aria-controls="ax-73">
+			<span><!---->Plus<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-down-light expanded-indicator"></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-73" aria-label="Plus">
+			<!---->
+				<li class="nav-bar-item" hidden="">
+					<a class=" nav-bar-button " href="https://docs.microsoft.com/fr-fr/documentation"><!---->Documentation<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item" hidden="">
+					<a class=" nav-bar-button is-active" href="https://docs.microsoft.com/fr-fr/learn/"><!---->Learn<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item" hidden="">
+					<a class=" nav-bar-button " href="https://docs.microsoft.com/fr-fr/answers/products/"><!---->Q&amp;A<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item" hidden="">
+					<a class=" nav-bar-button " href="https://docs.microsoft.com/fr-fr/samples/browse/"><!---->Exemples de code<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!---->
+			</ul>
+		</nav>
+	
+				<span class="nav-bar-spacer"></span>
+				
+		<div class="nav-bar-search " id="ax-74" hidden="">
+			
+		<form class="nav-bar-search-form" method="GET" name="nav-bar-search-form" role="search" id="nav-bar-search-form" aria-label="Rechercher" aria-expanded="false" action="https://docs.microsoft.com/fr-fr/search/">
+			<div class="autocomplete" data-bi-name="autocomplete"><!----> <div class="control ">
+				<input role="combobox" maxlength="100" aria-autocomplete="list" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" id="site-search-input" class="autocomplete-input input   is-small" type="search" name="terms" aria-expanded="false" aria-owns="ax-75-listbox" aria-activedescendant="" aria-label="Rechercher" placeholder="Rechercher">
+
+				<span aria-hidden="true" class="icon is-small is-left" hidden="">
+					<span class="has-text-primary docon docon-undefined"></span>
+				</span>
+
+				<span aria-hidden="true" class="autocomplete-loader loader has-text-primary " hidden=""></span>
+			</div>
+
+			<ul class="autocomplete-suggestions is-vertically-scrollable" role="listbox" id="ax-75-listbox" aria-label="site-search-input-suggestions" hidden="">
+				
+				
+			</ul><!----></div>
+			<!-- mobile safari will not dispatch submit event unless there's a submit button that is not display:none -->
+			<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+			<input name="category" hidden="" value="Learn">
+			
+			
+			
+		</form>
+	
+		</div>
+		
+					<div class="nav-bar-search">
+						<!-- hidden when the width drops to tablet -->
+						
+		<form class="nav-bar-search-form" method="GET" name="nav-bar-search-form" role="search" id="nav-bar-search-form-desktop" aria-label="Rechercher" aria-expanded="false" action="https://docs.microsoft.com/fr-fr/search/">
+			<div class="autocomplete" data-bi-name="autocomplete"><!----> <div class="control has-icons-left">
+				<input role="combobox" maxlength="100" aria-autocomplete="list" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" id="ax-76" class="autocomplete-input input control has-icons-left  is-small" type="search" name="terms" aria-expanded="false" aria-owns="ax-77-listbox" aria-activedescendant="" aria-label="Rechercher" placeholder="Rechercher">
+
+				<span aria-hidden="true" class="icon is-small is-left">
+					<span class="has-text-primary docon docon-search"></span>
+				</span>
+
+				<span aria-hidden="true" class="autocomplete-loader loader has-text-primary " hidden=""></span>
+			</div>
+
+			<ul class="autocomplete-suggestions is-vertically-scrollable" role="listbox" id="ax-77-listbox" aria-label="ax-76-suggestions" hidden="">
+				
+				
+			</ul><!----></div>
+			<!-- mobile safari will not dispatch submit event unless there's a submit button that is not display:none -->
+			<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+			<input name="category" hidden="" value="Learn">
+			
+			
+			
+		</form>
+	
+					</div>
+			  
+		<div class="nav-bar-search " hidden="">
+			<div class="nav-bar-search-form-expander">
+				<button id="form-expander" class="nav-bar-button has-hover-underline " title="Rechercher" aria-expanded="false" aria-controls="ax-74">
+					
+		<span class="is-visually-hidden-mobile"><!---->Rechercher<!----></span>
+		<span class="icon margin-left-xxs" aria-hidden="true">
+			<span class="docon docon-search"></span>
+		</span>
+	
+				</button>
+			</div>
+		</div>
+	
+				
+		<div class="nav-bar-profile">
+			
+		<a class="docs-sign-in auth-status-determined not-authenticated" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services#"> Se connecter </a>
+	 
+		<div class="dropdown has-caret auth-status-determined authenticated">
+			<button class="dropdown-trigger button-reset" aria-controls="user-menu" aria-expanded="false" aria-label="Votre compte">
+				<figure class="image is-36x36">
+					<img class="has-body-background-medium is-rounded" alt="" data-profile-property="avatarUrl" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGNEY1RjYiLz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQuMTE4NjUgMjYuNzE2MkM2LjE0MzYgMjIuMTY5NyAxMC43MDE2IDE5IDE2IDE5QzIxLjI5ODMgMTkgMjUuODU2NCAyMi4xNjk3IDI3Ljg4MTMgMjYuNzE2MkMyNC45NTMxIDI5Ljk2MDggMjAuNzE0NyAzMiAxNiAzMkMxMS4yODUzIDMyIDcuMDQ2ODkgMjkuOTYwOCA0LjExODY1IDI2LjcxNjJaTTIzIDEwQzIzIDEzLjg2NiAxOS44NjYgMTcgMTYgMTdDMTIuMTM0IDE3IDguOTk5OTkgMTMuODY2IDguOTk5OTkgMTBDOC45OTk5OSA2LjEzNDAxIDEyLjEzNCAzIDE2IDNDMTkuODY2IDMgMjMgNi4xMzQwMSAyMyAxMFoiIGZpbGw9IiNCOEI5QkEiLz48L3N2Zz4=">
+				</figure>
+			</button>
+			<div class="dropdown-menu box justify-content-flex-start has-body-background" id="user-menu" role="menu" style="right: 0px;">
+				<div class="media is-user-dir">
+					<div class="media-left">
+						<figure class="image is-48x48" aria-hidden="true">
+							<img class="has-body-background-medium is-rounded" aria-labelledby="displayName" data-profile-property="avatarUrl" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGNEY1RjYiLz48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTQuMTE4NjUgMjYuNzE2MkM2LjE0MzYgMjIuMTY5NyAxMC43MDE2IDE5IDE2IDE5QzIxLjI5ODMgMTkgMjUuODU2NCAyMi4xNjk3IDI3Ljg4MTMgMjYuNzE2MkMyNC45NTMxIDI5Ljk2MDggMjAuNzE0NyAzMiAxNiAzMkMxMS4yODUzIDMyIDcuMDQ2ODkgMjkuOTYwOCA0LjExODY1IDI2LjcxNjJaTTIzIDEwQzIzIDEzLjg2NiAxOS44NjYgMTcgMTYgMTdDMTIuMTM0IDE3IDguOTk5OTkgMTMuODY2IDguOTk5OTkgMTBDOC45OTk5OSA2LjEzNDAxIDEyLjEzNCAzIDE2IDNDMTkuODY2IDMgMjMgNi4xMzQwMSAyMyAxMFoiIGZpbGw9IiNCOEI5QkEiLz48L3N2Zz4=">
+						</figure>
+					</div>
+					<div class="media-content">
+						<h2 class="title font-size-lg">
+							<span id="displayName" class="is-inline-truncated has-max-width-200" data-profile-property="displayName">Deffo Armel</span>
+						</h2>
+						<p class="subtitle font-size-sm margin-bottom-none">
+							<span class="is-inline-truncated has-max-width-200" data-profile-property="upn">deffoarmel2036@yahoo.com</span>
+						</p>
+					</div>
+				</div>
+				<ul class="padding-top-xs padding-bottom-xs">
+					<li class="padding-bottom-xs">
+						<a data-profile-property="profileUrl" href="https://docs.microsoft.com/fr-fr/users/me/activity/"><!---->Profil<!----></a>
+					</li>
+					<li>
+						<a data-profile-property="settingsUrl" href="https://docs.microsoft.com/fr-fr/users/me/settings/"><!---->Paramètres<!----></a>
+					</li>
+				</ul>
+				<div class="border-top padding-top-xs">
+					<a class="docs-sign-out" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services#"><!---->Se déconnecter<!----></a>
+				</div>
+			</div>
+		</div>
+	
+		</div>
+	
+			 <!----></div> <div class="nav-bar border-top is-hidden-mobile"><!----> 
+		<a class="nav-bar-button is-title has-hover-underline" itemprop="url" href="https://docs.microsoft.com/learn/">
+			<span>
+				Learn
+				
+			</span>
+		</a>
+	 
+		
+		<nav class="nav-bar-nav" role="navigation" aria-label="Site">
+			<ul class="nav-bar-nav-list">
+				
+				<!----> <li class="dropdown nav-bar-item">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button is-active has-hover-underline" aria-controls="ax-78">
+			<span><!---->Produits<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-down-light expanded-indicator"></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-78" aria-label="Produits">
+			<!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/azure/"><!---->Azure<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/dynamics365/"><!---->Dynamics&nbsp;365<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/github"><!---->GitHub<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/m365/"><!---->Microsoft&nbsp;365<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/dotnet/"><!---->.NET<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/powerplatform/"><!---->Power Platform<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/teams/"><!---->Teams<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/browse/"><!---->Parcourir tous les parcours<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!----> <li class="dropdown nav-bar-item">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button  has-hover-underline" aria-controls="ax-79">
+			<span><!---->Rôles<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-down-light expanded-indicator"></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-79" aria-label="Rôles">
+			<!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/administrator"><!---->Administrateur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/ai-engineer"><!---->Ingénieur IA<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/app-maker"><!---->Créateur d’applications<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/auditor"><!---->Auditeur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/business-user"><!---->Utilisateur métier<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/data-analyst"><!---->Analyste Data<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/data-engineer"><!---->Ingénieur Data<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/data-scientist"><!---->Scientifique des données<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/developer"><!---->Développeur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/devops-engineer"><!---->Ingénieur DevOps<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/educator"><!---->Formateur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/functional-consultant"><!---->Consultant métier<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/security-engineer"><!---->Ingénieur Sécurité<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/solutions-architect"><!---->Architecte Solutions<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/student"><!---->Étudiant<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!----> <li class="nav-bar-item">
+				<a class="has-external-link-indicator nav-bar-button has-hover-underline " href="https://docs.microsoft.com/fr-fr/learn/tv/">
+					<span><!---->Learn TV<!----></span>
+				</a>
+		  </li><!----> <li class="dropdown nav-bar-item">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button  has-hover-underline" aria-controls="ax-80">
+			<span><!---->Certifications<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-down-light expanded-indicator"></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-80" aria-label="Certifications">
+			<!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/certifications/"><!---->Vue d’ensemble<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/certifications/browse/"><!---->Parcourir les certifications<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/certifications/courses/browse/"><!---->Parcourir les cours<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!----> <li class="nav-bar-item">
+				<a class="has-external-link-indicator nav-bar-button has-hover-underline " href="https://docs.microsoft.com/fr-fr/learn/support/">
+					<span><!---->FAQ et aide<!----></span>
+				</a>
+		  </li><!----> <li class="dropdown nav-bar-item" hidden="">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button  has-hover-underline" aria-controls="ax-81">
+			<span><!---->Plus<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-down-light expanded-indicator"></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-81" aria-label="Plus">
+			<!----> <li class="dropdown nav-bar-item" hidden="">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button is-active " aria-controls="ax-82">
+			<span><!---->Produits<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-right-light "></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-82" aria-label="Produits">
+			<!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/azure/"><!---->Azure<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/dynamics365/"><!---->Dynamics&nbsp;365<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/github"><!---->GitHub<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/m365/"><!---->Microsoft&nbsp;365<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/dotnet/"><!---->.NET<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/powerplatform/"><!---->Power Platform<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/teams/"><!---->Teams<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/browse/"><!---->Parcourir tous les parcours<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!----> <li class="dropdown nav-bar-item" hidden="">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button  " aria-controls="ax-83">
+			<span><!---->Rôles<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-right-light "></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-83" aria-label="Rôles">
+			<!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/administrator"><!---->Administrateur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/ai-engineer"><!---->Ingénieur IA<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/app-maker"><!---->Créateur d’applications<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/auditor"><!---->Auditeur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/business-user"><!---->Utilisateur métier<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/data-analyst"><!---->Analyste Data<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/data-engineer"><!---->Ingénieur Data<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/data-scientist"><!---->Scientifique des données<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/developer"><!---->Développeur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/devops-engineer"><!---->Ingénieur DevOps<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/educator"><!---->Formateur<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/functional-consultant"><!---->Consultant métier<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/security-engineer"><!---->Ingénieur Sécurité<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/solutions-architect"><!---->Architecte Solutions<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/roles/student"><!---->Étudiant<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!---->
+				<li class="nav-bar-item" hidden="">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/tv/"><!---->Learn TV<!----></a>
+				</li>
+		  <!----> <li class="dropdown nav-bar-item" hidden="">
+		<button aria-expanded="false" class="dropdown-trigger nav-bar-button  " aria-controls="ax-84">
+			<span><!---->Certifications<!----></span>
+			<span class="nav-bar-button-chevron" aria-hidden="true">
+				<span class="docon docon-chevron-right-light "></span>
+			</span>
+		</button>
+		<ul class="dropdown-menu" id="ax-84" aria-label="Certifications">
+			<!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/certifications/"><!---->Vue d’ensemble<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/certifications/browse/"><!---->Parcourir les certifications<!----></a>
+				</li>
+		  <!---->
+				<li class="nav-bar-item">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/certifications/courses/browse/"><!---->Parcourir les cours<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!---->
+				<li class="nav-bar-item" hidden="">
+					<a class="has-external-link-indicator nav-bar-button " href="https://docs.microsoft.com/fr-fr/learn/support/"><!---->FAQ et aide<!----></a>
+				</li>
+		  <!---->
+		</ul>
+	</li><!---->
+			</ul>
+		</nav>
+	
+		<span class="nav-bar-spacer"></span>
+		 
+		<div id="level-status-container" class="display-flex align-items-center is-hidden-touch">
+			<div id="level-status" class="position-relative level has-margin-left-extra-small has-margin-right-extra-small"><!---->
+	<span id="level-status-text" class="font-size-xs has-text-wrap is-inline-truncated is-uppercase font-weight-semibold">Niveau 1</span>
+	<span id="level-status-progress-container" class="hexagonal-progress">
+		<progress id="level-status-progress" class="progress is-hidden-mobile is-inline-block position-relative is-success" value="22" max="100">22%</progress>
+		<span class="hexagonal-progress-marker"></span>
+	</span>
+	<span id="level-status-points" class="font-size-xs has-text-wrap is-inline-truncated is-uppercase"><!----> <span class="font-weight-semibold"> 400 </span>/1799 XP<!----><!----></span>
+<!----></div>
+		</div>
+	
+	 <!----></div> <!----></header>		</div>
+
+						<div class="content-header uhf-container has-padding has-default-focus border-bottom-none" data-bi-name="content-header">
+					<nav class="breadcrumb-holder has-padding-none has-padding-left-medium-tablet has-padding-right-medium-tablet has-padding-left-none-uhf-tablet has-padding-left-none-uhf-tablet has-padding-none-desktop flex-grow-1" data-bi-name="breadcrumb" itemscope="" itemtype="http://schema.org/BreadcrumbList" role="navigation" aria-label="Chemin de navigation">
+						<ul id="page-breadcrumbs" class="breadcrumbs"><!----><!----> <li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+				<a itemprop="item" href="https://docs.microsoft.com/fr-fr/"><span itemprop="name"><!---->Docs<!----></span></a>
+				<meta itemprop="position" content="1">
+			</li><!----> <li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+				<a itemprop="item" href="https://docs.microsoft.com/fr-fr/learn/"><span itemprop="name"><!---->Learn<!----></span></a>
+				<meta itemprop="position" content="2">
+			</li><!----> <li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+				<a itemprop="item" href="https://docs.microsoft.com/fr-fr/learn/browse/"><span itemprop="name"><!---->Parcourir<!----></span></a>
+				<meta itemprop="position" content="3">
+			</li><!----> <li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+				<a itemprop="item" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/"><span itemprop="name"><!---->Présentation des principes de base d’Azure<!----></span></a>
+				<meta itemprop="position" content="4">
+			</li><!----> <li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem">
+				<span itemprop="name"><!---->Visite guidée des services Azure<!----></span>
+				<meta itemprop="position" content="5">
+			</li><!----><!----></ul>
+					</nav>
+				<div class="content-header-controls">
+					<button type="button" class="contents-button button" data-bi-name="contents-expand" aria-haspopup="true">
+						<span class="icon"><span class="docon docon-menu" aria-hidden="true"></span></span>
+						<span class="contents-expand-title">Contenu</span>
+					</button>
+					<button type="button" class="ap-collapse-behavior ap-expanded button" data-bi-name="ap-collapse" aria-controls="action-panel">
+						<span class="icon"><span class="docon docon-exit-mode" aria-hidden="true"></span></span>
+						<span>Quitter le mode focus</span>
+					</button>
+				</div>
+				<div class="has-padding-none-tablet padding-xs font-size-sm display-flex justify-content-space-between flex-grow-1 page-action-holder">
+					<ul class="is-hidden-mobile action-list justify-content-flex-start has-flex-justify-content-end-tablet display-flex flex-wrap-wrap flex-grow-1 is-unstyled">
+						<li>
+							<a id="lang-link" class="button button button-clear button-sm" title="Lire en anglais" data-bi-name="language-toggle" href="https://docs.microsoft.com/en-us/learn/modules/intro-to-azure-fundamentals/introduction" data-bi="{&quot;cN&quot;:&quot;language-toggle&quot;,&quot;value&quot;:&quot;off&quot;}">
+								<span id="lang-link-icon" class="icon docon docon-locale-globe" aria-hidden="true"></span>
+								<span id="lang-link-text" class="is-visually-hidden-touch is-hidden-portrait" title="Lire en anglais">Lire en anglais</span>
+							</a>
+						</li>
+						<li>
+							<button type="button" class="collection button button-clear button-sm has-inner-focus" data-list-type="collection" data-bi-name="collection" title="Ajouter Visite guidée des services Azure - Learn | Microsoft Docs à une collection" aria-pressed="false">
+								<span class="icon" aria-hidden="true">
+									<span class="docon docon-circle-addition has-text-primary"></span>
+								</span>
+								<span class="collection-status is-visually-hidden-touch is-hidden-portrait">Enregistrer</span>
+							</button>
+						</li>
+					</ul>
+					<button type="button" class="border contents-button  button button-clear button-sm is-hidden-tablet has-inner-focus" aria-label="Contenu" data-bi-name="contents-expand">
+						<span class="icon">
+							<span class="docon docon-editor-list-bullet" aria-hidden="true"></span>
+						</span>
+						<span class="contents-expand-title">Table des matières</span>
+					</button>
+					<div class="is-invisible"></div>
+					<div class="is-hidden-tablet level-item is-flexible level-right">
+						<button type="button" class="page-actions-button  button button-clear button-sm is-hidden-tablet has-inner-focus border is-full-height  has-margin-left-small" aria-label="Actions sur la page" data-bi-name="pageactions">
+							<span class="icon">
+								<span class="docon docon-more-vertical" aria-hidden="true"></span>
+							</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+
+
+		<div id="disclaimer-holder" class="has-overflow-hidden has-default-focus">
+			<!-- liquid-tag banners sectional -->
+		</div>
+	</div>
+
+	<div class="mainContainer  uhf-container has-body-background-dark uhf-container is-full  has-default-focus" data-bi-name="body">
+
+		<div class="columns has-large-gaps is-gapless-mobile  is-gapless">
+
+
+			<!-- .primary-holder -->
+			<section class="primary-holder column  is-full ">
+				<!--div.columns -->
+				<div class="columns is-gapless-mobile has-large-gaps  is-gapless">
+
+
+					<div id="main-column" class="column  is-full ">
+
+						<main id="main" role="main" class="content " data-bi-name="content" lang="fr-fr" dir="ltr">
+
+
+<div class="modular-content-container" data-target="docs">
+    <nav class="pagination is-centered is-wide" role="navigation" aria-label="pagination" data-bi-name="module-nav">
+        <a class="pagination-previous button button-clear text-decoration-none is-hidden-portrait has-inner-focus" data-bi-name="previous-unit" id="previous-unit-link" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/what-is-microsoft-azure/">
+            <span aria-hidden="true" class="icon docon docon-chevron-left-light"></span>
+            <span>Précédente</span>
+        </a>
+        <ul class="pagination-list">
+            <li class="dropdown has-centered-menu has-caret" data-bi-name="unit-menu">
+                <button aria-controls="module-menu" aria-expanded="false" class="pagination-link has-margin-auto-sides button button-clear text-decoration-none button-sm dropdown-trigger" data-bi-name="dropdown-trigger" title="Module menu">
+                    <span id="unit-place">Unité 4 sur 8</span>
+                    <span aria-hidden="true" class="icon">
+                        <span class="docon docon-chevron-down-light expanded-indicator"></span>
+                    </span>
+                </button>
+                <div class="dropdown-menu has-width-450" id="module-menu" role="menu"><!---->
+		<div class="nav-box">
+			<h2 class="nav-box-title font-size-md has-margin-top-none"><!---->Présentation des principes de base d’Azure<!----></h2>
+			<ul class="margin-none font-size-sm has-text-subtle is-unstyled" data-bi-name="module-menu-links">
+				<!----> <li class="nav-box-line module-navigation-item completable is-unstyled is-complete" data-nav-uid="learn.azure.intro-to-azure-fundamentals.introduction" data-progress-uid="learn.azure.intro-to-azure-fundamentals.introduction">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/introduction/">
+							<span><!---->Introduction<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->4 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled is-complete" data-nav-uid="learn.azure.intro-to-azure-fundamentals.what-is-cloud-computing" data-progress-uid="learn.azure.intro-to-azure-fundamentals.what-is-cloud-computing">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/what-is-cloud-computing/">
+							<span><!---->Qu’est-ce que le cloud computing&nbsp;?<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->9 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled is-complete" data-nav-uid="learn.azure.intro-to-azure-fundamentals.what-is-microsoft-azure" data-progress-uid="learn.azure.intro-to-azure-fundamentals.what-is-microsoft-azure">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/what-is-microsoft-azure/">
+							<span><!---->Qu’est-ce qu’Azure&nbsp;?<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->9 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled is-current is-complete" data-nav-uid="learn.azure.intro-to-azure-fundamentals.tour-of-azure-services" data-progress-uid="learn.azure.intro-to-azure-fundamentals.tour-of-azure-services">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services/">
+							<span><!---->Visite guidée des services Azure<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->11 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled" data-nav-uid="learn.azure.intro-to-azure-fundamentals.get-started-with-azure-accounts" data-progress-uid="learn.azure.intro-to-azure-fundamentals.get-started-with-azure-accounts">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/get-started-with-azure-accounts/">
+							<span><!---->Bien démarrer avec les comptes Azure<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->4 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled" data-nav-uid="learn.azure.intro-to-azure-fundamentals.case-study-introduction" data-progress-uid="learn.azure.intro-to-azure-fundamentals.case-study-introduction">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/case-study-introduction/">
+							<span><!---->Présentation de l’étude de cas<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->2 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled" data-nav-uid="learn.azure.intro-to-azure-fundamentals.knowledge-check" data-progress-uid="learn.azure.intro-to-azure-fundamentals.knowledge-check">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/knowledge-check/">
+							<span><!---->Contrôle des connaissances<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->3 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!----> <li class="nav-box-line module-navigation-item completable is-unstyled" data-nav-uid="learn.azure.intro-to-azure-fundamentals.summary" data-progress-uid="learn.azure.intro-to-azure-fundamentals.summary">
+						<a class="line-item is-spaced has-inner-focus" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/summary/">
+							<span><!---->Résumé<!----></span>
+							<div>
+								<span class="is-hidden-complete text-decoration-none has-no-wrap"><!---->1 min<!----></span>
+								<span class="is-shown-complete has-text-success docon docon-check">
+									<span class="is-visually-hidden">: Effectué<!----></span>
+								</span>
+							</div>
+						</a>
+					</li><!---->
+			</ul>
+		</div>
+	<!----></div>
+            </li>
+        </ul>
+        <a class="pagination-next button button-clear text-decoration-none is-hidden-portrait has-inner-focus" data-bi-name="next-unit" id="next-unit-link" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/get-started-with-azure-accounts/">
+            <span>Suivant</span>
+            <span aria-hidden="true" class="icon docon docon-chevron-right-light"></span>
+        </a>
+    </nav>
+</div>
+<div class="columns is-mobile is-gapless is-fixed-bottom is-hidden-tablet is-hidden-landscape has-body-background margin-none" id="mobile-nav">
+    <div class="column" id="previous-unit-link-mobile-col">
+        <a class="button button-block button-filled is-radiusless button-lg margin-none has-inner-focus" data-bi-name="previous-unit" id="previous-unit-link-mobile" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/what-is-microsoft-azure/">
+            <span aria-hidden="true" class="icon docon docon-chevron-left-light"></span>
+            <span>Précédente</span>
+        </a>
+    </div>
+    <div class="column" id="next-unit-link-mobile-col">
+        <a class="button button-block is-primary is-radiusless is-large margin-none has-inner-focus" data-bi-name="next-unit" id="next-unit-link-mobile" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/get-started-with-azure-accounts/">
+            <span>Suivant</span>
+            <span aria-hidden="true" class="icon docon docon-chevron-right-light"></span>
+        </a>
+    </div>
+</div>
+
+							
+
+
+
+
+
+							<!-- <content> -->
+								<div class="modular-content-container has-body-background box">
+	<div id="unit-inner-section" class="section is-uniform position-relative">
+		<h1 class="has-margin-right-super-large-desktop">Visite guidée des services Azure</h1>
+		<div data-progress-uid="learn.azure.intro-to-azure-fundamentals.tour-of-azure-services" class="xp-tag position-absolute top-0 right-0 margin-top-xs has-margin-top-large-tablet has-margin-top-extra-large-desktop has-margin-top-medium-interactive has-margin-right-large has-margin-right-extra-large-tablet has-margin-right-large-interactive is-complete">
+			<div class="xp-tag-hexagon">
+				<span class="xp-tag-icon is-shown-complete docon docon-check">
+					<span class="visually-hidden">Effectué</span>
+				</span>
+				<span class="xp-tag-xp">100 XP</span>
+			</div>
+		</div>
+		<ul class="metadata page-metadata">
+			<li>11 minutes</li>
+		</ul>
+			<p>Azure peut vous aider à relever les plus gros défis professionnels. Vous apportez vos conditions, votre créativité et vos outils de développement de logiciels favoris. Azure vous apporte une infrastructure d’échelle mondiale toujours disponible pour créer vos applications.</p>
+<p>Commençons la visite guidée des principaux services proposés par Azure.</p>
+<h2 id="azure-overview">Présentation d’Azure</h2>
+<div class="embeddedvideo"><iframe src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/RWBg9Q.html" frameborder="0" allowfullscreen="true" data-linktype="external"></iframe></div>
+<h2 id="azure-services">Services Azure</h2>
+<p>Voici une vue d’ensemble des services et des fonctionnalités disponibles dans Azure.</p>
+<p><span class="mx-imgBorder">
+<img src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/azure-services-6c41a736.png" alt="Diagramme montrant une vue d’ensemble des services Azure populaires avec des sections pour la sécurité et la gestion, les services de plateforme, le cloud hybride et les services d’infrastructure." data-linktype="relative-path">
+</span>
+</p>
+<p>Examinons de plus près les catégories les plus utilisées&nbsp;:</p>
+<section class="row">
+<div class="column">
+</div>
+<div class="column">
+</div>
+</section>
+<section class="row">
+<div class="column">
+<ul>
+<li>Calcul</li>
+<li>Mise en réseau</li>
+<li>Stockage</li>
+<li>Mobile</li>
+<li>Bases de données</li>
+</ul>
+</div>
+<div class="column">
+<ul>
+<li>Web</li>
+<li>Internet des objets (IoT)</li>
+<li>Big Data</li>
+<li>Intelligence artificielle</li>
+<li>DevOps</li>
+</ul>
+</div>
+</section>
+<h3 id="compute">Calcul</h3>
+<p>Les services de calcul sont souvent la raison principale pour laquelle les entreprises choisissent la plateforme Azure. Azure fournit différentes options pour l’hébergement des applications et services. Voici quelques exemples de services de calcul dans Azure.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Fonction du service</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Machines virtuelles Azure</p>
+</div>
+<div class="column">
+<p>Machines virtuelles Windows ou Linux hébergées dans Azure.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Virtual Machine Scale Sets</p>
+</div>
+<div class="column">
+<p>Mise à l’échelle des machines virtuelles Windows ou Linux hébergées dans Azure.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Kubernetes Service</p>
+</div>
+<div class="column">
+<p>Gestion de cluster pour les machines virtuelles qui exécutent des services conteneurisés.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Service Fabric</p>
+</div>
+<div class="column">
+<p>Plateforme de systèmes distribués qui s’exécute dans Azure ou localement.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Batch</p>
+</div>
+<div class="column">
+<p>Service managé pour les applications de calculs complexes et les applications en parallèle.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Container Instances</p>
+</div>
+<div class="column">
+<p>Applications conteneurisées exécutées sur Azure sans provisionner de serveurs ni de machines virtuelles.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Functions</p>
+</div>
+<div class="column">
+<p>Service de calcul serverless basé sur les événements.</p>
+</div>
+</section>
+<h3 id="networking">Réseau</h3>
+<p>La liaison des ressources de calcul et l’accès aux applications sont les principales fonctions du réseau Azure. La fonctionnalité de réseau dans Azure comprend toute une série d’options pour connecter le monde extérieur aux services et fonctionnalités dans les centres de données Azure.</p>
+<p>Voici quelques exemples de services réseau dans Azure.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Fonction du service</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Réseau virtuel Azure</p>
+</div>
+<div class="column">
+<p>Connecte des machines virtuelles aux connexions de réseau privé virtuel (VPN) entrantes.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Load Balancer</p>
+</div>
+<div class="column">
+<p>Équilibre les connexions entrantes et sortantes vers les applications ou les points de terminaison de service.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Application Gateway</p>
+</div>
+<div class="column">
+<p>Optimise la distribution de batteries de serveurs d’applications tout en améliorant la sécurité des applications.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Passerelle VPN Azure</p>
+</div>
+<div class="column">
+<p>Accède aux réseaux virtuels Azure via des passerelles VPN à hautes performances.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure DNS</p>
+</div>
+<div class="column">
+<p>Fournit des réponses DNS ultrarapides et une très haute disponibilité du domaine.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Content Delivery Network</p>
+</div>
+<div class="column">
+<p>Distribue sur une large bande passante du contenu aux clients partout dans le monde.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure DDoS Protection</p>
+</div>
+<div class="column">
+<p>Protège les applications hébergées sur Azure contre les attaques par déni de service distribué (DDoS).</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Traffic Manager</p>
+</div>
+<div class="column">
+<p>Distribue le trafic réseau entre différentes régions Azure dans le monde.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure ExpressRoute</p>
+</div>
+<div class="column">
+<p>Se connecte à Azure via des connexions à large bande passante sécurisées et dédiées.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Network Watcher</p>
+</div>
+<div class="column">
+<p>Supervise et diagnostique les problèmes réseau à l’aide d’une analyse basée sur des scénarios.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Pare-feu Azure</p>
+</div>
+<div class="column">
+<p>Implémente un pare-feu de haute sécurité et à haute disponibilité avec une scalabilité illimitée.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Virtual WAN</p>
+</div>
+<div class="column">
+<p>Crée un réseau WAN unifié qui connecte des sites locaux et distants.</p>
+</div>
+</section>
+<h3 id="storage">Stockage</h3>
+<p>Azure fournit quatre grands types de services de stockage.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Fonction du service</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Stockage Blob Azure</p>
+</div>
+<div class="column">
+<p>Service de stockage d’objets très volumineux, comme les fichiers vidéo ou les images bitmap.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Stockage Fichier Azure</p>
+</div>
+<div class="column">
+<p>Partages de fichiers accessibles et gérables comme un serveur de fichiers.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Stockage File d’attente Azure</p>
+</div>
+<div class="column">
+<p>Magasin de données utilisé pour mettre en file d’attente et distribuer de manière sécurisée les messages entre les applications.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Stockage Table Azure</p>
+</div>
+<div class="column">
+<p>Le Stockage Table est un service qui stocke des données structurées non relationnelles (également appelées données NoSQL structurées) dans le cloud, en fournissant un magasin de clés/d’attributs avec une conception sans schéma.</p>
+</div>
+</section>
+<p>Ces services ont tous plusieurs caractéristiques en commun&nbsp;:</p>
+<ul>
+<li><strong>Durabilité</strong> et haute disponibilité assorties de capacités de redondance et de réplication.</li>
+<li><strong>Sécurisation</strong> par chiffrement automatique et contrôle d’accès en fonction du rôle.</li>
+<li><strong>Scalabilité</strong> avec un stockage quasi illimité.</li>
+<li><strong>Managé</strong>, maintenance et résolution des problèmes critiques inclus.</li>
+<li><strong>Accessibilité</strong> à l’échelon mondial via HTTP ou HTTPS.</li>
+</ul>
+<h3 id="mobile">Mobile</h3>
+<p>Avec Azure, les développeurs peuvent créer de façon simple et rapide des services back-end mobiles pour applications iOS, Android et Windows. Les fonctionnalités qui auparavant prenaient du temps et accentuaient les risques liés aux projets, comme l’ajout de la connexion d’entreprise et la connexion à des ressources locales telles que SAP, Oracle, SQL Server et SharePoint, sont désormais simples à inclure.</p>
+<p>Autres fonctionnalités de ce service :</p>
+<ul>
+<li>Synchronisation des données hors connexion.</li>
+<li>Connectivité vers les données locales.</li>
+<li>Diffusion des notifications push.</li>
+<li>Mise à l’échelle automatique en fonction des besoins de l’entreprise.</li>
+</ul>
+<h3 id="databases">Bases de données</h3>
+<p>Azure propose plusieurs services de base de données pour stocker un large éventail de types de données et de volumes. Par ailleurs, avec la connectivité globale, ces données sont immédiatement accessibles par les utilisateurs.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Fonction du service</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Cosmos DB</p>
+</div>
+<div class="column">
+<p>Base de données distribuée au niveau mondial qui prend en charge les options de NoSQL.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure SQL Database</p>
+</div>
+<div class="column">
+<p>Base de données relationnelle complètement managée, avec mise à l’échelle automatique, intelligence intégrale et sécurité robuste.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Database pour MySQL</p>
+</div>
+<div class="column">
+<p>Base de données relationnelle MySQL complètement managée et scalable avec haute disponibilité et sécurité.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Database pour PostgreSQL</p>
+</div>
+<div class="column">
+<p>Base de données relationnelle PostgreSQL complètement managée et scalable avec haute disponibilité et sécurité.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>SQL&nbsp;Server sur les machines virtuelles Azure</p>
+</div>
+<div class="column">
+<p>Service qui héberge des applications SQL Server d’entreprise dans le cloud.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Synapse Analytics</p>
+</div>
+<div class="column">
+<p>Entrepôt de données complètement managé avec sécurité intégrale à chaque niveau d’échelle sans coût supplémentaire.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Database Migration Service</p>
+</div>
+<div class="column">
+<p>Service qui migre les bases de données dans le cloud sans modifier le code d’application.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Cache Azure pour Redis</p>
+</div>
+<div class="column">
+<p>Service complètement managé qui met en cache les données statiques et les données fréquemment utilisées pour réduire la latence des données et des applications.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Database for MariaDB</p>
+</div>
+<div class="column">
+<p>Base de données relationnelle MariaDB complètement managée et scalable avec haute disponibilité et sécurité.</p>
+</div>
+</section>
+<h3 id="web">Web</h3>
+<p>Aujourd’hui, dans le monde de l’entreprise, il est indispensable de disposer d’une grande expérience du web. Azure offre un support de premier ordre pour créer et héberger des applications web et des services web basés sur HTTP. Les services Azure suivants sont axés sur l’hébergement web.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Description</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure App Service</p>
+</div>
+<div class="column">
+<p>Créez rapidement des applications web performantes basées sur le cloud.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Notification Hubs</p>
+</div>
+<div class="column">
+<p>Envoyez des notifications Push vers n’importe quelle plateforme à partir d’un backend</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Gestion des API Azure</p>
+</div>
+<div class="column">
+<p>Publiez des API en toute sécurité et à grande échelle pour les développeurs, les partenaires et les employés.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Recherche cognitive Azure</p>
+</div>
+<div class="column">
+<p>Déployez ce service de recherche complètement managé.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Fonctionnalité Web Apps d’Azure App Service</p>
+</div>
+<div class="column">
+<p>Créez et déployez des applications web stratégiques à grande échelle.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Service Azure SignalR</p>
+</div>
+<div class="column">
+<p>Ajoutez facilement des fonctionnalités web en temps réel.</p>
+</div>
+</section>
+<h3 id="iot">IoT</h3>
+<p>Les personnes n’ont jamais eu accès à autant d’informations. Le développement des assistants numériques personnels a conduit à l’avènement des smartphones, et il existe maintenant des montres intelligentes, des thermostats intelligents et même des réfrigérateurs intelligents. Avant, les ordinateurs personnels étaient la norme. Maintenant, avec Internet, n’importe quel objet connecté peut accéder à des informations très utiles. Cette possibilité donnée aux appareils de recueillir et de transmettre des informations à des fins d’analyse de données s’appelle l’IoT.</p>
+<p>De nombreux services peuvent faciliter et orienter le développement de solutions IoT de bout en bout.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Description</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>IoT Central</p>
+</div>
+<div class="column">
+<p>Solution IoT SaaS (software as a service) mondiale complètement managée qui facilite la connexion, la supervision et la gestion à grande échelle des ressources IoT.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure IoT Hub</p>
+</div>
+<div class="column">
+<p>Hub de messagerie qui garantit des communications sécurisées et permet de superviser des millions d’appareils IoT.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>IoT Edge</p>
+</div>
+<div class="column">
+<p>Service complètement managé qui permet aux modèles d’analyse de données d’être envoyés (push) directement sur les appareils IoT et ainsi de réagir rapidement aux changements d’état sans avoir besoin de consulter des modèles IA cloud.</p>
+</div>
+</section>
+<h3 id="big-data">Big Data</h3>
+<p>Les données affluent dans tous les formats et toutes les tailles. Le Big Data fait référence à des volumes de données <em>énormes</em>. Les volumes de données générés par les systèmes météo, les systèmes de communication, la recherche génomique, les plateformes d’imagerie et les divers autres scénarios se comptent en centaines de gigaoctets. Face à de tels volumes de données, il est difficile d’en faire l’analyse et de prendre des décisions. Ces données sont si volumineuses que les formes traditionnelles de traitement et d’analyse ne sont plus adaptées.</p>
+<p>Des technologies de cluster open source ont été développées pour gérer ces immenses jeux de données. Azure prend en charge un large éventail de technologies et de services afin de fournir des solutions analytiques et de Big Data.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Description</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Synapse Analytics</p>
+</div>
+<div class="column">
+<p>Exécutez des opérations analytiques à très grande échelle en vous appuyant sur un entrepôt de données d’entreprise cloud qui tire parti du traitement massivement parallèle pour exécuter rapidement des requêtes complexes sur des pétaoctets de données.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure&nbsp;HDInsight</p>
+</div>
+<div class="column">
+<p>Traitez d’immenses volumes de données au moyen de clusters managés Hadoop dans le cloud.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure Databricks</p>
+</div>
+<div class="column">
+<p>Intégrez ce service d’analytique collaboratif basé sur Apache Spark à d’autres services de Big Data dans Azure.</p>
+</div>
+</section>
+<h3 id="ai">Intelligence artificielle</h3>
+<p>Dans le contexte du cloud computing, l’IA s’articule autour d’une large gamme de services, au cœur de laquelle se trouve le machine learning. Machine Learning est une technique de science des données qui permet aux ordinateurs d’utiliser des données existantes afin de prévoir les tendances, les résultats et les comportements futurs. Avec le Machine Learning, les ordinateurs apprennent sans être explicitement programmés.</p>
+<p>Les prévisions ou prédictions générées par le Machine Learning peuvent rendre les applications et les appareils plus intelligents. Par exemple, quand vous faites vos courses en ligne, le Machine Learning peut vous recommander d’autres produits susceptibles de vous plaire, en tenant compte de ce que vous avez acheté. Quand vous glissez votre carte de crédit dans un appareil, le Machine Learning compare la transaction à une base de données de transactions et aide à détecter les fraudes. Et lorsque votre robot aspirateur nettoie une pièce, le machine learning l’aide à déterminer si le travail est terminé.</p>
+<p>Voici quelques-uns des types de services d’IA et de machine learning les plus courants dans Azure.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Description</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Service Azure Machine Learning</p>
+</div>
+<div class="column">
+<p>Environnement cloud qui vous permet de développer, entraîner, tester, déployer, gérer et suivre des modèles Machine Learning. Il est capable de générer et ajuster automatiquement un modèle. Dans un premier temps, il vous laisse démarrer l’entraînement sur votre ordinateur local avant d’effectuer un scale-out sur le cloud.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure ML Studio</p>
+</div>
+<div class="column">
+<p>Espace de travail collaboratif visuel dans lequel vous pouvez créer, tester et déployer des solutions de Machine Learning à l’aide d’algorithmes de Machine Learning prédéfinis et de modules de traitement des données.</p>
+</div>
+</section>
+<p>Les <em>services cognitifs</em> constituent un ensemble de produits similaires. Vous pouvez utiliser ces API prédéfinies dans vos applications pour résoudre des problèmes complexes.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Description</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Vision</p>
+</div>
+<div class="column">
+<p>Utilisez des algorithmes de traitement d’images destinés à identifier, légender, indexer et modérer intelligemment les images et les vidéos.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Speech</p>
+</div>
+<div class="column">
+<p>Convertissez du contenu audio en texte, utilisez la voix pour vérifier ou ajoutez la reconnaissance de l’orateur à votre application.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Mappage des connaissances</p>
+</div>
+<div class="column">
+<p>Mappez les informations et les données complexes pour résoudre certaines tâches comme les recommandations intelligentes et la recherche sémantique.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Recherche Bing</p>
+</div>
+<div class="column">
+<p>Ajoutez les API Recherche Bing à vos applications et profitez de la possibilité de combiner des milliards de pages web, d’images, de vidéos et d’actualités en un seul appel d’API.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Traitement du langage naturel</p>
+</div>
+<div class="column">
+<p>Ils permettent à vos applications de traiter le langage naturel avec des scripts prédéfinis, d’évaluer les sentiments et d’apprendre à reconnaître ce que veulent les utilisateurs.</p>
+</div>
+</section>
+<h3 id="devops">DevOps</h3>
+<p>DevOps réunit les personnes, les processus et les technologies en automatisant la livraison de logiciels afin d’apporter à vos utilisateurs une valeur continue. Avec Azure DevOps, vous pouvez créer, <em>générer</em> et <em>publier</em> des pipelines qui assurent une intégration, une livraison et un déploiement continus de vos applications. Vous pouvez intégrer des référentiels et des tests d’application, procéder à la supervision des applications et utiliser des artefacts de build. Vous pouvez aussi utiliser des éléments de backlog pour le suivi, automatiser le déploiement de l’infrastructure et intégrer une palette d’outils et de services tiers comme Jenkins et Chef. Toutes ces fonctions et bien d’autres sont étroitement intégrées à Azure pour permettre des déploiements cohérents et reproductibles pour vos applications et fournir ainsi des processus de génération et de mise en production simplifiés.</p>
+<section class="row">
+<div class="column">
+<p><strong>Nom du service</strong></p>
+</div>
+<div class="column">
+<p><strong>Description</strong></p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure DevOps</p>
+</div>
+<div class="column">
+<p>Utilisez des outils de collaboration de développement, tels que des pipelines hautes performances, des dépôts Git privés et gratuits, des tableaux Kanban configurables ainsi que des tests de charge automatisés et très complets basés sur le cloud. Anciennement Visual Studio Team Services.</p>
+</div>
+</section>
+<section class="row">
+<div class="column">
+<p>Azure DevTest Labs</p>
+</div>
+<div class="column">
+<p>Créez rapidement des environnements Windows et Linux à la demande pour tester ou présenter des applications directement à partir de pipelines de déploiement.</p>
+</div>
+</section>
+
+		<div id="next-section" class="modular-content-container is-hidden-portrait"><div><hr class="hr"><div><!---->
+		<h2 class="title is-4 has-margin-top-none"><!---->Unité suivante: Bien démarrer avec les comptes Azure<!----></h2>
+		<p>
+			<a class="button button-primary button-filled" href="https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/get-started-with-azure-accounts/" data-bi-name="continue" target="">
+				<span><!---->Continuer<!----></span>
+				<span class="icon" aria-hidden="true"><span class="docon docon-chevron-right-light"></span></span>
+			</a>
+		</p>
+		
+	<!----></div></div></div>
+	</div>
+</div>
+
+							<!-- </content> -->
+
+						</main>
+
+						<!-- fallback rating section for reference only, remove after a week or so -->
+						<!-- end page rating section -->
+
+<div class="modular-content-container margin-block-xs">
+	<section class="feedback-section section is-full-height is-uniform has-padding-top-none has-padding-bottom-none position-relative">
+		<p class="font-weight-semibold">
+		Besoin d'aide&nbsp;? Consultez notre <a id="troubleshooting-guide" class="has-text-primary" data-bi-name="troubleshooting" href="https://docs.microsoft.com/fr-fr/learn/support/troubleshooting?uid=learn.azure.intro-to-azure-fundamentals.tour-of-azure-services&amp;documentId=190ef208-2e88-9bbb-364d-3d20ce098872&amp;versionIndependentDocumentId=b37fa802-c1c6-9e41-a4f3-0f28ffd73bf4&amp;contentPath=%2FMicrosoftDocs%2Flearn-pr.fr-FR%2Fblob%2Flive%2Flearn-pr%2Fazure-fundamentals%2Fintro-to-azure-fundamentals%2Ftour-of-azure-services.yml&amp;url=https%3A%2F%2Fdocs.microsoft.com%2Ffr-fr%2Flearn%2Fmodules%2Fintro-to-azure-fundamentals%2Ftour-of-azure-services&amp;author=rknapp">guide de résolution des problèmes</a> ou fournissez des commentaires spécifiques en <a id="module-unit-feedback-link" class="has-text-primary" data-bi-name="feedback" href="https://docs.microsoft.com/fr-fr/learn/support/troubleshooting?uid=learn.azure.intro-to-azure-fundamentals.tour-of-azure-services&amp;documentId=190ef208-2e88-9bbb-364d-3d20ce098872&amp;versionIndependentDocumentId=b37fa802-c1c6-9e41-a4f3-0f28ffd73bf4&amp;contentPath=%2FMicrosoftDocs%2Flearn-pr.fr-FR%2Fblob%2Flive%2Flearn-pr%2Fazure-fundamentals%2Fintro-to-azure-fundamentals%2Ftour-of-azure-services.yml&amp;url=https%3A%2F%2Fdocs.microsoft.com%2Ffr-fr%2Flearn%2Fmodules%2Fintro-to-azure-fundamentals%2Ftour-of-azure-services&amp;author=rknapp#report-feedback">signalant un problème</a>.				</p>
+	</section>
+</div>
+
+
+						<!-- recommendations section -->
+						<!-- end recommendations section -->
+
+						<!-- feedback section -->
+						<!-- end feedback section -->
+
+						<!-- feedback report section -->
+						<!-- end feedback report section -->
+
+						<div class="border-top is-visible-interactive has-default-focus has-margin-top-large  has-margin-top-none">
+
+
+
+	<footer id="footer-interactive" data-bi-name="footer" class="footer-layout">
+	<div class="display-flex is-full-height has-padding-right-extra-large-desktop">
+			<a data-mscc-ic="false" class="locale-selector-link button button-clear flex-shrink-0" href="https://docs.microsoft.com/fr-fr/locale?target=https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services" data-bi-name="select-locale">
+					<span class="icon" aria-hidden="true">
+						<span class="docon docon-world"></span>
+					</span>
+					<span class="local-selector-link-text">Français</span></a>
+		<div class="margin-inline-xs flex-shrink-0">
+<div class="dropdown has-caret-up">
+	<button class="dropdown-trigger button button-clear button-sm has-inner-focus theme-dropdown-trigger" aria-controls="theme-menu-interactive" aria-expanded="false" title="Thème" data-bi-name="theme">
+		<span class="icon">
+			<span class="docon docon-sun" aria-hidden="true"></span>
+		</span>
+		<span>Thème</span>
+	</button>
+	<div class="dropdown-menu" id="theme-menu-interactive" role="menu">
+		<ul class="theme-selector has-padding-small">
+			<li class="theme is-block">
+				<button class="button button-clear button-sm theme-control button-block justify-content-flex-start" data-theme-to="light">
+					<span class="theme-light has-margin-right-small">
+						<span class="theme-selector-icon css-variable-support border is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span role="menuitem">
+Clair					</span>
+				</button>
+			</li>
+			<li class="theme is-block">
+				<button class="button button-clear button-sm theme-control button-block justify-content-flex-start" data-theme-to="dark">
+					<span class="theme-dark has-margin-right-small">
+						<span class="border theme-selector-icon css-variable-support is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span role="menuitem">
+Sombre					</span>
+				</button>
+			</li>
+			<li class="theme is-block">
+				<button class="button button-clear button-sm theme-control button-block justify-content-flex-start" data-theme-to="high-contrast">
+					<span class="theme-high-contrast has-margin-right-small">
+						<span class="border theme-selector-icon css-variable-support is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span role="menuitem">
+Contraste élevé					</span>
+				</button>
+			</li>
+		</ul>
+	</div>
+</div>		</div>
+	</div>
+	<ul class="links" data-bi-name="footerlinks">
+		<li class="manage-cookies-holder" hidden=""></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/previous-versions/" data-bi-name="archivelink">Version précédente de Docs</a></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/teamblog" data-bi-name="bloglink">Blog</a></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/contribute" data-bi-name="contributorGuide">Collaboration</a></li>
+					<li><a data-mscc-ic="false" href="https://go.microsoft.com/fwlink/?LinkId=521839" data-bi-name="privacy">Confidentialité &amp; cookies</a></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/legal/termsofuse" data-bi-name="termsofuse">Conditions d'utilisation</a></li>
+				<li><a data-mscc-ic="false" href="https://go.microsoft.com/fwlink/?linkid=2121428" data-bi-name="conformanceDisclosure ">Accessibilité</a></li>
+				<li><a data-mscc-ic="false" href="https://www.microsoft.com/en-us/legal/intellectualproperty/Trademarks/EN-US.aspx" data-bi-name="trademarks">Marques</a></li>
+		<li>© Microsoft 2021</li>
+	</ul>
+</footer>
+						</div>
+					</div>
+
+
+				</div>
+				<!--end of div.columns -->
+
+			</section>
+			<!--end of .primary-holder -->
+
+			<!-- interactive container -->
+			<aside id="interactive-container" class="interactive-container is-visible-interactive column has-body-background-dark ">
+			</aside>
+			<!-- end of interactive container -->
+		</div>
+
+	</div>
+	<!--end of .mainContainer -->
+
+	<section class="border-top has-default-focus is-hidden-interactive has-margin-top-large  has-margin-top-none">
+
+
+
+	<footer id="footer" data-bi-name="footer" class="footer-layout uhf-container has-padding" role="contentinfo">
+	<div class="display-flex is-full-height has-padding-right-extra-large-desktop">
+			<a data-mscc-ic="false" class="locale-selector-link button button-clear flex-shrink-0" href="https://docs.microsoft.com/fr-fr/locale?target=https://docs.microsoft.com/fr-fr/learn/modules/intro-to-azure-fundamentals/tour-of-azure-services" data-bi-name="select-locale">
+					<span class="icon" aria-hidden="true">
+						<span class="docon docon-world"></span>
+					</span>
+					<span class="local-selector-link-text">Français</span></a>
+		<div class="margin-inline-xs flex-shrink-0">
+<div class="dropdown has-caret-up">
+	<button class="dropdown-trigger button button-clear button-sm has-inner-focus theme-dropdown-trigger" aria-controls="theme-menu" aria-expanded="false" title="Thème" data-bi-name="theme">
+		<span class="icon">
+			<span class="docon docon-sun" aria-hidden="true"></span>
+		</span>
+		<span>Thème</span>
+	</button>
+	<div class="dropdown-menu" id="theme-menu" role="menu">
+		<ul class="theme-selector has-padding-small">
+			<li class="theme is-block">
+				<button class="button button-clear button-sm theme-control button-block justify-content-flex-start is-selected" data-theme-to="light" aria-pressed="true">
+					<span class="theme-light has-margin-right-small">
+						<span class="theme-selector-icon css-variable-support border is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span role="menuitem">
+Clair					</span>
+				</button>
+			</li>
+			<li class="theme is-block">
+				<button class="button button-clear button-sm theme-control button-block justify-content-flex-start" data-theme-to="dark" aria-pressed="false">
+					<span class="theme-dark has-margin-right-small">
+						<span class="border theme-selector-icon css-variable-support is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span role="menuitem">
+Sombre					</span>
+				</button>
+			</li>
+			<li class="theme is-block">
+				<button class="button button-clear button-sm theme-control button-block justify-content-flex-start" data-theme-to="high-contrast" aria-pressed="false">
+					<span class="theme-high-contrast has-margin-right-small">
+						<span class="border theme-selector-icon css-variable-support is-inline-block has-body-background" aria-hidden="true">
+							<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+								<rect width="22" height="14" class="has-fill-body-background"></rect>
+								<rect x="5" y="5" width="12" height="4" class="has-fill-secondary"></rect>
+								<rect x="5" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="8" y="2" width="2" height="1" class="has-fill-secondary"></rect>
+								<rect x="11" y="2" width="3" height="1" class="has-fill-secondary"></rect>
+								<rect x="1" y="1" width="2" height="2" class="has-fill-secondary"></rect>
+								<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary"></rect>
+								<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary"></rect>
+							</svg>
+						</span>
+					</span>
+					<span role="menuitem">
+Contraste élevé					</span>
+				</button>
+			</li>
+		</ul>
+	</div>
+</div>		</div>
+	</div>
+	<ul class="links" data-bi-name="footerlinks">
+		<li class="manage-cookies-holder" hidden=""></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/previous-versions/" data-bi-name="archivelink">Version précédente de Docs</a></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/teamblog" data-bi-name="bloglink">Blog</a></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/contribute" data-bi-name="contributorGuide">Collaboration</a></li>
+					<li><a data-mscc-ic="false" href="https://go.microsoft.com/fwlink/?LinkId=521839" data-bi-name="privacy">Confidentialité &amp; cookies</a></li>
+				<li><a data-mscc-ic="false" href="https://docs.microsoft.com/fr-fr/legal/termsofuse" data-bi-name="termsofuse">Conditions d'utilisation</a></li>
+				<li><a data-mscc-ic="false" href="https://go.microsoft.com/fwlink/?linkid=2121428" data-bi-name="conformanceDisclosure ">Accessibilité</a></li>
+				<li><a data-mscc-ic="false" href="https://www.microsoft.com/en-us/legal/intellectualproperty/Trademarks/EN-US.aspx" data-bi-name="trademarks">Marques</a></li>
+		<li>© Microsoft 2021</li>
+	</ul>
+</footer>
+	</section>
+
+		<script src="./Visite guidée des services Azure - Learn _ Microsoft Docs_files/MathJax.js.télécharger" integrity="sha384-RLsAi7wiVvnmHrRjlVvUjU45C0bfsIBg6Gsxue6azjJi+lA5q5uK+XbGzO3yn5g1" crossorigin="anonymous"></script>
+	<div id="action-panel" role="region" aria-label="Volet des actions" class="action-panel has-default-focus" tabindex="-1"></div>
+
+
+<div data-flash-app-container="true" id="flash_player_app_root"></div></body></html>

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="main-content">
-        <div class="container-fluid">
+        <div class="container-fluid" style="font-family: 'Century Gothic';">
             <div class="row justify-content-center">
                 <div class="col-12">
                         <div class="card-header py-3">
@@ -18,8 +18,7 @@
                                                 data-backdrop="static" 
                                                 data-keyboard="false"
                                                 title="Ajout D'un Procéssus"
-                                                style="background-color: #345B86;" 
-                                                class="btn btn-icon-split"
+                                                class="btn btn-icon-split btn-primary"
                                                 data-toggle="modal" 
                                                 data-target="#modal_add_processus">
                                                 <span class="icon text-white-80">
@@ -39,7 +38,7 @@
                                     <div class="card-body">
                                         <!-- table -->
                                         <table class="table datatables" id="dataTable-1">
-                                            <thead>
+                                            <thead class="bg-dark">
                                             <tr>
                                                 <th></th>
                                                 <th>N°</th>
@@ -49,7 +48,9 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach($processus as $key => $pro)
+                                            @if(Session::has('processus'))
+                                            @if(is_iterable(Session::get('processus')))
+                                            @foreach(Session::get('processus') as $key => $pro)
                                                 <tr>
                                                     <td>
                                                     <div class="custom-control custom-checkbox">
@@ -66,20 +67,25 @@
                                                     <div class="dropdown-menu dropdown-menu-right">
                                                         <a 
                                                             id="btn_edi_po"
-                                                            data-pro="{{ $pro }}"
+                                                            data-pro="{{ json_encode($pro) }}"
                                                             class="dropdown-item"
                                                             href="#"
                                                             data-backdrop="static"
                                                             data-keyboard="false"
                                                             data-toggle="modal"
                                                             data-target="#modal_edit_processus">
+                                                            <span class="fe fe-edit-2 mr-4"></span>
                                                             Edit
                                                         </a>
-                                                        <a id="btnDelete" data-incidents="{{ $incidents }}" data-processus="{{ $pro }}" class="dropdown-item" href="#">Supprimer</a>
+                                                        <a id="btnDelete" data-incidents="{{ json_encode(Session::get('incidents')) }}" data-processus="{{ json_encode($pro) }}" class="dropdown-item" href="#!">
+                                                        <span class="fe fe-x mr-4"></span>
+                                                        Supprimer</a>
                                                     </div>
                                                     </td>
                                                 </tr>
                                             @endforeach
+                                            @endif
+                                            @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -112,13 +118,13 @@
                                                         @method('PUT')
                                                     <input type="hidden" id="id" value="" name="id">
                                                     <div class="form-group mb-3">
-                                                        <label for="dept_edit"> <span class="fe fe-edit mr-1"></span> Procéssus</label>
-                                                        <input style="font-family: Century Gothic;" class="form-control" id="p_edit" name="name" placeholder="Veuillez Entrer Le Nom Du Procéssus."/>
+                                                        <label for="p_edit"> <span class="fe fe-edit mr-1"></span>Désignation Du Procéssus <span style="color:red;"> *</span></label>
+                                                        <input style="font-family: Century Gothic; font-size:1.2em;" class="form-control" id="p_edit" name="name" placeholder="Veuillez Entrer Le Nom Du Procéssus."/>
                                                         <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                                     </div>
                                                     <div class="form-group mb-3">
-                                                            <label for="descr"><span class="fe fe-edit-2 mr-1"></span> Description</label>
-                                                            <textarea style="resize:none;" class="form-control" id="de_edit" name="description" placeholder="Veuillez Entrer Une Description Du Procéssus." rows="3"></textarea>
+                                                            <label for="de_edit"><span class="fe fe-edit-2 mr-1"></span> Description</label>
+                                                            <textarea style="resize:none; font-size:1.2em;" class="form-control" id="de_edit" name="description" placeholder="Veuillez Entrer Une Description Du Procéssus." rows="4"></textarea>
                                                             <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                                     </div>
                                                 </form>
@@ -161,13 +167,13 @@
                                                             @csrf
                                                             @method('POST')
                                                         <div class="form-group mb-3">
-                                                            <label for="pro_name"> <span class="fe fe-edit mr-1"></span> Procéssus</label>
-                                                            <input type="text" style="font-family: Century Gothic;" class="form-control" id="pro_name" name="name" placeholder="Veuillez Entrer Le Nom Du Procéssus."/>
+                                                            <label for="pro_name"> <span class="fe fe-edit mr-1"></span>Désignation Du Procéssus <span style="color:red;"> *</span></label>
+                                                            <input type="text" style="font-family: Century Gothic; font-size:1.2em;" class="form-control" id="pro_name" name="name" placeholder="Veuillez Entrer Le Nom Du Procéssus."/>
                                                             <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                                         </div>
                                                         <div class="form-group mb-3">
                                                             <label for="descr"><span class="fe fe-edit-2 mr-1"></span> Description</label>
-                                                            <textarea style="resize:none;" class="form-control" id="descr" name="description" placeholder="Veuillez Entrer Une Description Du Procéssus." rows="3"></textarea>
+                                                            <textarea style="resize:none; font-size:1.2em;" class="form-control" id="descr" name="description" placeholder="Veuillez Entrer Une Description Du Procéssus." rows="4"></textarea>
                                                             <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                                         </div>
                                                     </form>
@@ -199,7 +205,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validation" disabled style="width:100%; height:5em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="validation" disabled style="width:100%; height:5em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -219,7 +225,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="val_pros" disabled style="width:100%; height:5em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="val_pros" disabled style="width:100%; height:6em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -239,7 +245,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="val_sia" disabled style="width:100%; height:5em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea id="val_sia" disabled style="width:100%; height:5em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">

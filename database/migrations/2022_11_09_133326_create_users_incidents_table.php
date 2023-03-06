@@ -16,7 +16,7 @@ class CreateUsersIncidentsTable extends Migration
         Schema::create('users_incidents', function (Blueprint $table) {
             $table->id();
             $table->boolean('isTrigger')->default(0);
-            $table->string('incident_number', 10)->unsigned();
+            $table->string('incident_number', 15)->unsigned();
             $table->foreign('incident_number')->references('number')->on('incidents')->onUpdate('cascade');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');

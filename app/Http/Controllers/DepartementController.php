@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Departement;
@@ -24,6 +25,11 @@ class DepartementController extends Controller
         $this->middleware('permission:supprimer-departement', ['only' => ['destroy']]);
     }
 
+    public function getDepartements()
+    {
+        return Session::get('departements');
+    }
+
 
     /**
      * Display a listing of the resource.
@@ -34,15 +40,7 @@ class DepartementController extends Controller
     {
         notify()->info('Liste Des Départements ! ⚡️');
 
-        $departements = Departement::all();
-
-        $categories = DB::table('categories')->get();
-
-        return view('departements.index',
-        [
-         'departements' => $departements,
-         'categories' => $categories,
-        ]);
+        return view('departements.index');
     }
 
     /**
@@ -64,14 +62,16 @@ class DepartementController extends Controller
     {
         $input = $request->all();
 
-        $get_departements = Departement::get();
+        $get_departements = $this->getDepartements();
         $oui = true;
 
-        foreach ($get_departements as $departement) {
-            $departement_courrant = strtolower(Str::ascii(str_replace(" ", "", $departement->name)));
-            $departement_saisi = strtolower(Str::ascii(str_replace(" ", "", $input['name'])));
-            if(strcmp($departement_courrant, $departement_saisi) == 0){
-                $oui = false;
+        if(is_iterable($get_departements)){
+            foreach ($get_departements as $departement) {
+                $departement_courrant = strtolower(Str::ascii(str_replace(" ", "", $departement->name)));
+                $departement_saisi = strtolower(Str::ascii(str_replace(" ", "", $input['name'])));
+                if(strcmp($departement_courrant, $departement_saisi) == 0){
+                    $oui = false;
+                }
             }
         }
 
@@ -86,10 +86,23 @@ class DepartementController extends Controller
             $departement->save();
 
             $departement = DB::table('departements')->get()->last();
-            
-            smilify('success', 'Département Enrégistrer Avec Succès !');
 
-            return response([$departement]);    
+            if(Session::has('departements')){
+                $newDepartements = array();
+
+                array_push($newDepartements, $departement);
+
+                for ($w=0; $w < count($get_departements); $w++) {
+                    $depa = $get_departements[$w];
+                    array_push($newDepartements, $depa);
+                }
+                
+                Session::put('departements', $newDepartements);
+            }
+            
+            notify('success', 'Département Enrégistrer Avec Succès !');
+
+            return response()->json([$departement]);
         }
     }
 
@@ -126,14 +139,16 @@ class DepartementController extends Controller
     {
         $input = $request->all();
 
-        $departements = DB::table('departements')->get();
+        $departements = $this->getDepartements();
 
         $Qte = 0;
         $tab = array();
 
-        foreach ($departements as $departement) {
-            if($departement->id != intval($request->input('id'))){
-                array_push($tab, $departement);
+        if(is_iterable($departements)){
+            foreach ($departements as $departement) {
+                if($departement->id != intval($request->input('id'))){
+                    array_push($tab, $departement);
+                }
             }
         }
 
@@ -148,12 +163,33 @@ class DepartementController extends Controller
         if($Qte > 0){
             return [];
         }else{
-            DB::table('departements')->where('id', $request->id)->update([
-                'name'=>$request->name,
-            ]);
-            
-            smilify('success', 'Département Modifier Avec Succèss !');
 
+            DB::table('departements')->where('id', $request->id)->update([
+                'name'=> $request->name,
+            ]);
+
+            if(Session::has('departements')){
+
+                $dept_edit = NULL;
+                $newDepartements = array();    
+    
+                for ($j=0; $j < count($departements); $j++) {
+                        $dept_courant = $departements[$j];
+                        if(intval($request->id) == intval($dept_courant->id)){
+                            $dept_edit = $dept_courant;
+                            $dept_edit->name = $request->name;
+                        } else{
+                            array_push($newDepartements, $dept_courant);
+                        }   
+                }
+
+                array_push($newDepartements, $dept_edit);
+
+                Session::put('departements', $newDepartements);
+            }
+    
+            notify()->success('Département Modifier Avec Succèss ! ⚡️');
+            
             return response()->json([1]);
         }
     }
@@ -166,19 +202,26 @@ class DepartementController extends Controller
      */
     public function destroy(Request $request)
     {
+
         DB::table('departements')->where('id', $request->id)->delete();
+
+        if(Session::has('departements')){
+            $dept_edit = NULL;
+            $newDepartements = array();
+            $departements = $this->getDepartements();
+
+            for ($j=0; $j < count($departements); $j++) { 
+                $dept_courant = $departements[$j];
+                if(intval($request->id) != intval($dept_courant->id)){
+                    array_push($newDepartements, $dept_courant);
+                }
+            }
+
+            Session::put('departements', $newDepartements);
+        }
 
         smilify('success', 'Département Supprimer Avec Succèss !');
 
         return response()->json([1]);
-    }
-
-    public function generate(){
-
-        $sites = Site::with('regions')->get();
-
-        $pdf = PDF::loadView('PDF/sites', ['sites' => $sites]);
-        
-        return $pdf->stream('sites.pdf', array('Attachment'=>0));
     }
 }

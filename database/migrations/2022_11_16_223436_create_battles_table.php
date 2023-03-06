@@ -17,7 +17,7 @@ class CreateBattlesTable extends Migration
             $table->id();
             $table->string('title')->lenght(100);
             $table->string('description')->lenght(500);
-            $table->string('incident_id', 10)->unsigned();
+            $table->string('incident_id', 15)->unsigned();
             $table->foreign('incident_id')->references('number')->on('incidents')->onUpdate('cascade')->onDelete('cascade');
             $table->date('created_at');
             $table->date('updated_at')->nullable();

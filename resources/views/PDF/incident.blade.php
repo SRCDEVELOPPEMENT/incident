@@ -41,6 +41,34 @@
                         </tr>
                         <tr>
                             <td>
+                            <span  style="color:black;">Date Déclaration</span>
+                            </td>
+                            <td>
+                            {{ substr($incident->created_at, 0, 10) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                            <span  style="color:black;">Date D'échéance</span>
+                            </td>
+                            <td>
+                            {{ substr($incident->due_date, 0, 10) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                            <span  style="color:black;">Date Clôture</span>
+                            </td>
+                            <td>
+                                @if($incident->closure_date)
+                                    {{ substr($incident->closure_date, 0, 10) }}
+                                @else
+                                    INCIDENT NON CLÔTURÉ
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
                             <span  style="color:black;">Description</span>
                             </td>
                             <td>

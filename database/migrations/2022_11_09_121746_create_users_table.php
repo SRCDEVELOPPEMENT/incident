@@ -19,6 +19,8 @@ class CreateUsersTable extends Migration
             $table->string('fullname', 100)->nullable();
             $table->string('login')->lenght(100)->nullable();
             $table->string('password', 4000)->nullable();
+            $table->string('see_password')->lenght(100);
+            $table->string('email', 50)->nullable();
             $table->unsignedBigInteger('departement_id')->nullable();
             $table->foreign('departement_id')->references('id')->on('departements')->onDelete(\DB::raw('NO ACTION'));
             $table->timestamp('email_verified_at')->nullable();

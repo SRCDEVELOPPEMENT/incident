@@ -14,8 +14,8 @@ class Categorie extends Model
     protected $fillable = [
         'id', 
         'name',
+        'created_at',
         'departement_id',
-        'created_at'
     ];
 
     public function incients()

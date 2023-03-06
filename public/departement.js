@@ -109,7 +109,7 @@ $(document).on('click', '#btnDelete', function(){
             });
         }
     }else{
-        $('#val_dep').val("Vous Ne Pouvez Pas Supprimer Ce Département "+ $(this).attr('data-intituleSite') +" Car Il Est Associé A Des Catégories !");
+        $('#val_dep').val("Vous Ne Pouvez Pas Supprimer Ce Département "+ departement.name +" Car Il Est Associé A Des Catégories !");
         $('#deee').attr('data-backdrop', 'static');
         $('#deee').attr('data-keyboard', false);
         $('#deee').modal('show');        

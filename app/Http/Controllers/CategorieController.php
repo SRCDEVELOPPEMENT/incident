@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use App\Models\Categorie;
 use App\Models\Incident;
@@ -29,6 +30,12 @@ class CategorieController extends Controller
     }
 
 
+    public function getCategories()
+    {
+        return Session::get('categories');
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -38,6 +45,8 @@ class CategorieController extends Controller
     {
         notify()->info('Liste Des Catégories ! ⚡️');
 
+        $types = DB::table('types')->get();
+
         $departements = Departement::all();
 
         $categories = Categorie::with('departements')->get();
@@ -46,6 +55,7 @@ class CategorieController extends Controller
 
         return view('categories.index', 
         [
+            'types' => $types,
             'categories' => $categories,
             'departements' => $departements,
             'incidents' => $incidents
@@ -72,7 +82,7 @@ class CategorieController extends Controller
     {
         $input = $request->all();
 
-        $get_categories = Categorie::get();
+        $get_categories = $this->getCategories();
         $oui = true;
 
         foreach ($get_categories as $categorie) {
@@ -90,19 +100,35 @@ class CategorieController extends Controller
             $categorie = new Categorie();
 
             $categorie->name = $input['name'];
-            $categorie->departement_id = $input['departement_id'];
             $categorie->created_at = Carbon::now()->format('Y-m-d');
+            if(is_numeric($input['departement_id'])){
+                $categorie->departement_id = $input['departement_id'];
+            }else{
+                $categorie->type = $input['departement_id'];
+            }
+
             $categorie->save();
 
             $categorie = Categorie::with('departements')->get()->last();
-            
+
+            if(Session::has('categories')){
+                $newCategories = array();
+                array_push($newCategories, $categorie);
+
+                for ($w=0; $w < count($get_categories); $w++) {
+                    $cat = $get_categories[$w];
+                    array_push($newCategories, $cat);
+                }
+                Session::put('categories', $newCategories);
+            }
+
             smilify('success', 'Catégorie Enrégistrer Avec Succès !');
 
             return response([$categorie]);    
         }
     }
 
-    /**
+    /**get_categories
      * Display the specified resource.
      *
      * @param  int  $id
@@ -133,7 +159,7 @@ class CategorieController extends Controller
      */
     public function update(Request $request)
     {
-        $categories = DB::table('categories')->get();
+        $categories = $this->getCategories();
 
         $Qte = 0;
         $tab = array();
@@ -155,11 +181,71 @@ class CategorieController extends Controller
         if($Qte > 0){
             return response()->json([]);
         }else{
-            DB::table('categories')->where('id', $request->id)->update([
-                'name'=> $request->name,
-                'departement_id'=> $request->departement_id,
-            ]);
-            
+            if(is_numeric($request->departement_id)){
+
+                DB::table('categories')->where('id', $request->id)->update([
+                    'name'=> $request->name,
+                    'type'=> NULL,
+                    'departement_id'=> $request->departement_id,
+                ]);
+
+                if(Session::has('categories')){
+
+                    $categorie_edit = NULL;
+                    $newCategories = array();
+        
+                    for ($j=0; $j < count($categories); $j++) {
+                            $categorie_courant = $categories[$j];
+                            if(intval($request->input('id')) == intval($categorie_courant->id)){
+
+                                $categorie_edit = $categorie_courant;
+                                $categorie_edit->name = $request->name;
+                                $categorie_edit->type = NULL;
+                                $categorie_edit->departement_id = $request->departement_id;
+    
+                            } else{
+                                array_push($newCategories, $categorie_courant);
+                            }
+                    }
+    
+                    array_push($newCategories, $categorie_edit);
+    
+                    Session::put('categories', $newCategories);
+                }
+     
+            }else{
+                DB::table('categories')->where('id', $request->id)->update([
+                    'name'=> $request->name,
+                    'departement_id'=> NULL,
+                    'type'=> $request->departement_id,
+                ]);
+                
+                if(Session::has('categories')){
+
+                    $categorie_edit = NULL;
+                    $newCategories = array();
+        
+                    for ($j=0; $j < count($categories); $j++) {
+                            $categorie_courant = $categories[$j];
+                            if(intval($request->input('id')) == intval($categorie_courant->id)){
+
+                                $categorie_edit = $categorie_courant;
+                                $categorie_edit->name = $request->name;
+                                $categorie_edit->type = $request->departement_id;
+                                $categorie_edit->departement_id = NULL;
+    
+                            } else{
+                                array_push($newCategories, $categorie_courant);
+                            }
+                    }
+    
+                    array_push($newCategories, $categorie_edit);
+    
+                    Session::put('categories', $newCategories);
+                }
+
+            }
+
             smilify('success', 'Catégorie Modifier Avec Succès !');
 
             return response()->json([1]);
@@ -176,17 +262,23 @@ class CategorieController extends Controller
     {
         DB::table('categories')->where('id', $request->id)->delete();
 
+        if(Session::has('categories')){
+            $newCategories = array();
+            $categories = $this->getCategories();
+
+            for ($j=0; $j < count($categories); $j++) {
+                $categorie_courant = $categories[$j];
+                if(intval($request->id) != intval($categorie_courant->id)){
+                    array_push($newCategories, $categorie_courant);
+                }
+            }
+
+            Session::put('categories', $newCategories);
+        }
+
         smilify('success', 'Catégorie Supprimer Avec Succèss !');
 
         return response()->json([1]);
     }
 
-    public function generate(){
-
-        $vehicules = Vehicule::get();
-
-        $pdf = PDF::loadView('PDF/vehicules', ['vehicules' => $vehicules]);
-        
-        return $pdf->stream('vehicules.pdf', array('Attachment'=>0));
-    }
 }

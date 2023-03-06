@@ -6,6 +6,7 @@ use DB;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Session;
 
 class PermissionController extends Controller
 {
@@ -72,7 +73,11 @@ class PermissionController extends Controller
         if(!$oui){
             return response()->json([]);
         }else{
-        Permission::create(['name' => $input['name']]);
+        Permission::create(
+            [
+                'name' => $input['name'],
+                'description' => $input['description'],
+            ]);
     
         $permission = DB::table('permissions')->get()->last();
 
@@ -142,7 +147,7 @@ class PermissionController extends Controller
         $permission = Permission::find($request->id);
 
         $permission->name = $request->input('name');
-
+        $permission->description = $request->input('description');
         $permission->save();
         
         return response()->json([1]);

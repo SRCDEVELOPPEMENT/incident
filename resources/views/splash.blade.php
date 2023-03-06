@@ -47,7 +47,7 @@
                     <div style="font-size:13px;" class="text-center text-gray-500">
                         <span class="mr-3">
                             <i class="fas fa-eye mr-1"></i>
-                            <a target="_blank" href="https://groupesorepco.com/">Site Web</a>
+                            <a target="_blank" href="#!">Site Web</a>
                         </span>
                         <span class="mr-3">
                             <i class="fas fa-crosshairs mr-1"></i>
@@ -69,9 +69,9 @@
                     <hr>
                     <div style="font-size:13px;" class="text-center text-gray-500 mr-3">
                         <span class="mr-3"><span class="mr-3">Copyright &copy; SOREPCO SA 2022</span>| Nous Suivre sur les réseaux sociaux</span>
-                        <a target="_blank" href="https://www.facebook.com/sorepcogroup"><i class="fab fa-1x fa-facebook mr-1"></i></a>
-                        <a target="_blank" href="https://www.youtube.com/channel/UCAyBoJnJxN1fx0QoKNCkd4w"><i class="fab fa-1x fa-youtube mr-1"></i></a>
-                        <a target="_blank" href="https://www.instagram.com/sorepcogroup/"><i class="fab fa-1x fa-instagram"></i></a>
+                        <a target="_blank" href="#!"><i class="fab fa-1x fa-facebook mr-1"></i></a>
+                        <a target="_blank" href="#!"><i class="fab fa-1x fa-youtube mr-1"></i></a>
+                        <a target="_blank" href="#!"><i class="fab fa-1x fa-instagram"></i></a>
                     </div>
                 </div>
             </footer>

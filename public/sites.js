@@ -5,125 +5,134 @@ $('#btnSaveSite').on('click', function(){
     let good = true;
     let message = "";
 
-    let tab = $('#conf_save_site').attr('data-sites');
+    if(!$('#site_region').val()){
+        good = false;
+        message += "Veuillez Choisir La Région Du Site !\n";
+    }
 
-    let sites = JSON.parse(tab);
-
+    if(!$('#site_type').val()){
+        good = false;
+        message += "Veuillez Choisir Un Type De Site !\n";
+    }
+    
     if(!$('#site').val().trim()){
         good = false;
         message += "Veuillez Renseigner Un Site !\n";
     }
 
-    if(!$('#site_type').val().trim()){
-        good = false;
-        message += "Veuillez Renseigner Un Type De Site !\n";
-    }
-    if(!$('#region').val().trim()){
-        good = false;
-        message += "Veuillez Renseigner Une Région !\n";
-    }
-
     if(!good){
         good = false;
+        $('#modalSite').modal('hide');
         $('#validation').val(message);
         $('#errorvalidationsModals').attr('data-backdrop', 'static');
         $('#errorvalidationsModals').attr('data-keyboard', false);
         $('#errorvalidationsModals').modal('show');
     }else{
-        $('#site_conf').replaceWith(`<span style="color: black; font-size: 20px;" id="site_conf">${$('#site').val().trim()}</span>`);
-        $('#region_conf').replaceWith(`<span style="color: black; font-size: 20px;" id="region_conf">${$("#region option:selected").text()}</span>`);
-        $('#type_conf').replaceWith(`<span style="color: black; font-size: 20px;" id="type_conf">${$("#site_type").val()}</span>`);
-        $('#modalConfirmationSaveSite').attr('data-backdrop', 'static');
-        $('#modalConfirmationSaveSite').attr('data-keyboard', false);
-        $('#modalConfirmationSaveSite').modal('show');
-    }
-})
-
-$(document).on('click', '#conf_save_site', function(){
-    $.ajax({
-        type: 'POST',
-        url: 'createSite',
-        data: $('#siteFormInsert').serialize(),
-        headers:{
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success:function(data){
-          if(data.length == 2){
-            $(this).attr('data-sites', JSON.stringify(data[1]));
-
-            let site = data[0];
-            if(site){
-                $('#dataTable').prepend(`
-                                <tr style="font-size:15px; color:black;">
-                                    <td><label>${site.site_name}</label></td>
-                                    <td><label> ${site.site_type} </label></td>
-                                    <td><label> ${site.regions.region_name} </label></td>
-                                    <td> 
-                                        <div class='row'>
-                                            <button class="btn btn-sm btn-info btn-icon-split mr-2" data-site=${site} id="btnEdit" data-id=${site.id} data-intituleSite=${site.intituleSite }>
-                                                <span class="icon text-white-80">
-                                                    <i class="fas fa-lg fa-building"></i>
-                                                    <i class="fas fa-sm fa-pen mr-2"></i>
-                                                </span>
-                                                <span class="text">Editer</span>
-                                            </button>
-
-                                            <button class="btn btn-sm btn-danger btn-icon-split" id="btnDelete">
-                                                <span class="icon text-white-80">
-                                                    <i class="fas fa-lg fa-building"></i>
-                                                    <i class="fas fa-sm fa-times"></i>
-                                                </span>
-                                                <span class="text">Supprimer</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                `);
-               $('#siteFormInsert')[0].reset();
-               $('#modalConfirmationSaveSite').modal('toggle');
+        $.ajax({
+            type: 'POST',
+            url: 'createSite',
+            data: $('#siteFormInsert').serialize(),
+            headers:{
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success:function(data){
+              if(data.length == 1){
+    
+                let site = data[0];
+                if(site){
+                    $('#dataTable-1').prepend(`
+                    <tr style="font-size:15px;">
+                        <td><label>${site.name}</label></td>
+                        <td><label>${site.types ? site.types.name : ''}</label></td>
+                        <td><label>${site.region}</label></td>
+                        <td>
+                            <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="text-muted sr-only">Action</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                    <a 
+                                        id="btn_edi" 
+                                        data-site="${site}"
+                                        class="dropdown-item" 
+                                        href="#"
+                                        data-backdrop="static"
+                                        data-keyboard="false"
+                                        data-toggle="modal"
+                                        data-target="#modalEditSite">
+                                        Edit
+                                    </a>
+                                    <a id="btnDelete" data-site="${site}" class="dropdown-item" href="#">Supprimer</a>
+                            </div>
+                        </td>
+                    </tr>
+                    `);
+                   $('#siteFormInsert')[0].reset();
+                }
+              }else{
+                $('#validation').val('Veuillez Modifier Votre Site Car Déja Existant !');
+                $('#errorvalidationsModals').attr('data-backdrop', 'static');
+                $('#errorvalidationsModals').attr('data-keyboard', false);
+                $('#errorvalidationsModals').modal('show');    
+              }
             }
-          }else{
-            $('#validation').val('Veuillez Modifier Votre Site Car Déja Existant !');
-            $('#errorvalidationsModals').attr('data-backdrop', 'static');
-            $('#errorvalidationsModals').attr('data-keyboard', false);
-            $('#errorvalidationsModals').modal('show');    
-          }
-        }
-    })
-})
+        })
+    
+    }
+});
 
-$(document).on('click', '#btnEdit', function(){
+$(document).on('click', '#dismiss_btn', function(){
+    $('#errorvalidationsModals').modal('hide');
+    $('#modalSite').attr('data-backdrop', 'static');
+    $('#modalSite').attr('data-keyboard', false);
+    $('#modalSite').modal('show');
+});
+
+$(document).on('click', '#dismiss_bouton', function(){
+    $('#error_edit').modal('hide');
+    $('#modalEditSite').attr('data-backdrop', 'static');
+    $('#modalEditSite').attr('data-keyboard', false);
+    $('#modalEditSite').modal('show');
+});
+
+
+$(document).on('click', '#btn_edi', function(){
 
     let newSite = JSON.parse($(this).attr('data-site'));
 
     $("#siteFormEdit")[0].reset();
-    
     $('.form-group #id').val(newSite.id);
-    $('.form-group #sites').val(newSite.site_name);
-    $('.form-group #regions').val(newSite.region_id);
-    $('.form-group #site_types').val(newSite.site_type);
-    $('#modalEditSite').attr('data-backdrop', 'static');
-    $('#modalEditSite').attr('data-keyboard', 'false');
-    $('#modalEditSite').modal('show');
-    
-})
+    $('.form-group #site_regions').val(newSite.region);
+    $('.form-group #sites').val(newSite.name);
+    $('.form-group #site_types').val(newSite.type_id);
+});
 
 
 $(document).on('click', '#btnDelete', function(){
     let users = JSON.parse($(this).attr('data-users'));
+    let site = JSON.parse($(this).attr('data-site'));
+    let incidents = JSON.parse($(this).attr('data-incidents'));
+
     let good = true;
+    let bon = true;
 
     users.forEach(user => {
-        if(user.site_id == $(this).attr('data-id')){
+        if(user.site_id == site.id){
             good = false;
         }
     });
-    if(good){
-        if(confirm("Voulez-Vous Vraiment Supprimer Ce Site "+ $(this).attr('data-site_name') +" ?") == true){
+
+    incidents.forEach(incident => {
+        if(incident.site_id == site.id){
+            bon = false;
+        }
+    });
+
+    if(good && bon){
+        if(confirm("Voulez-Vous Vraiment Supprimer Ce Site "+ site.name +" ?") == true){
                 $.ajax({
-                    type: 'GET',
+                    type: 'DELETE',
                     url: 'deleteSite',
-                    data: { id: $(this).attr('data-id')},
+                    data: { id: site.id},
                     headers:{
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
@@ -133,12 +142,12 @@ $(document).on('click', '#btnDelete', function(){
             })
         }
     }else{
-        $('#validation').val("Vous Ne Pouvez Pas Supprimer Ce Site "+ $(this).attr('data-intituleSite') +" Car Il Est Associé A D'autres Modules !");
-        $('#errorvalidationsModals').attr('data-backdrop', 'static');
-        $('#errorvalidationsModals').attr('data-keyboard', false);
-        $('#errorvalidationsModals').modal('show');        
+        $('#validation_del').val("Vous Ne Pouvez Pas Supprimer Ce Site "+ site.name +" Car Il Est Associé A Des Utilisateurs Et Ou A Des Incidents !");
+        $('#errordel').attr('data-backdrop', 'static');
+        $('#errordel').attr('data-keyboard', false);
+        $('#errordel').modal('show');    
     }
-})
+});
 
 
 
@@ -147,29 +156,31 @@ $('#btnEditSite').on('click', function(){
     let good = true;
     let message = "";
 
+    if(!$('#site_regions').val()){
+        good = false;
+        message += "Veuillez Choisir La Région Du Site !\n";
+    }
+
+    if(!$('#site_types').val()){
+        good = false;
+        message += "Veuillez Choisir Un Type De Site !\n";
+    }
+
     if(!$('#sites').val().trim()){
         good = false;
         message += "Veuillez Renseigner Un Site !\n";
     }
-
-    if(!$('#site_types').val().trim()){
-        good = false;
-        message += "Veuillez Renseigner Un Type De Site !\n";
-    }
-    if(!$('#regions').val().trim()){
-        good = false;
-        message += "Veuillez Renseigner Une Région !\n";
-    }
-        
+    
     if(!good){
             good = false;
-            $('#validation').val(message);
-            $('#errorvalidationsModals').attr('data-backdrop', 'static');
-            $('#errorvalidationsModals').attr('data-keyboard', false);
-            $('#errorvalidationsModals').modal('show');
+            $('#validation_edit').val(message);
+            $('#modalEditSite').modal('hide');
+            $('#error_edit').attr('data-backdrop', 'static');
+            $('#error_edit').attr('data-keyboard', false);
+            $('#error_edit').modal('show');
     }else{
             $.ajax({
-                type: 'POST',
+                type: 'PUT',
                 url: 'editSite',
                 data: $('#siteFormEdit').serialize(),
                 headers:{
@@ -177,7 +188,6 @@ $('#btnEditSite').on('click', function(){
                 },
                 success: function(data){
                     if(data.length == 1){
-                        $('#siteFormEdit')[0].reset();
                         location.reload();
                     }else{
                         alert("Veuillez Modifier Votre Site Car Déja Existant !");
@@ -185,7 +195,7 @@ $('#btnEditSite').on('click', function(){
                 }
             })
     }
-})
+});
 
 $(document).on('click', '#btnClose', function(){
     location.reload();
@@ -202,3 +212,18 @@ $(document).ready(function(){
         $('#siteFormEdit')[0].reset();
     });
 })
+
+$(document).on('click', '#ajouttyp', function(){
+    $('#modalSite').modal('hide');
+    $('#modalType').attr('data-backdrop', 'static');
+    $('#modalType').attr('data-keyboard', false);
+    $('#modalType').modal('show');
+});
+
+
+$(document).on('click', '#Klos', function(){
+    $('#modalType').modal('hide');
+    $('#modalSite').attr('data-backdrop', 'static');
+    $('#modalSite').attr('data-keyboard', false);
+    $('#modalSite').modal('show');
+});

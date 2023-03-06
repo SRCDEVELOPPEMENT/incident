@@ -8,7 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Logtache;
 use App\Models\Tache;
+use App\Models\Site;
 use App\Models\Departement;
 use App\Models\Users_incident;
 
@@ -27,9 +29,13 @@ class User extends Authenticatable
         'id',
         'fullname',
         'login',
+        'site_id',
         'password',
+        'see_password',
         'created_at',
-        'departement_id'
+        'departement_id',
+        'email',
+        'responsable',
     ];
 
     public function departements()
@@ -37,11 +43,22 @@ class User extends Authenticatable
         return $this->belongsTo(Departement::class, 'departement_id');
     }
 
+
+    public function sites()
+    {
+        return $this->belongsTo(Site::class, 'site_id');
+    }
+
+
     public function users_incidents()
     {
         return $this->hasMany(Users_incident::class);
     }
 
+    public function logtaches()
+    {
+        return $this->hasMany(Logtache::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

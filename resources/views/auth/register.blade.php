@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-auth-card>
         <x-slot name="logo">
-            <a href="/">
+            <a href="#!">
                 <x-application-logo />
             </a>
         </x-slot>

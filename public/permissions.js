@@ -6,7 +6,11 @@ $('#btnAddPermission').on('click', function(){
     good = false;
     message+="Veuillez Renseigner Une Permission !\n";
     }
-
+    if(!$('#description').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Une Description !\n";
+    }
+    
     if(!good){
         good = false;
         $('#validation').val(message);
@@ -80,12 +84,14 @@ $(document).on('click', '#btnEdit', function(){
 
     let id = $(this).attr('data-id');
     let name = $(this).attr('data-name');
+    let description = $(this).attr('data-description');
 
     $("#permissionFormEdit")[0].reset();
     
     $('.form-group #id').val(id);
     $('.form-group #names').val(name);
-    
+    $('.form-group #descriptions').val(description);
+
     $('#modalEditPermission').attr('data-backdrop', 'static');
     $('#modalEditPermission').attr('data-keyboard', 'false');
     $('#modalEditPermission').modal('show');
@@ -101,15 +107,19 @@ $('#btnEditPermission').on('click', function(){
     if(!$('#names').val().trim()){
         good = false;
         message+="Veuillez Renseigner Une Permission !\n";
-        }
-        
-        if(!good){
+    }
+    if(!$('#descriptions').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Une Description !\n";
+    }
+   
+    if(!good){
             good = false;
             $('#validation').val(message);
             $('#errorvalidationsModals').attr('data-backdrop', 'static');
             $('#errorvalidationsModals').attr('data-keyboard', false);
             $('#errorvalidationsModals').modal('show');                  
-        }else{
+    }else{
             $.ajax({
                 type: 'POST',
                 url: 'editPermission',
@@ -125,14 +135,14 @@ $('#btnEditPermission').on('click', function(){
                     }
                 }
             })
-        }
+    }
 })
 
 
 $(document).on('click', '#btnDelete', function(){
-    let roles_has_permissions = JSON.parse($(this).attr('data-roles_has_permissions'));
+    let namepermission = $(this).attr('data-name');
     
-    if(confirm("Voulez-Vous Vraiment Supprimer Cette Permission ?") == true){
+    if(confirm("Voulez-Vous Vraiment Supprimer Cette Permission : "+namepermission+" ?") == true){
             $.ajax({
                 type: 'GET',
                 url: 'deletePermission',
@@ -153,7 +163,7 @@ $(document).on('click', '#btnDelete', function(){
 
 $(function() { 
 
-    $('#btnExit').click(function() { 
+    $('#btnreset').click(function() { 
         $('#permissionFormInsert')[0].reset();
     }); 
 }); 
