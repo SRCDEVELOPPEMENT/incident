@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use App\Models\Categorie;
+use App\Models\Site;
 use App\Models\Incident;
-use App\Models\Departement;
 use Validator,Redirect,Response;
 use Illuminate\Support\Str;
 use PDF;
@@ -30,12 +30,6 @@ class CategorieController extends Controller
     }
 
 
-    public function getCategories()
-    {
-        return Session::get('categories');
-    }
-
-
     /**
      * Display a listing of the resource.
      *
@@ -45,19 +39,19 @@ class CategorieController extends Controller
     {
         notify()->info('Liste Des Catégories ! ⚡️');
 
+        $categories = Categorie::with('sites.types')->get();
+
         $types = DB::table('types')->get();
 
-        $departements = Departement::all();
+        $sites = Site::with('types')->get();
 
-        $categories = Categorie::with('departements')->get();
 
         $incidents = Incident::with('categories', 'processus')->get();
 
-        return view('categories.index', 
+        return view('categories.index', compact('categories'),
         [
+            'sites' => $sites,
             'types' => $types,
-            'categories' => $categories,
-            'departements' => $departements,
             'incidents' => $incidents
         ]);
     }
@@ -82,7 +76,7 @@ class CategorieController extends Controller
     {
         $input = $request->all();
 
-        $get_categories = $this->getCategories();
+        $get_categories = Categorie::with('sites')->get();
         $oui = true;
 
         foreach ($get_categories as $categorie) {
@@ -101,26 +95,15 @@ class CategorieController extends Controller
 
             $categorie->name = $input['name'];
             $categorie->created_at = Carbon::now()->format('Y-m-d');
-            if(is_numeric($input['departement_id'])){
-                $categorie->departement_id = $input['departement_id'];
+            if(is_numeric($input['site_id'])){
+                $categorie->site_id = $input['site_id'];
             }else{
-                $categorie->type = $input['departement_id'];
+                $categorie->type = $input['site_id'];
             }
 
             $categorie->save();
 
-            $categorie = Categorie::with('departements')->get()->last();
-
-            if(Session::has('categories')){
-                $newCategories = array();
-                array_push($newCategories, $categorie);
-
-                for ($w=0; $w < count($get_categories); $w++) {
-                    $cat = $get_categories[$w];
-                    array_push($newCategories, $cat);
-                }
-                Session::put('categories', $newCategories);
-            }
+            $categorie = Categorie::with('sites')->get()->last();
 
             smilify('success', 'Catégorie Enrégistrer Avec Succès !');
 
@@ -159,7 +142,7 @@ class CategorieController extends Controller
      */
     public function update(Request $request)
     {
-        $categories = $this->getCategories();
+        $categories = Categorie::with('sites')->get();
 
         $Qte = 0;
         $tab = array();
@@ -181,37 +164,13 @@ class CategorieController extends Controller
         if($Qte > 0){
             return response()->json([]);
         }else{
-            if(is_numeric($request->departement_id)){
+            if(is_numeric($request->site_id)){
 
                 DB::table('categories')->where('id', $request->id)->update([
                     'name'=> $request->name,
                     'type'=> NULL,
-                    'departement_id'=> $request->departement_id,
+                    'site_id'=> $request->site_id,
                 ]);
-
-                if(Session::has('categories')){
-
-                    $categorie_edit = NULL;
-                    $newCategories = array();
-        
-                    for ($j=0; $j < count($categories); $j++) {
-                            $categorie_courant = $categories[$j];
-                            if(intval($request->input('id')) == intval($categorie_courant->id)){
-
-                                $categorie_edit = $categorie_courant;
-                                $categorie_edit->name = $request->name;
-                                $categorie_edit->type = NULL;
-                                $categorie_edit->departement_id = $request->departement_id;
-    
-                            } else{
-                                array_push($newCategories, $categorie_courant);
-                            }
-                    }
-    
-                    array_push($newCategories, $categorie_edit);
-    
-                    Session::put('categories', $newCategories);
-                }
      
             }else{
                 DB::table('categories')->where('id', $request->id)->update([
@@ -220,30 +179,6 @@ class CategorieController extends Controller
                     'type'=> $request->departement_id,
                 ]);
                 
-                if(Session::has('categories')){
-
-                    $categorie_edit = NULL;
-                    $newCategories = array();
-        
-                    for ($j=0; $j < count($categories); $j++) {
-                            $categorie_courant = $categories[$j];
-                            if(intval($request->input('id')) == intval($categorie_courant->id)){
-
-                                $categorie_edit = $categorie_courant;
-                                $categorie_edit->name = $request->name;
-                                $categorie_edit->type = $request->departement_id;
-                                $categorie_edit->departement_id = NULL;
-    
-                            } else{
-                                array_push($newCategories, $categorie_courant);
-                            }
-                    }
-    
-                    array_push($newCategories, $categorie_edit);
-    
-                    Session::put('categories', $newCategories);
-                }
-
             }
 
             smilify('success', 'Catégorie Modifier Avec Succès !');
@@ -261,20 +196,6 @@ class CategorieController extends Controller
     public function destroy(Request $request)
     {
         DB::table('categories')->where('id', $request->id)->delete();
-
-        if(Session::has('categories')){
-            $newCategories = array();
-            $categories = $this->getCategories();
-
-            for ($j=0; $j < count($categories); $j++) {
-                $categorie_courant = $categories[$j];
-                if(intval($request->id) != intval($categorie_courant->id)){
-                    array_push($newCategories, $categorie_courant);
-                }
-            }
-
-            Session::put('categories', $newCategories);
-        }
 
         smilify('success', 'Catégorie Supprimer Avec Succèss !');
 

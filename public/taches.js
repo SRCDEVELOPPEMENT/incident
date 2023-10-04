@@ -31,7 +31,7 @@ $(document).on('click', '#btn_tach_err_ok', function(){
 $(document).on('click', '#toto', function(){
 
     let incident = JSON.parse($(this).attr('data-incident'));
-
+    console.log(incident)
     $('#txt_num_i').replaceWith(`<span id="txt_num_i" style="margin-left: 13em;" class="text-xl badge badge-success">${incident.number}</span>`);
     $('#inco').val(incident.number);
 
@@ -77,20 +77,9 @@ $(document).on('click', '#btn_add_unique_task', function(){
         }
     }
 
-    if($('#deepartes').val()){
-
-        if($('#deepartes').val() && isNaN($('#deepartes').val())){
-
-            if(!$('#sity').val()){
-                good = false;
-                message += "Veuillez Choisir Un Site ! \n";        
-            }
-            
-        }
-
-    }else{
+    if(!$('#deepartes').val()){
         good = false;
-        message += "Veuillez Choisir Le Département Ou Le Site Chargé De Resoudre L'incident ! \n";
+        message += "Veuillez Choisir Le Site Chargé De Resoudre L'incident ! \n";
     }
 
     if(!good){
@@ -107,7 +96,7 @@ $(document).on('click', '#btn_add_unique_task', function(){
         </textarea>`);
 
         $('#obss_conf').replaceWith(`
-            <textarea class="bg-light" style="resize:none;" disabled name="" id="obss_conf" rows="7">${$('#obs_task').val()}</textarea>
+            <textarea class="text-lg bg-light" style="resize:none;" disabled name="" id="obss_conf" rows="8">${$('#obs_task').val()}</textarea>
         `);
 
         $('#dsis_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="dsis_conf">${$('#number_ds_task').val()}</span>`);
@@ -164,11 +153,11 @@ $(document).on('click', '#conf_save_t', function(){
                                 ${task.status}
                             </a>
                         </td>
-                        <td>${task.created_at}</td>
+                        <td></td>
                         <td>${task.maturity_date}</td>
                         <td></td>
                         <td></td>
-                        <td>${task.departements ? task.departements.name : task.sites ? task.sites.name : ""}</td>
+                        <td></td>
                         <td>
                             <a
                                 id="set_priority_degr"
@@ -232,8 +221,6 @@ $(document).on('click', '#conf_save_t', function(){
 
 $(document).ready(function() {
 
-    let monthAndDay = new Date().getFullYear() +"-"+ String(new Date().getMonth() + 1).padStart(2, '0');
-
     table = $('#dataTable-1').DataTable({
         destroy: true,
         paging: false,
@@ -243,7 +230,6 @@ $(document).ready(function() {
 
     $("#departe").on("change", function() {
         
-        $('#searchMonth').val('');
         $('#searchDate').val('');
         $('#search_text_simple').val('');
         $('#validationCustom04').val('');
@@ -256,7 +242,6 @@ $(document).ready(function() {
   
     $("#validationCustom04").on("change", function() {
 
-        $('#searchMonth').val('');
         $('#searchDate').val('');
         $('#search_text_simple').val('');
         $('#departe').val('');
@@ -269,7 +254,6 @@ $(document).ready(function() {
 
     $("#searchDate").on("change", function() {
 
-        $('#searchMonth').val('');
         $('#departe').val('');
         $('#search_text_simple').val('');
         $('#validationCustom04').val('');
@@ -292,53 +276,10 @@ $(document).ready(function() {
 
     });
 
-    $("#searchMonth").on("change", function() {
         
-        $('#searchDate').val('');
-        $('#departe').val('');
-        $('#search_text_simple').val('');
-        $('#validationCustom04').val('');
-
-        var filter = $(this).val();
-        var table = document.getElementById("dataTable-1");
-        var tr = table.getElementsByTagName("tr");
-
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[5];
-            if (td) {
-              txtValue = td.textContent || td.innerText;
-              if (txtValue.indexOf(filter) > -1) {
-                tr[i].style.display = "";
-              } else {
-                tr[i].style.display = "none";
-              }
-            }
-        }
-    });
-
-    
-    // Chargement Tache Mois Encours
-        $('#searchMonth').val(monthAndDay);
-        var table = document.getElementById("dataTable-1");
-        var tr = table.getElementsByTagName("tr");
-    
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[5];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.indexOf(monthAndDay) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-    // Fin Chargement Tache Mois Encours
-    
     $('#search_text_simple').on('input', function(){
         $('#departe').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#validationCustom04').val('');
 
         var value = $(this).val().toLowerCase();
@@ -350,7 +291,6 @@ $(document).ready(function() {
     $(document).on('change', '#emis_recus', function(){
         $('#departe').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#search_text_simple').val('');
         $('#validationCustom04').val('');
         $('#year_courant_incident').val('');
@@ -481,10 +421,90 @@ $(document).on('click', 'button[name="submit_download"]', function(){
     $('#midoriya').val($(this).attr('data-file_id'));
 });
 
+$(document).on('click', '#btnExitModalStatus', function(){
+    $('#statut_e').val('');
+    $('#segment').empty();
+});
 
 $(document).on('click', '#exit_modal_down', function(){
     location.reload();
 });
+
+$(document).on('click', '#vue_other_infos_incident, #infos_incident', function(){
+    $.ajax({
+        type: 'GET',
+        url: "get_un_incident",
+        data: {
+            number : $(this).attr('data-number'),
+        },
+         headers:{
+             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+         },
+         success: function(incident){
+            
+            let categories = JSON.parse($('#vue_other_infos_incident').attr('data-categories'));
+            let processus = JSON.parse($('#vue_other_infos_incident').attr('data-processus'));
+            let sites = JSON.parse($('#vue_other_infos_incident').attr('data-sites'));
+
+            let cate = categories.find(c => c.id == incident.categorie_id);
+            let pro = processus.find(p => p.id == incident.proces_id);
+        
+            if(incident.site_incident){
+                var site_incident = sites.find(s => s.id == incident.site_incident);
+            }
+                
+            if(incident.deja_pris_en_compte === "1"){
+                $('.deja_pris_encompte').replaceWith(`<span class="text-xl text-danger deja_pris_encompte">${incident.comment ? incident.comment : ""}</span>`)
+            }else if(!incident.deja_pris_en_compte){
+                if(incident.observation_rex){
+                    $('.deja_pris_encompte').replaceWith(`<span class="text-xl text-success deja_pris_encompte">Incident Assigné Avec Succèss !</span>`)
+                }else{
+                    $('.deja_pris_encompte').replaceWith(`<span class="text-xl text-warning deja_pris_encompte">Incident Pas Encore Assigné !</span>`)  
+                }
+            }
+            
+            $('.site_de_lincident').replaceWith(`<div class="my-0 big"><span class="site_de_lincident">${site_incident ? site_incident.name : ""}</span></div>`);
+            $('.declarateur').replaceWith(`<div class="my-0 big"><span class="text-xl declarateur">${incident.fullname_declarateur ? incident.fullname_declarateur : "AUCUN DECLARATEUR"}</span></div>`)
+            $('.observation_coordos').replaceWith(`<span class="text-xl observation_coordos">${incident.observation_rex ? incident.observation_rex : ""}</span>`);
+            $('.processus_impacter').replaceWith(`<span class="text-xl processus_impacter">${pro.name}</span>`);
+            $('.sident').replaceWith(`<span class="sident badge badge-info text-xl">${incident.number}</span>`);
+            $('.desc').replaceWith(`<span class="text-xl desc">${incident.description}</span>`);
+            $('.cose').replaceWith(`<span class="text-xl cose">${incident.cause}</span>`);
+            $('.perim').replaceWith(`<span class="text-xl perim">${incident.perimeter ? incident.perimeter : ''}</span>`);
+        
+            $('.actions_do').replaceWith(`<span class="text-xl actions_do">${incident.battles ? incident.battles : ''}</span>`);
+            
+            if(incident.due_date){
+                if(parseInt(incident.due_date.replaceAll("-", "")) < parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""))){
+                    if(incident.status == "ENCOURS"){
+                        $('.due_dat').replaceWith(`<span class="text-warning text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
+                    }else{
+                        $('.due_dat').replaceWith(`<span class="text-primary text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
+                    }
+                }else{
+                    $('.due_dat').replaceWith(`<span class="text-primary text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
+                }
+            }else{
+                $('.due_dat').replaceWith(`<span class="due_dat"></span>`);
+            }
+        
+            $('.kate').replaceWith(`<span class="text-xl kate">${cate.name ? cate.name : ""}</span>`);
+        
+            $('.cloture_daaaate').replaceWith(`<span class="text-xl text-success cloture_daaaate">${incident.closure_date ? incident.closure_date : ""}</span>`);
+            $('.creat_dat').replaceWith(`<span class="text-xl creat_dat">${incident.declaration_date}</span>`);
+        
+            if(incident.status == "ENCOURS"){
+                $('.stat_inci').replaceWith(`<span class="text-xl text-primary stat_inci">${incident.status}</span>`);
+            }else if(incident.status == "CLÔTURÉ"){
+                $('.stat_inci').replaceWith(`<span class="text-xl text-success stat_inci">${incident.status}</span>`);
+            }else{
+                $('.stat_inci').replaceWith(`<span class="text-xl text-muted stat_inci">${incident.status}</span>`);
+            }
+        
+         }
+    })    
+});
+
 
 $(document).on('click', '#ask_service', function(){
     let task = JSON.parse($(this).attr('data-task'));
@@ -533,19 +553,10 @@ $(document).on('click', '#modif_stay_tach', function(){
 
 $(document).on('click', '#tasch_m', function(){
     let task = JSON.parse($(this).attr('data-task'));
-    let fichiers = JSON.parse($(this).attr('data-fichiers'));
-    let elements = [];
-    for (let index = 0; index < fichiers.length; index++) {
-        const fichier = fichiers[index];
-        if(parseInt(fichier.tache_id) == parseInt(task.id)){
-            elements.push(fichier);
-        }
-    }
 
     if($('#statut_e').val()){
         
         if($('#statut_e').val() == "RÉALISÉE"){
-            if(elements.length > 0){
                 $.ajax({
                     type: 'PUT',
                     url: "updateStatusTask",
@@ -572,13 +583,6 @@ $(document).on('click', '#tasch_m', function(){
                         }
                     }
                 });
-            }else{
-                $('#change_status').modal('hide');
-                $('#textstat').val('Veuillez D\'abord Charger Le(s) Document(s) Qui Atteste Que La Tâche Est Bien Réalisé !');
-                $('#stat_task').attr('data-backdrop', 'static');
-                $('#stat_task').attr('data-keyboard', false);
-                $('#stat_task').modal('show');
-            }
         }else{
             $.ajax({
                 type: 'PUT',
@@ -685,9 +689,7 @@ $(document).on('click', '#log_task', function(){
     let meslogs = [];
     let task = JSON.parse($(this).attr('data-task'));
     let logs = JSON.parse($(this).attr('data-logs'));
-    let created_log = JSON.parse($(this).attr('data-created_log'));
-    let tab_id_log = JSON.parse($(this).attr('data-tab_id_log'));
-
+    console.log(logs)
     $('#tekila').replaceWith(`<strong class="text-xl" id="tekila">${$(this).attr('data-key')}</strong>`);
 
     for (let index = 0; index < logs.length; index++) {
@@ -700,15 +702,6 @@ $(document).on('click', '#log_task', function(){
     for (let i = 0; i < meslogs.length; i++) {
         const log = meslogs[i];
         
-        let index_dateCreateLog = -1;
-        for (let a = 0; a < tab_id_log.length; a++) {
-            const id = tab_id_log[a];
-            if(log.id == id){
-                index_dateCreateLog = a;
-                break;
-            }
-        }
-
         $('.dubai').append(`
             <div class="list-group-item">
                 <div class="row align-items-center">
@@ -717,10 +710,10 @@ $(document).on('click', '#log_task', function(){
                 </div>
                 <div class="col">
                     <small><strong></strong></small>
-                    <div class="my-0 text-lg big"><span>${log.title}</span></div>
+                    <div class="my-0 text-lg big"><span>${log.title ? log.title : ""}</span></div>
                 </div>
                 <div class="col">
-                    <div class="my-0 text-lg big"><span>${created_log[index_dateCreateLog]}</span></div>
+                    <div class="my-0 text-lg big"><span>${log.created_at ? log.created_at : ""}</span></div>
                 </div>
                 <div class="col">
                     <small class="badge badge-pill text-lg badge-light text-uppercase">${log.statut ? log.statut : ''}</small>
@@ -819,10 +812,9 @@ $(document).on('click', '#supp_task', function(){
 $(document).on('click', '#editions', function(){
 
     let task = JSON.parse($(this).attr('data-task'));
-    
+    console.log(task)
     let sites = JSON.parse($('#toto').attr('data-sites'));
     let incident = JSON.parse($('#toto').attr('data-incident'));
-    let departements = JSON.parse($('#toto').attr('data-departements'));
 
     $('#txt_num_i_edit').replaceWith(`<span id="txt_num_i_edit" style="margin-left: 13em;" class="text-xl badge badge-success">${incident.number}</span>`);
     $('#id_edit').val(task.id);
@@ -830,36 +822,8 @@ $(document).on('click', '#editions', function(){
     $('.form-group #obs_task_edit').val(task.observation_task);
     $('.form-group #degree_realis').val(task.resolution_degree);
     $('.form-group input[id="dateing"]').val(task.maturity_date);
-
-    if(task.departement_id){
-        let mon_departement = departements.find(d => d.id == task.departement_id);
-        $('#deepartes_edit').val(mon_departement.id);
-
-    }else if(task.site_id){
-        $('#nino_edit').remove();
-
-        if(task.sites.types.name == "AGENCE"){
-            $('#deepartes_edit').val(task.sites.types.name);
-        }else if(task.sites.types.name == "MAGASIN"){
-            $('#deepartes_edit').val(task.sites.types.name);
-        }
-        
-        $('#devdocs_edit').append(`
-            <div id="nino_edit" class="form-group my-4">
-                <label for="sity_edit"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident <span style="color:red;"> *</span></label>
-                <select style="font-size: 1.2em;" class="form-control custom-select border-primary" id="sity_edit" name="sity_edit">
-                    <option value="">Choisissez...</option>
-                </select>
-            </div>
-        `);
-
-        for (let i = 0; i < sites.length; i++) {
-            const sit = sites[i];
-            $('#sity_edit').append(`<option value="${sit.id}">${sit.name}</option>`);
-        }
-        console.log(task);
-        $('#sity_edit').val(task.site_id);
-    }
+    $('#deepartes_edit').val(task.site_id);
+    
 });
 
 
@@ -894,20 +858,9 @@ $(document).on('click', '#btn_edit_unique_task', function(){
         message+="Veuillez Choisir Le Dégré De Résolution De La Tâche !\n";
     }
 
-    if($('select[name="deepartes_edit"]').val()){
-
-        if($('select[name="deepartes_edit"]').val() && isNaN($('select[name="deepartes_edit"]').val())){
-
-            if(!$('#sity_edit').val()){
-                good = false;
-                message += "Veuillez Choisir Un Site ! \n";        
-            }
-            
-        }
-
-    }else{
+    if(!$('select[name="deepartes_edit"]').val()){
         good = false;
-        message += "Veuillez Choisir Le Département Ou Le Site Chargé De Resoudre L'incident ! \n";
+        message += "Veuillez Choisir Un Site ! \n";        
     }
 
     if(!good){
@@ -1008,68 +961,6 @@ $(document).on('click', '#btn_degree', function(){
     $('#update_degree').modal('show');
 });
 
-$(document).on('change', 'select[name="deepartes"]', function(){
-    let allSites = [];
-    let sites = JSON.parse($(this).attr('data-sites'));
-    let types = JSON.parse($(this).attr('data-types'));
-
-    if($(this).val()){
-        
-        if(isNaN($(this).val())){
-
-            for (let index = 0; index < types.length; index++) {
-                const type = types[index];
-                if(type.name == $(this).val()){
-                    for (let j = 0; j < sites.length; j++) {
-                        const site = sites[j];
-                        if(site.type_id == type.id){
-                            allSites.push(site);
-                        }
-                    }
-                }
-            }
-
-
-            if(allSites.length > 0){
-
-                $('#nino').remove();
-                $('#devdocs').append(`
-                    <div id="nino" class="form-group my-4">
-                        <label for="sity"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident<span style="color:red;"> *</span></label>
-                        <select style="font-size: 1.2em;" data-sites="{{ $sites }}" class="form-control custom-select border-primary" id="sity" name="site_id">
-                            <option selected value="">Choisissez...</option>
-                        </select>
-                    </div>
-                `);
-                for (let i = 0; i < allSites.length; i++) {
-                    const sit = allSites[i];
-                    $('#sity').append(`<option value="${sit.id}">${sit.name}</option>`);
-                }
-
-            }else{
-
-                $('#nino').remove();
-                $('#devdocs').append(`
-                    <div id="nino" class="form-group my-4">
-                        <label for="sity"><span class="fe fe-navigation-2 mr-2"></span>Site Chargé De Resoudre L'incident<span style="color:red;"> *</span></label>
-                        <select style="font-size: 1.2em;" data-sites="{{ $sites }}" class="form-control custom-select border-primary" id="sity" name="site_id">
-                            <option selected value="">Choisissez...</option>
-                        </select>
-                    </div>
-                `);
-
-                $('#sity').empty().append(`<option value="">AUCUNE OPTION DISPONIBLE</option>`);
-            } 
-
-        }else{
-            $('#nino').remove();
-        }
-        
-    }else{
-        $('#nino').remove();
-    }
-});
-
 
 $(document).on('change', 'select[name="deepartes_edit"]', function(){
 
@@ -1132,109 +1023,5 @@ $(document).on('change', 'select[name="deepartes_edit"]', function(){
     }else{
         $('#nino_edit').remove();
     }
-});
-
-$(document).on('click', '#InfIncs', function(){
-
-    let nombres_taches = 0;
-    
-    let number = $(this).attr('data-number');
-    let incidents = JSON.parse($(this).attr('data-incidents'));
-    let tasks = JSON.parse($(this).attr('data-tasks'));
-    let dates = JSON.parse($(this).attr('data-created'));
-    let numeros = JSON.parse($(this).attr('data-ids'));
-    let due_dates = JSON.parse($(this).attr('data-exited'));
-    let users_incidents = JSON.parse($(this).attr('data-users_incidents'));
-    let users = JSON.parse($(this).attr('data-users'));
-    let departements = JSON.parse($(this).attr('data-departements'));
-    let sites = JSON.parse($(this).attr('data-sites'));
-
-    
-    for (let we = 0; we < tasks.length; we++) {
-        const tas = tasks[we];
-        
-        if(tas.incident_number == number){
-            nombres_taches +=1;
-        }
-    }
-
-    let index_dateCreation_Inc = -1;
-    for (let fb = 0; fb < numeros.length; fb++) {
-        const numbber = numeros[fb];
-        if(numbber == number){
-            index_dateCreation_Inc = fb;
-        }
-    }
-
-    let incident = incidents.find(i => i.number == number);
-    
-    
-    $('.numero_tasks').replaceWith(`<i class="text-xl numero_tasks">${$(this).attr('data-key')}</i>`);
-    $('.sident').replaceWith(`<i class="text-lg badge badge-pill badge-success sident">${incident.number}</i>`);
-    $('.desc').replaceWith(`<span class="text-xl desc">${incident.description}</span>`);
-    $('.cose').replaceWith(`<span class="text-xl desc">${incident.cause}</span>`);
-    $('.observation_coordos').replaceWith(`<span class="observation_coordos">${incident.observation_rex ? incident.observation_rex : ""}</span>`);
-
-    if(incident.status == "ENCOURS"){
-        $('.stat_inci').replaceWith(`<span class="text-xl text-primary stat_inci">${incident.status}</span>`);
-    }else if(incident.status == "CLÔTURÉ"){
-        $('.stat_inci').replaceWith(`<span class="text-xl text-success stat_inci">${incident.status}</span>`);
-    }else{
-        $('.stat_inci').replaceWith(`<span class="text-xl text-muted stat_inci">${incident.status}</span>`);
-    }
-    $('.perim').replaceWith(`<span class="text-xl perim">${incident.perimeter ? incident.perimeter : ''}</span>`);
-    $('.actions_do').replaceWith(`<span class="text-xl actions_do">${incident.battles ? incident.battles : ''}</span>`);
-    $('.kate').replaceWith(`<span class="text-xl kate">${incident.categories ? incident.categories.name : ""}</span>`);
-    
-    if(incident.due_date){
-        if(parseInt(incident.due_date.replaceAll("-", "")) < parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""))){
-            if(incident.status == "ENCOURS"){
-                $('.due_dat').replaceWith(`<span class="text-warning text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
-            }else{
-                $('.due_dat').replaceWith(`<span class="text-primary text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
-            }
-        }else{
-            $('.due_dat').replaceWith(`<span class="text-primary text-xl due_dat">${incident.due_date ? incident.due_date : ''}</span>`);
-        }
-    }else{
-        $('.due_dat').replaceWith(`<span class="due_dat"></span>`);
-    }
-
-    $('.creat_dat').replaceWith(`<span class="text-xl creat_dat">${dates[index_dateCreation_Inc]}</span>`);
-    $('.cloture_daate').replaceWith(`<span class="text-xl cloture_daate">${incident.closure_date ? incident.closure_date : ''}</span>`);
-    $('.tac').replaceWith(`<span class="text-xl tac">${nombres_taches < 10 ? 0 +""+ nombres_taches : nombres_taches}</span>`);
-    
-    
-    //Entité Emetteur Et Récèpteur
-    $('.site_emeter').replaceWith(`<span class="site_emeter"></span>`);
-    $('.syte_receppt').replaceWith('<span class="syte_receppt"></span>');
-
-
-    let mon_user_ince = users_incidents.find(u => u.incident_number == incident.number && u.isDeclar === '1');
-    let mon_user_inci_recepteur = users_incidents.find(u => u.incident_number == incident.number && u.isTrigger === '1' && u.isCoordo === '1' && u.isTriggerPlus === '1');
-    
-    if(mon_user_ince){
-        let Utilisateur = users.find(u => u.id == mon_user_ince.user_id);
-        if(Utilisateur){
-            if(Utilisateur.departement_id){
-                var dept = departements.find(d => d.id == Utilisateur.departement_id);
-            }else if(Utilisateur.site_id){
-                var sit = sites.find(s => s.id == Utilisateur.site_id);
-            }
-        }
-    }
-
-    if(mon_user_inci_recepteur){
-        let user = users.find(u => u.id == mon_user_inci_recepteur.user_id);
-
-        if(user){
-            var dept_recepteur = departements.find(d => d.id == user.departement_id);
-            var sit_recepteur = sites.find(s => s.id == user.site_id);
-        }
-    }
-
-    $('.site_emeter').replaceWith(`<span class="site_emeter">${sit ? sit.name : dept ? dept.name : ""}</span>`);
-    $('.syte_receppt').replaceWith(`<span class="syte_receppt">${dept_recepteur ? dept_recepteur.name : sit_recepteur ? sit_recepteur.name : ""}</span>`);
-
 });
 

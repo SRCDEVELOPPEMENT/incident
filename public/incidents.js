@@ -31,6 +31,7 @@ $(document).on('click', '#toggle', function(){
     $('#nibiru_number').replaceWith(`<strong class="badge badge-success" id="nibiru_number">${incident.number}</strong>`);
 });
 
+
 $(document).on('click', '#Kloture', function(){
         let tasks = JSON.parse($(this).attr('data-tasks'));
         let incident = JSON.parse($(this).attr('data-incident'));
@@ -50,8 +51,7 @@ $(document).on('click', '#Kloture', function(){
                 count +=1;
             }
         }
-        if(incident.categorie_id){
-            if(incident.due_date){
+        if($('#cloture_comment').val().trim()){
                 if((count == 0) && (tab.length > 0)){
                     $.ajax({
                         type: 'PUT',
@@ -78,21 +78,40 @@ $(document).on('click', '#Kloture', function(){
                     $('#close_inc').attr('data-keyboard', false);
                     $('#close_inc').modal('show');    
                 }
-            }else{
-                $('#textClo').val('Veuillez Définir Une Date D\'échance Pour Cet Incident Avant De Le Clôturer !');
-                $('#clos').modal('hide');
-                $('#close_inc').attr('data-backdrop', 'static');
-                $('#close_inc').attr('data-keyboard', false);
-                $('#close_inc').modal('show');
-            }
         }else{
-            $('#textClo').val('Veuillez Définir Une Catégorie Pour Cet Incident Avant De Le Clôturer !');
+            $('#textClo').val('Veuillez Renseigner Un Commentaire De Clôture Pour Cet Incident !');
             $('#clos').modal('hide');
             $('#close_inc').attr('data-backdrop', 'static');
             $('#close_inc').attr('data-keyboard', false);
             $('#close_inc').modal('show');
         }
 });
+
+$(document).on('click', '#Kloture_rex', function(){
+    //let tasks = JSON.parse($(this).attr('data-tasks'));
+    let incident = JSON.parse($(this).attr('data-incident'));
+
+    $.ajax({
+        type: 'PUT',
+        url: 'cloture_special_rex',
+        data: {
+            status : "CLÔTURÉ",
+            number : incident.number,
+            valeur : $('#valeure_rex').val(),
+            comment : $('#cloture_comment_rex').val()
+        },
+        headers:{
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(data){
+            if(data.length > 0){
+                location.reload();
+            }
+        }
+    });
+
+});
+
 
 $(document).on('click', '#commentaire_cloture', function(){
 
@@ -106,24 +125,56 @@ $(document).on('click', '#commentaire_cloture', function(){
 
 
 $(document).on('click', '#infos_incident', function(){
-    let index_declarations = -1;
-    let dates = JSON.parse($(this).attr('data-created'));
-    let numbers = JSON.parse($(this).attr('data-ids'));
-    let departements = JSON.parse($(this).attr('data-departements'));
-    let users = JSON.parse($(this).attr('data-users'));
-    let users_incidents = JSON.parse($(this).attr('data-users_incidents'));
-    let incident = JSON.parse($(this).attr('data-number'));
-    let tasks = JSON.parse($(this).attr('data-task'));
+    let incident = JSON.parse($(this).attr('data-incident'));
+    // let incident = {
+    //     number : $(this).attr('data-number'),
+    //     description : $(this).attr("data-description"),
+    //     status : $(this).attr('data-status'),
+    //     cause : $(this).attr('data-cause'),
+    //     motif_annulation : $(this).attr('data-motif_annulation'),
+    //     proces_id : $(this).attr('data-proces_id'),
+    //     perimeter : $(this).attr('data-perimeter'),
+    //     priority : $(this).attr('data-priority'),
+    //     declaration_date : $(this).attr('data-declaration_date'),
+    //     battles : $(this).attr('data-battles'),
+    //     comment : $(this).attr('data-comment'),
+    //     site_id : $(this).attr('data-site_id'),
+    //     observation_rex : $(this).attr('data-observation_rex'),
+    //     archiver : $(this).attr('data-archiver'),
+    //     deja_pris_en_compte : $(this).attr('data-deja_pris_en_compte'),
+    //     categorie_id : $(this).attr('data-categorie_id'),
+    //     site_declarateur : $(this).attr('data-site_declarateur'),
+    //     observation : $(this).attr('data-observation'),
+    //     fullname_declarateur : $(this).attr('data-fullname_declarateur'),
+    //     closure_date : $(this).attr('data-closure_date'),
+    //     due_date : $(this).attr('data-due_date'),
+    //     valeur : $(this).attr('data-valeur'),
+    // };
+
+    let tasks = JSON.parse($(this).attr('data-tasks'));
+    let categories = JSON.parse($(this).attr('data-categories'));
+    let processus = JSON.parse($(this).attr('data-processus'));
     let sites = JSON.parse($(this).attr('data-sites'));
 
-    let count = 0;
-    for (let index = 0; index < tasks.length; index++) {
-        const task = tasks[index];
-        if(task.incident_number == incident.number){
-            count +=1;
+    let cate = categories.find(c => c.id == incident.categorie_id);
+    let pro = processus.find(p => p.id == incident.proces_id);
+
+    if(incident.site_incident){
+        var site_incident = sites.find(s => s.id == incident.site_incident);
+    }
+
+    let r = 0;
+    var text = "";
+    for (let vg = 0; vg < tasks.length; vg++) {
+        const t = tasks[vg];
+        text = text + t.description + "     |     ";
+        if(t.status == "ENCOURS"){
+            r +=1;
         }
     }
     
+    $('.les_taches').replaceWith(`<span class="les_taches">${text} </span>`);
+
     if(incident.deja_pris_en_compte === "1"){
         $('.deja_pris_encompte').replaceWith(`<span class="text-xl text-danger deja_pris_encompte">${incident.comment ? incident.comment : ""}</span>`)
     }else if(!incident.deja_pris_en_compte){
@@ -134,13 +185,23 @@ $(document).on('click', '#infos_incident', function(){
         }
     }
     
+
+    $('.site_de_lincident').replaceWith(`<div class="my-0 big"><span class="site_de_lincident">${site_incident ? site_incident.name : ""}</span></div>`);
+    $('.declarateur').replaceWith(`<div class="my-0 big"><span class="text-xl declarateur">${incident.fullname_declarateur ? incident.fullname_declarateur : "AUCUN DECLARATEUR"}</span></div>`)
     $('.observation_coordos').replaceWith(`<span class="text-xl observation_coordos">${incident.observation_rex ? incident.observation_rex : ""}</span>`);
-    $('.processus_impacter').replaceWith(`<span class="text-xl processus_impacter">${incident.processus.name}</span>`);
+    $('.processus_impacter').replaceWith(`<span class="text-xl processus_impacter">${pro.name}</span>`);
     $('#inf_number').replaceWith(`<span class="badge badge-success" id="inf_number">${incident.number}</span>`);
     $('.desc').replaceWith(`<span class="text-xl desc">${incident.description}</span>`);
     $('.cose').replaceWith(`<span class="text-xl cose">${incident.cause}</span>`);
     $('.perim').replaceWith(`<span class="text-xl perim">${incident.perimeter ? incident.perimeter : ''}</span>`);
-    $('.tac').replaceWith(`<span class="text-xl tac">${count < 10 ? 0 +""+ count : count}</span>`);
+    $('.tac').replaceWith(`<span class="text-xl tac">${(tasks.length) < 10 ? 0 +""+ (tasks.length) : (tasks.length)}</span>`);
+    
+    if(tasks.length == 0){
+        $('.statut_taches').replaceWith(`<span class="text-xl statut_taches">"ENCOURS DE REALISATION"</span>`);
+    }else{
+        $('.statut_taches').replaceWith(`<span class="text-xl statut_taches">${r == 0 ? "RÉALISÉE" : "ENCOURS DE REALISATION"}</span>`);
+    }
+
     $('.actions_do').replaceWith(`<span class="text-xl actions_do">${incident.battles ? incident.battles : ''}</span>`);
     
     if(incident.due_date){
@@ -157,17 +218,10 @@ $(document).on('click', '#infos_incident', function(){
         $('.due_dat').replaceWith(`<span class="due_dat"></span>`);
     }
 
-    $('.kate').replaceWith(`<span class="text-xl kate">${incident.categories ? incident.categories.name : ""}</span>`);
-
-    for (let l = 0; l < numbers.length; l++) {
-        const number = numbers[l];
-        if(number == incident.number){
-            index_declarations = l;
-        }
-    }
+    $('.kate').replaceWith(`<span class="text-xl kate">${cate.name ? cate.name : ""}</span>`);
 
     $('.cloture_daaaate').replaceWith(`<span class="text-xl text-success cloture_daaaate">${incident.closure_date ? incident.closure_date : ""}</span>`);
-    $('.creat_dat').replaceWith(`<span class="text-xl creat_dat">${dates[index_declarations]}</span>`);
+    $('.creat_dat').replaceWith(`<span class="text-xl creat_dat">${incident.declaration_date}</span>`);
 
     if(incident.status == "ENCOURS"){
         $('.stat_inci').replaceWith(`<span class="text-xl text-primary stat_inci">${incident.status}</span>`);
@@ -177,38 +231,6 @@ $(document).on('click', '#infos_incident', function(){
         $('.stat_inci').replaceWith(`<span class="text-xl text-muted stat_inci">${incident.status}</span>`);
     }
 
-    //Entité Emetteur Et Récèpteur
-    $('.site_emeter').replaceWith(`<span class="site_emeter"></span>`);
-    $('.syte_receppt').replaceWith('<span class="syte_receppt"></span>');
-
-    let mon_user_ince = users_incidents.find(u => u.incident_number == incident.number && u.isDeclar === '1');
-    let mon_user_inci_recepteur = users_incidents.find(u => u.incident_number == incident.number && u.isTrigger === '1' && u.isCoordo === '1' && u.isTriggerPlus === '1');
-
-    if(mon_user_ince){
-        let Utilisateur = users.find(u => u.id == mon_user_ince.user_id);
-
-        if(Utilisateur){
-            if(Utilisateur.departement_id){
-                var dept = departements.find(d => d.id == Utilisateur.departement_id);
-            }else if(Utilisateur.site_id){
-                var sit = sites.find(s => s.id == Utilisateur.site_id);
-            }
-        }
-
-    }
-    
-    if(mon_user_inci_recepteur){
-        let user = users.find(u => u.id == mon_user_inci_recepteur.user_id);
-
-        if(user){
-            var dept_recepteur = departements.find(d => d.id == user.departement_id);
-            var sit_recepteur = sites.find(s => s.id == user.site_id);
-        }
-    }
-
-    $('.syte_receppt').replaceWith(`<span class="syte_receppt">${dept_recepteur ? dept_recepteur.name : sit_recepteur ? sit_recepteur.name : ""}</span>`);
-    $('.site_emeter').replaceWith(`<span class="site_emeter">${sit ? sit.name : dept ? dept.name : ""}</span>`);
-
 });
 
 $(document).on('click', '.incd', function(){
@@ -217,11 +239,12 @@ $(document).on('click', '.incd', function(){
 });
 
 $(document).ready(function() {
+
+    $('#form_incident')[0].reset();
     //BUTTON ASSIGNATION
     $('.badji').hide();
     //END BUTTON ASSIGNATION
-    let categories = JSON.parse($('#validationCustom04').attr('data-categories'));
-    let monthAndDay = new Date().getFullYear() +"-"+ String(new Date().getMonth() + 1).padStart(2, '0');
+    let sites = JSON.parse($('#validationCustom04').attr('data-sites'));
 
 
     table = $('#dataTable-1').DataTable({
@@ -234,18 +257,17 @@ $(document).ready(function() {
     $("#searchDate").on("change", function() {
         $('#emis_recus').val('');
         $('#assigner_as').val('');
-        $('#searchMonth').val('');
         $('#search_text_simple').val('');
         $('#year_courant_incident').val('');
 
-        //Mise A Jour Categorie
+        //Mise A Jour Site
         $('#validationCustom04 option').remove();
-        $('#validationCustom04').append(`<option selected value="">Catégorie...</option>`);
-        for (let h = 0; h < categories.length; h++) {
-            const categorie = categories[h];
-            $('#validationCustom04').append(`<option value="${categorie.name}">${categorie.name}</option>`);
+        $('#validationCustom04').append(`<option selected value="">Site...</option>`);
+        for (let h = 0; h < sites.length; h++) {
+            const site = sites[h];
+            $('#validationCustom04').append(`<option value="${site.name}">${site.name}</option>`);
         }
-        //Mise A Jour Categorie
+        //Mise A Jour Site
 
         var value = $(this).val().toLowerCase();
         $(".agencies tr").filter(function() {
@@ -258,7 +280,6 @@ $(document).ready(function() {
         $('#assigner_as').val('');
         $('#year_courant_incident').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#search_text_simple').val('');
 
         var value = $(this).val().toLowerCase();
@@ -272,17 +293,16 @@ $(document).ready(function() {
         $('#emis_recus').val('');
         $('#assigner_as').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#search_text_simple').val('');
 
-        //Mise A Jour Categorie
+        //Mise A Jour Site
         $('#validationCustom04 option').remove();
-        $('#validationCustom04').append(`<option selected value="">Catégorie...</option>`);
-        for (let h = 0; h < categories.length; h++) {
-            const categorie = categories[h];
-            $('#validationCustom04').append(`<option value="${categorie.name}">${categorie.name}</option>`);
+        $('#validationCustom04').append(`<option selected value="">Site...</option>`);
+        for (let h = 0; h < sites.length; h++) {
+            const site = sites[h];
+            $('#validationCustom04').append(`<option value="${site.name}">${site.name}</option>`);
         }
-        //Mise A Jour Categorie
+        //Mise A Jour Site
 
         var filter =$(this).val();
         var table = document.getElementById("dataTable-1");
@@ -301,73 +321,21 @@ $(document).ready(function() {
         }
     });
     
-    $("#searchMonth").on("change", function() {
-        $('#emis_recus').val('');
-        $('#assigner_as').val('');
-        $('#searchDate').val('');
-        $('#search_text_simple').val('');
-        $('#year_courant_incident').val('');
-
-        //Mise A Jour Categorie
-        $('#validationCustom04 option').remove();
-        $('#validationCustom04').append(`<option selected value="">Catégorie...</option>`);
-        for (let h = 0; h < categories.length; h++) {
-            const categorie = categories[h];
-            $('#validationCustom04').append(`<option value="${categorie.name}">${categorie.name}</option>`);
-        }
-        //Mise A Jour Categorie
-
-        var filter = $(this).val();
-        var table = document.getElementById("dataTable-1");
-        var tr = table.getElementsByTagName("tr");
-
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[3];
-            if (td) {
-              txtValue = td.textContent || td.innerText;
-              if (txtValue.indexOf(filter) > -1) {
-                tr[i].style.display = "";
-              } else {
-                tr[i].style.display = "none";
-              }
-            }
-        }
-    });
-
-    // Chargement Incidents Mois Encours
-    $('#searchMonth').val(monthAndDay);
-    var table = document.getElementById("dataTable-1");
-    var tr = table.getElementsByTagName("tr");
-
-    for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[3];
-        if (td) {
-            txtValue = td.textContent || td.innerText;
-            if (txtValue.indexOf(monthAndDay) > -1) {
-                tr[i].style.display = "";
-            } else {
-                 tr[i].style.display = "none";
-            }
-        }
-    }
-    // Fin Chargement Incidents Année Encours
-
 
     $('#search_text_simple').on('input', function(){
         $('#emis_recus').val('');
         $('#assigner_as').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#year_courant_incident').val('');
 
-        //Mise A Jour Categorie
+        //Mise A Jour Site
         $('#validationCustom04 option').remove();
-        $('#validationCustom04').append(`<option selected value="">Catégorie...</option>`);
-        for (let h = 0; h < categories.length; h++) {
-            const categorie = categories[h];
-            $('#validationCustom04').append(`<option value="${categorie.name}">${categorie.name}</option>`);
+        $('#validationCustom04').append(`<option selected value="">Site...</option>`);
+        for (let h = 0; h < sites.length; h++) {
+            const site = sites[h];
+            $('#validationCustom04').append(`<option value="${site.name}">${site.name}</option>`);
         }
-        //Mise A Jour Categorie
+        //Mise A Jour Site
 
         var value = $(this).val().toLowerCase();
         $(".agencies tr").filter(function() {
@@ -379,19 +347,18 @@ $(document).ready(function() {
     $(document).on('change', '#emis_recus', function(){
         $('#assigner_as').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#search_text_simple').val('');
         $('#validationCustom04').val('');
         $('#year_courant_incident').val('');
 
-        //Mise A Jour Categorie
+        //Mise A Jour Site
         $('#validationCustom04 option').remove();
-        $('#validationCustom04').append(`<option selected value="">Catégorie...</option>`);
-        for (let h = 0; h < categories.length; h++) {
-            const categorie = categories[h];
-            $('#validationCustom04').append(`<option value="${categorie.name}">${categorie.name}</option>`);
+        $('#validationCustom04').append(`<option selected value="">Site...</option>`);
+        for (let h = 0; h < sites.length; h++) {
+            const site = sites[h];
+            $('#validationCustom04').append(`<option value="${site.name}">${site.name}</option>`);
         }
-        //Mise A Jour Categorie
+        //Mise A Jour Site
 
         var filter = $(this).val();
         var table = document.getElementById("dataTable-1");
@@ -414,26 +381,25 @@ $(document).ready(function() {
     $(document).on('change', '#assigner_as', function(){
         $('#emis_recus').val('');
         $('#searchDate').val('');
-        $('#searchMonth').val('');
         $('#search_text_simple').val('');
         $('#validationCustom04').val('');
         $('#year_courant_incident').val('');
 
-        //Mise A Jour Categorie
+        //Mise A Jour Site
         $('#validationCustom04 option').remove();
-        $('#validationCustom04').append(`<option selected value="">Catégorie...</option>`);
-        for (let h = 0; h < categories.length; h++) {
-            const categorie = categories[h];
-            $('#validationCustom04').append(`<option value="${categorie.name}">${categorie.name}</option>`);
+        $('#validationCustom04').append(`<option selected value="">Site...</option>`);
+        for (let h = 0; h < sites.length; h++) {
+            const site = sites[h];
+            $('#validationCustom04').append(`<option value="${site.name}">${site.name}</option>`);
         }
-        //Mise A Jour Categorie
+        //Mise A Jour Site
 
         var filter = $(this).val();
         var table = document.getElementById("dataTable-1");
         var tr = table.getElementsByTagName("tr");
 
         for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[8];
+            td = tr[i].getElementsByTagName("td")[9];
             if (td) {
               txtValue = td.textContent || td.innerText;
               if (txtValue.indexOf(filter) > -1) {
@@ -466,192 +432,21 @@ $(document).on('click', '#customSwitch1', function(){
     }
 });
 
-let tasks = [];
-let taches = [];
-
-$(document).on('click', '#btn_add_unique_task', function(){
-    let good = true;
-    let message = "";
-
-    if(!$('#desc_unique').val().trim()){
-        good = false;
-        message+="Veuillez Renseigner La Description Où Le But De La Tâche !\n";
-    }
-    
-    if(!$('#obs_task').val().trim()){
-        good = false;
-        message+="Veuillez Renseigner Une Observation De La Tâche !\n";
-    }
-
-    if(!$('#date_echeance_unique').val()){
-        good = false;
-        message+="Veuillez Renseigner La Date D'échéance De La Tâche !\n";
-    }else{
-        let today = parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""));
-        let date_saisi = parseInt($('#date_echeance_unique').val().replaceAll("-", ""));
-        if(date_saisi < today){
-            good = false;
-            message +="Veuillez Renseigner Une Date D\'échéance Qui Est Supérieur Où Egale A La Date D'aujourd'huit ! \n";
-        }
-    }
-
-    if($('#set_departement_or_site').val()){
-
-        if($('#set_departement_or_site').val() && isNaN($('#set_departement_or_site').val())){
-
-            if(!$('#sity').val()){
-                good = false;
-                message += "Veuillez Choisir Un Site ! \n";        
-            }
-            
-        }
-
-    }else{
-        good = false;
-        message += "Veuillez Choisir Le Département Ou Le Site Chargé De Resoudre L'incident ! \n";
-    }
-
-    if(!good){
-        good = false;
-        $('#validtion_task').val(message);
-        $('#modal_task').modal('hide');
-        $('#FalcoTas').attr('data-backdrop', 'static');
-        $('#FalcoTas').attr('data-keyboard', false);
-        $('#FalcoTas').modal('show');
-    }else{
-        $('#decrit_conf').replaceWith(`
-        <textarea style="color:white; background-color: #33393F; resize:none;" disabled name="" id="decrit_conf" cols="30" rows="4">
-            ${$('#desc_unique').val()}
-        </textarea>`);
-        $('#eche_conf').replaceWith(`<span style="color: white; font-size: 20px;" id="eche_conf">${$('#date_echeance_unique').val()}</span>`);
-        
-        if(isNaN($('#set_departement_or_site').val())){
-            $('#gerant_conf').replaceWith(`<span style="color: white; font-size: 20px;" id="gerant_conf">${$('#sity option:selected').text()}</span>`);
-        }else{
-            $('#gerant_conf').replaceWith(`<span style="color: white; font-size: 20px;" id="gerant_conf">${$('#set_departement_or_site option:selected').text()}</span>`);
-        }
-
-        // if($('#user_task_unique option:selected').text() != "Choisissez..."){
-        //     $('#gerant_conf').replaceWith(`<span style="color: white; font-size: 20px;" id="gerant_conf">${$('#user_task_unique option:selected').text()}</span>`);
-        // }
-
-        $('#modal_task').modal('hide');
-        $('#modalConfirmationSaveTask').attr('data-backdrop', 'static');
-        $('#modalConfirmationSaveTask').attr('data-keyboard', false);
-        $('#modalConfirmationSaveTask').modal('show');
-    }
-});
-
-$(document).on('click', '#conf_save_t', function(){
-    $.ajax({
-        type: 'POST',
-        url: "createTask",
-        data: $('#frmtach').serialize(),
-         headers:{
-             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-         },
-         success: function(task){
-            if(task.length > 0){              
-                $('#frmtach')[0].reset();
-                $('#modalConfirmationSaveTask').modal('toggle');
-                $('#modal_task').attr('data-backdrop', 'static');
-                $('#modal_task').attr('data-keyboard', false);
-                $('#modal_task').modal('show');            
-            }
-         }
-    })
-});
-
-$(document).on('click', '#btn_clear_fields_unique', function(){
-    $('#frmtach')[0].reset();
-});
-
-
-$(document).on('click', '#oui_tache', function(){
-    $('#inco').val($('#nibiru').text());
-    $('#txt_num_i').replaceWith(`<span id="txt_num_i" style="margin-left: 13em;" class="text-xl badge badge-success">${$('#nibiru').text()}</span>`);
-    $('#proposition').modal('hide');
-});
-
-
-$(document).on('click', '#btn_add_task', function(){
-    let good = true;
-    let message = "";
-
-    if(!$('#desc').val().trim()){
-        good = false;
-        message+="Veuillez Renseigner La Description Où Le But De La Tâche !\n";
-    }
-    if(!$('#date_echeance').val()){
-        good = false;
-        message+="Veuillez Renseigner La Date D'échéance De La Tâche !\n";
-    }else{
-        let today = parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""));
-        let date_saisi = parseInt($('#date_echeance').val().replaceAll("-", ""));
-        if(date_saisi < today){
-            good = false;
-            message +="Veuillez Renseigner Une Date D\'échéance Qui Est Supérieur Où Egale A La Date D'aujourd'huit !";
-        }
-    }
-
-    if(!good){
-        good = false;
-        $('#validation').val(message);
-        $('#modal_incident').modal('hide');
-        $('#Falco').attr('data-backdrop', 'static');
-        $('#Falco').attr('data-keyboard', false);
-        $('#Falco').modal('show');
-    }else{
-        let task = {
-            description: $('#desc').val(),
-            date_echeance: $('#date_echeance').val(),
-            departement: $('#departement_task').val(),
-        };
-        tasks.push(task);
-        $('#number_task').replaceWith(`<i id="number_task">${tasks.length}</i>`);
-        $('#btn_display').append(`<button id="btn_count_task" title="Annuler Cette Tâche" data-title="${task.title}" class="badge badge-pill badge-success mr-1">${tasks.length}<i class="fe fe-16 fe-trash-2"></i></button>`);            
-        $('#form_tache')[0].reset();
-    }
-});
-
-$(document).on('click', '#btn_count_task', function(){
-    for (let index = 0; index < tasks.length; index++) {
-        const task = tasks[index];
-        if(task.title != $(this).attr('data-title')){
-            taches.push(task);
-        }
-    }
-    $('#number_task').replaceWith(`<i id="number_task">${taches.length}</i>`);
-    tasks = [];
-    for (let index = 0; index < taches.length; index++) {
-        const t = taches[index];
-        tasks.push(t);
-    }
-    taches = [];
-    $(this).remove();
-});
-
-$(document).on('click', '#btn_reset_task', function(){
-    for (let index = 0; index < tasks.length; index++) {
-        $('#btn_count_task').remove();
-    }
-    tasks = [];
-    taches = [];
-    $('#number_task').replaceWith(`<i id="number_task">0</i>`);
-});
-
-
-$(document).on('click', '#dismiss_btn_tasq', function(){
-    $('#FalcoTas').modal('hide');
-    $('#modal_task').attr('data-backdrop', 'static');
-    $('#modal_task').attr('data-keyboard', false);
-    $('#modal_task').modal('show');
-});
-
 
 $(document).on('click', 'button[name="buttonAddingIncidants"]', function(){
     let good = true;
     let message = "";
+
+    if(!$('#fullname').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Votre Nom Complèt !\n";
+    }
+    
+
+    if(!$('#site_incident').val()){
+        good = false;
+        message+="Veuillez Choisir Le Site Où Est Survenu L'incident !\n";
+    }
 
     if(!$('#description').val().trim()){
         good = false;
@@ -659,7 +454,17 @@ $(document).on('click', 'button[name="buttonAddingIncidants"]', function(){
     }
     if(!$('#cause').val().trim()){
         good = false;
-        message+="Veuillez Spécifier La Cause De L'incident !\n";
+        message+="Veuillez Renseigner La Cause De L'incident !\n";
+    }
+
+    if(!$('#deepa').val()){
+        good = false;
+        message+="Veuillez Choisir Un Site Au Quel Affecté L'incident !\n";
+    }
+
+    if(!$('#categorie').val()){
+        good = false;
+        message+="Veuillez Choisir La Catégorie De L'incident !\n";
     }
 
     if($('#process_incdent').val().length == 1){
@@ -682,6 +487,16 @@ $(document).on('click', 'button[name="buttonAddingIncidants"]', function(){
         message+="Veuillez Choisir La Priorité De L'incident !\n";
     }
 
+    if(!$('#obs').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Une Observation !\n";
+    }
+    
+    if(!$('#date_due_insert').val()){
+        good = false;
+        message+="Veuillez Renseigner La Date D'échéance De L'incident !\n";
+    }
+
     if(!good){
         good = false;
 
@@ -696,13 +511,20 @@ $(document).on('click', 'button[name="buttonAddingIncidants"]', function(){
 
         let process = JSON.parse($(this).attr('data-processus'));
 
+        $('#site_survenue_conf').replaceWith(`
+            <textarea class="bg-light" style="resize:none;" disabled name="" id="site_survenue_conf" cols="30" rows="3">${$('#site_incident option:selected').text()}</textarea>
+        `); 
+        $('#fullname_conf').val($('#fullname').val());
         $('#description_conf').replaceWith(`
         <textarea class="bg-light" style="resize:none;" disabled name="" id="description_conf" cols="30" rows="5">${$('#description').val()}</textarea>`);   
         $('#cause_conf').replaceWith(`
         <textarea class="bg-light" style="resize:none;" disabled name="" id="cause_conf" cols="30" rows="5">${$('#cause').val()}</textarea>`);   
         $('#perimeter_conf').replaceWith(`<textarea class="bg-light" style="resize:none;" disabled name="" id="perimeter_conf" cols="30" rows="5">${$('#perimeter').val()}</textarea>`);
-        $('#categorie_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="categorie_conf">${$('#categorie option:selected').text()}</span>`);
+        $('#Kate_conf').replaceWith(`<span class="bg-light" style="font-size: 20px;" id="Kate_conf">${$('#categorie option:selected').text()}</span>`);
         $('#menees_actions_conf').replaceWith(`<textarea class="bg-light" style="resize:none;" disabled name="" id="menees_actions_conf" cols="30" rows="5">${$('#battles').val()}</textarea>`);
+        $('#personne_assigne').replaceWith(`<textarea style="resize:none;" disabled name="" id="personne_assigne" cols="30" rows="1">${$('#deepa option:selected').text()}</textarea>`);
+        $('#priori_conf').replaceWith(`<textarea style="resize:none;" disabled name="" id="priori_conf" cols="30" rows="1">${$('#priority').val()}</textarea>`);
+        $('#observe_conf').replaceWith(`<textarea style="resize:none;" disabled name="" id="observe_conf" cols="30" rows="6">${$('#obs').val()}</textarea>`);
 
         let elt = '';
         
@@ -729,7 +551,7 @@ $(document).on('click', 'button[name="buttonAddingIncidants"]', function(){
 });
 
 $(document).on('click', '#conf_save_incident', function(){
-    let user_connecter = JSON.parse($(this).attr('data-user'));
+    
     $.ajax({
         type: 'POST',
         url: "createIncident",
@@ -737,78 +559,28 @@ $(document).on('click', '#conf_save_incident', function(){
                 priority: $('#priority').val(),
                 description: $('#description').val(),
                 cause: $('#cause').val(),
+                categorie: $('#categorie').val(),
                 processus_id: $('#process_incdent').val(),
                 perimeter: $('#perimeter').val(),
                 battles: $('#battles').val(),
-                taches: tasks,
+                domaine: $('#deepa').val(),
+                observation: $('#obs').val(),
+                due_date: $('#date_due_insert').val(),
+                fullname : $('#fullname').val(),
+                site_incident : $('#site_incident').val()
               },
          headers:{
              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
          },
          success: function(data){
-
-            if(data.length > 0){
-                for (let index = 0; index < tasks.length; index++) {
-                    $('#btn_count_task').remove();
-                }
-
-                tasks = [];
-                taches = [];
-                
-                $('#number_task').replaceWith(`
-                <span class="badge badge-pill badge-primary"><i id="number_task">0</i></span>`);
-                let incident = data[0];
-        
-                $('#form_incident')[0].reset();
+            if(data.length > 1){
                 $('#modalConfirmationSaveIncident').modal('toggle');
-
-                $('#dataTablechance .agencies').prepend(`
-                <tr>
-                    <td>${ incident.number }</td>
-                    <td></td>
-                    <td>${ incident.description }</td>
-                    <td></td>
-                    <td class="text-sm"> DEFINISSEZ UNE ECHEANCE </td>
-                    <td></td>
-                    <td>${ incident.processus.name }</td>
-                    <td></td>
-                    <td>${ incident.priority }</td>
-                    <td>
-                        <a 
-                            style="text-decoration:none; color: white;" 
-                            href="{{ route('listedTask', ['number' => ${incident.number}]) }}" 
-                            title="Liste Des Tâches De L'incident">
-                            <small class="text-white text-lg mr-1">00</small>
-                            <span class="fe fe-list"></span>
-                            <span class="fe fe-check"></span>
-                        </a>
-                    </td>
-                    <td><a style="text-decoration:none; color:white;" type="button" href="{{ route('printIncident', ['number' => ${incident.number}]) }}" title="Imprimer Cet Incident" class="fe fe-printer fe-32"></a></td>
-                    <td>
-                        <a 
-                            type="button" 
-                            href="#" 
-                            title="Cloturer Cet Incident"
-                            style="text-decoration:none; color:white;"
-                            class="fe fe-toggle-left fe-32 saiyan">
-                        </a>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="text-muted sr-only">Action</span>
-                        </button>
-                    </td>
-                </tr>
-                `);
-
-                if(user_connecter.roles[0].name == "COORDONATEUR"){
-                    $('#nibiru').replaceWith(`<strong class="badge badge-success" id="nibiru">${incident.number}</strong>`);
-                    $('#proposition').attr('data-backdrop', 'static');
-                    $('#proposition').attr('data-keyboard', false);            
-                    $('#proposition').modal('show');
-                }else{
-                    location.reload();
-                }
+                $("#validation").val('Incident Déja Enrégistré !');
+                $('#Falco').attr('data-backdrop', 'static');
+                $('#Falco').attr('data-keyboard', false);
+                $('#Falco').modal('show');
+            }else{
+                location.reload();
             }
          }
     });
@@ -845,17 +617,19 @@ $(document).on('click', '#btn_clear_fields_edit', function(){
 });
 
 
-$(document).on('click', '#btn_clear_fields_incident', function(){
+$(document).on('click', '#btn_clear_fields_incident, #btnExitModalIncident', function(){
     $("#form_incident")[0].reset();
 });
 
 
-$(document).on('click', '#btnExitModalIncident, #btnExitModalTask, #btnExitModalCloture, #bat_boy, #btnCloseProposition, #btnCloseNon', function(){
+$(document).on('click', '#btnExitModalCloture, #bat_boy, #btnCloseProposition, #btnCloseNon', function(){
+    $('#form_incident')[0].reset();
     location.reload();
 });
 
 
 $(document).on('click', '#btncloseeditform', function(){
+    $('#formEditIncident')[0].reset();
     $('#categorie_edit').empty().append(`<option value="">Choisissez...</option>`);
 });
 
@@ -868,21 +642,28 @@ $(document).on('click', '#btn_edit_in', function(){
 
     $('#nimero').replaceWith(`<span class="badge badge-pill badge-success" id="nimero">${incident.number}</span>`);
     $('#number_incident').val(incident.number);
+    $('#fullname_edit').val(incident.fullname_declarateur);
     $('.form-group #description_edit').val(incident.description);
     $('.form-group #cause_edit').val(incident.cause);
     $('.form-group #perimeter_edit').val(incident.perimeter);
     $('.form-group #battles_edit').val(incident.battles ? incident.battles : '');
     $('.form-group #process_editss').val(incident.proces_id);
     $('.form-group #prioritys').val(incident.priority);
+    $('.form-group #obs_edit').val(incident.observation);
+    $('.form-group #site_incident_edit').val(incident.site_incident);
     if(incident.due_date){
         $('.form-group #date_echeance_edit').val(incident.due_date);
     }
 
+    if(incident.site_id){
+        $('.form-group #deepaEdit').val(incident.site_id);
+    }
+    
+    $('#categorie_edit').append(`<option value="${categorie.id}">${categorie.name}</option>`);
     if(incident.categorie_id){
         let categ = categories.find(c => c.id == incident.categorie_id);
-        if(categ.departement_id){
-
-            $('#deepaEdit').val(categ.departement_id);
+        
+        if(categ.type == "AGENCE" || categ.type == "MAGASIN"){
 
             for (let index = 0; index < categories.length; index++) {
                 const categorie = categories[index];
@@ -898,8 +679,6 @@ $(document).on('click', '#btn_edit_in', function(){
 
             $('.form-group #categorie_edit').val(incident.categorie_id);
         }else{
-
-            $('#deepaEdit').val(categ.type);
 
             for (let index = 0; index < categories.length; index++) {
                 const categorie = categories[index];
@@ -923,6 +702,17 @@ $(document).on('click', '#btn_edit_incident', function(){
     let good = true;
     let message = "";
 
+
+    if(!$('#fullname_edit').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Votre Nom Complèt !\n";
+    }
+
+    if(!$('#site_incident_edit').val().trim()){
+        good = false;
+        message+="Veuillez Choisir Le Site Où Est Survenu L'incident !\n";
+    }
+
     if(!$('#description_edit').val().trim()){
         good = false;
         message+="Veuillez Renseigner La Description De L'incident !\n";
@@ -941,21 +731,10 @@ $(document).on('click', '#btn_edit_incident', function(){
         message+="Veuillez Choisir Le Procéssus De L'incident !\n";
     }
 
-    // if($('#process_edit').val().length == 1){
-    //     if(isNaN(parseInt($('#process_edit').val()[0]))){
-    //         good = false;
-    //         message+="Veuillez Choisir Le(s) Procéssus Impacté(s) Par L'incident !\n";
-    //     }
-    // }else if($('#process_edit').val().length > 1){
-    //     console.log('tab 1')
-    //     if(isNaN(parseInt($('#process_edit').val()[1]))){
-    //         good = false;
-    //         message+="Veuillez Choisir Le(s) Procéssus Impacté(s) Par L'incident !\n";
-    //     }
-    // }else if($('#process_edit').val().length == 0){
-    //     good = false;
-    //     message+="Veuillez Choisir Le(s) Procéssus Impacté(s) Par L'incident !\n";
-    // }
+    if(!$('#obs_edit').val().trim()){
+        good = false;
+        message+="Veuillez Renseigner Une Observation !\n";
+    }
 
 
     if(!$('#prioritys').val()){
@@ -1206,111 +985,64 @@ $(document).on('click', '#echeance_btn_inc', function(){
     }
 });
 
-$(document).on('click', '#archive_incident', function(){
-    let incident = JSON.parse($(this).attr('data-incident'));
-    $('#taboo').replaceWith(`<strong class="badge badge-success" id="taboo">${incident.number}</strong>`);
-    $('#archivag').attr('data-backdrop', 'static');
-    $('#archivag').attr('data-keyboard', false);
-    $('#archivag').modal('show');
+
+
+$(document).on('change', 'select[name="esperance"]', function(){
+    let categoryies = [];
+    let categos = [];
+    let categories = JSON.parse($(this).attr('data-categories'));
+
+    if($(this).val()){
+            $('#categorie').empty().append(`<option selected value="">Choisissez...</option>`);
+        
+            for (let index = 0; index < categories.length; index++) {
+                const categorie = categories[index];
+                
+                if(categorie.site_id){
+                if(parseInt(categorie.site_id) == parseInt($(this).val())){
+                    categoryies.push(categorie);
+                }}else{
+                    categos.push(categorie);
+                }
+            }
+    
+            if(categoryies.length > 0){
+                for (let i = 0; i < categoryies.length; i++) {
+                    const cat = categoryies[i];
+                    $('#categorie').append(`<option value="${cat.id}">${cat.name}</option>`);
+                }    
+            }else{
+                $('#categorie').empty().append(`<option selected value="">Choisissez...</option>`);
+                for (let i = 0; i < categos.length; i++) {
+                    const cat = categos[i];
+                    $('#categorie').append(`<option value="${cat.id}">${cat.name}</option>`);
+                }
+            } 
+        
+        
+    }else{
+        $('#categorie').empty();
+    }
 });
-
-
-
-// $(document).on('change', 'select[name="esperance"]', function(){
-//     let categoryies = [];
-//     let categories = JSON.parse($(this).attr('data-categories'));
-//     let types = JSON.parse($(this).attr('data-types'));
-
-//     if($(this).val()){
-//         $('#categorie').empty().append(`<option selected value="">Choisissez...</option>`);
-        
-//         if(isNaN($(this).val())){
-//             for (let index = 0; index < types.length; index++) {
-//                 const type = types[index];
-//                 if(type.name == $(this).val()){
-//                     for (let index = 0; index < categories.length; index++) {
-//                         const categorie = categories[index];
-//                         if(categorie.type){
-//                             if(categorie.type == type.name){
-//                                 categoryies.push(categorie);
-//                             }    
-//                         }
-//                     }
-//                 }
-//             }
-
-//             if(categoryies.length > 0){
-//                 for (let i = 0; i < categoryies.length; i++) {
-//                     const cat = categoryies[i];
-//                     $('#categorie').append(`<option value="${cat.id}">${cat.name}</option>`);
-//                 }    
-//             }else{
-//                 $('#categorie').empty().append(`<option value="">AUCUNE OPTION DISPONIBLE</option>`);
-//             } 
-
-//         }else{
-//             for (let index = 0; index < categories.length; index++) {
-//                 const categorie = categories[index];
-    
-//                 if(parseInt(categorie.departement_id) == parseInt($(this).val())){
-//                     categoryies.push(categorie);
-//                 }
-//             }
-    
-//             if(categoryies.length > 0){
-//                 for (let i = 0; i < categoryies.length; i++) {
-//                     const cat = categoryies[i];
-//                     $('#categorie').append(`<option value="${cat.id}">${cat.name}</option>`);
-//                 }    
-//             }else{
-//                 $('#categorie').empty();
-//             } 
-//         }
-        
-//     }else{
-//         $('#categorie').empty();
-//     }
-// });
 
 
 $(document).on('change', 'select[name="assignatdeepartes"]', function(){
     let categoryies = [];
+    let categos = [];
     let categories = JSON.parse($(this).attr('data-categories'));
     let types = JSON.parse($(this).attr('data-types'));
 
     if($(this).val()){
-        $('#categor').empty().append(`<option selected value="">Choisissez...</option>`);
+            $('#categor').empty().append(`<option selected value="">Choisissez...</option>`);
         
-        if(isNaN($(this).val())){
-            for (let index = 0; index < types.length; index++) {
-                const type = types[index];
-                if(type.name == $(this).val()){
-                    for (let index = 0; index < categories.length; index++) {
-                        const categorie = categories[index];
-                        if(categorie.type){
-                            if(categorie.type == type.name){
-                                categoryies.push(categorie);
-                            }    
-                        }
-                    }
-                }
-            }
-
-            if(categoryies.length > 0){
-                for (let i = 0; i < categoryies.length; i++) {
-                    const cat = categoryies[i];
-                    $('#categor').append(`<option value="${cat.id}">${cat.name}</option>`);
-                }    
-            }else{
-                $('#categor').empty().append(`<option value="">AUCUNE OPTION DISPONIBLE</option>`);
-            } 
-
-        }else{
             for (let index = 0; index < categories.length; index++) {
                 const categorie = categories[index];
     
-                if(parseInt(categorie.departement_id) == parseInt($(this).val())){
+                if(categorie.site_id){
+                if(parseInt(categorie.site_id) == parseInt($(this).val())){
                     categoryies.push(categorie);
+                }}else{
+                    categos.push(categorie);
                 }
             }
     
@@ -1320,9 +1052,13 @@ $(document).on('change', 'select[name="assignatdeepartes"]', function(){
                     $('#categor').append(`<option value="${cat.id}">${cat.name}</option>`);
                 }
             }else{
-                $('#categor').empty();
+                $('#categor').empty().append(`<option value="">Choisissez...</option>`);
+                for (let i = 0; i < categos.length; i++) {
+                    const cat = categos[i];
+                    $('#categor').empty().append(`<option value="${cat.id}">${cat.name}</option>`);
+                }
             } 
-        }
+        
         
     }else{
         $('#categor').empty();
@@ -1332,42 +1068,21 @@ $(document).on('change', 'select[name="assignatdeepartes"]', function(){
 
 $(document).on('change', 'select[name="esperanceEdit"]', function(){
     let categoryies = [];
+    let categos = [];
     let categories = JSON.parse($(this).attr('data-categories'));
     let types = JSON.parse($(this).attr('data-types'));
 
     if($(this).val()){
         $('#categorie_edit').empty().append(`<option selected value="">Choisissez...</option>`);
         
-        if(isNaN($(this).val())){
-            for (let index = 0; index < types.length; index++) {
-                const type = types[index];
-                if(type.name == $(this).val()){
-                    for (let index = 0; index < categories.length; index++) {
-                        const categorie = categories[index];
-                        if(categorie.type){
-                            if(categorie.type == type.name){
-                                categoryies.push(categorie);
-                            }    
-                        }
-                    }
-                }
-            }
-
-            if(categoryies.length > 0){
-                for (let i = 0; i < categoryies.length; i++) {
-                    const cat = categoryies[i];
-                    $('#categorie_edit').append(`<option value="${cat.id}">${cat.name}</option>`);
-                }    
-            }else{
-                $('#categorie_edit').empty().append(`<option value="">AUCUNE OPTION DISPONIBLE</option>`);
-            } 
-
-        }else{
             for (let index = 0; index < categories.length; index++) {
                 const categorie = categories[index];
     
-                if(parseInt(categorie.departement_id) == parseInt($(this).val())){
+                if(categorie.site_id){
+                if(parseInt(categorie.site_id) == parseInt($(this).val())){
                     categoryies.push(categorie);
+                }}else{
+                    categos.push(categorie);
                 }
             }
     
@@ -1377,10 +1092,12 @@ $(document).on('change', 'select[name="esperanceEdit"]', function(){
                     $('#categorie_edit').append(`<option value="${cat.id}">${cat.name}</option>`);
                 }    
             }else{
-                $('#categorie_edit').empty();
-            } 
-        }
-        
+                $('#categorie_edit').empty().append(`<option selected value="">Choisissez...</option>`);
+                for (let i = 0; i < categos.length; i++) {
+                    const cat = categos[i];
+                    $('#categorie_edit').append(`<option value="${cat.id}">${cat.name}</option>`);
+                }
+            }         
     }else{
         $('#categorie_edit').empty();
     }
@@ -1843,6 +1560,19 @@ $(document).on('click', '#btn_edit_incident_mappo', function(){
     }
 
 });
+
+$(document).on('click', '#cloture_rex', function(){
+
+    let incident = JSON.parse($(this).attr('data-incident'));
+    if(!incident.closure_date){
+        $('#nibiru_number_rex').replaceWith(`<strong id="nibiru_number_rex">${incident.number}</strong>`);
+        $('#Kloture_rex').attr('data-incident', JSON.stringify(incident));
+        $('#clos_rex').attr('data-backdrop', 'static');
+        $('#clos_rex').attr('data-keyboard', false);
+        $('#clos_rex').modal('show');
+    }
+});
+
 
 $(document).on('click', '#assign_elt_gohan', function(){
 

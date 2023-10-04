@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Departement;
 use App\Models\Vehicule;
 use App\Models\Site;
 use Illuminate\Http\Request;
@@ -41,8 +40,6 @@ class UserController extends Controller
     {
         notify()->info('Liste Des Utilisateurs De L\'application ! ⚡️', 'Info Utilisateur');
 
-        $departements = Departement::all();
-
         $roles = Role::get();
 
         $utilisateurs = User::with('sites.types')->get();
@@ -51,7 +48,6 @@ class UserController extends Controller
 
         return view('users.index', 
         [
-        'departements' => $departements,
         'roles' => $roles,
         'sites' => $sites,
         'utilisateurs' => $utilisateurs,
@@ -133,9 +129,8 @@ class UserController extends Controller
                 'login' => $input['login'] ? Str::ascii(str_replace(" ", "", $input['login'])) : NULL,
                 'see_password' => $input['password'],
                 'password' => $input['password'] ? Hash::make($input['password']) : NULL,
-                'departement_id' => $request->input('departement_id') ? intval($request->input('departement_id')) : NULL,
                 'fullname' => $request->fullname ? $request->fullname : NULL,
-                'site_id' => $request->input('site_id') ? intval($request->input('site_id')) : ($request->input('magasin_id') ? intval($request->input('magasin_id')) : NULL),
+                'site_id' => $request->input('site_id') ? intval($request->input('site_id')) : NULL,
             ]);
 
             
@@ -143,7 +138,7 @@ class UserController extends Controller
 
             $utilisateurs = User::get();
 
-            $utilisateur = User::with('departements', 'sites')->get()->last();
+            $utilisateur = User::with('sites')->get()->last();
             
             notify()->success('Utilisateur Créer Avec Succèss ! ⚡️');
 
@@ -169,10 +164,6 @@ class UserController extends Controller
         $user = User::where('login', '=', $input['username'])->get()->first();
         $user->password = Hash::make($input['password']);
         $user->save();
-        // User::where('id', '=', $request->id)->update([
-        //     'password' => Hash::make($input['password']),
-        //     'see_password' => $input['password'],
-        // ]);
         notify()->success('Mot De Passe Modifier Avec Succèss ! ⚡️');
 
         return response()->json([1, 2]);    
@@ -232,11 +223,10 @@ class UserController extends Controller
                 'responsable' => $request->input('usings_edit') ? intval($request->input('usings_edit')) : NULL,
                 'email' => $request->input('email') ? $request->input('email') : NULL,
                 'fullname' => $request->input('fullname'),
-                'departement_id' => $request->input('departement_id') ? intval($request->input('departement_id')) : NULL,
                 'login' => $request->input('login') ? $request->input('login') : NULL,
                 'password' => $request->input('password') ? Hash::make($request->input('password')) : NULL,
                 'see_password' => $request->input('password'),
-                'site_id' => $request->input('site_id') != NULL ? intval($request->input('site_id')) : ($request->input('magasin_id') != NULL ? intval($request->input('magasin_id')) : NULL),
+                'site_id' => $request->input('site_id') != NULL ? intval($request->input('site_id')) : NULL,
             ]);
 
             $user = User::where('id', '=', $request->id)->get()->first();

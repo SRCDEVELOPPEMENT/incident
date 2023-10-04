@@ -12,14 +12,13 @@
                               $taches_created = array();
                               $taches_closure = array();
 
-                              if(Session::has('incidents')){
-                              if(is_iterable(Session::get('incidents'))){
-                              for ($j=0; $j < count(Session::get('incidents')); $j++) {
-                                $indi = Session::get('incidents')[$j];
+                              if(is_iterable($incidents)){
+                              for ($j=0; $j < count($incidents); $j++) {
+                                $indi = $incidents[$j];
                                 array_push($tab_ids, $indi->number);
                                 array_push($tab_exited, $indi->due_date);
                                 array_push($tab_created, substr(strval($indi->created_at), 0, 10));
-                              }}}
+                              }}
 
                               if(Session::has('tasks')){
                               if(is_iterable(Session::get('tasks'))){
@@ -55,8 +54,8 @@
                             <div class="col-md-12">
                                 <div>
                                     <div class="card-body">
-                                        <div class="row">
-                                        <span class="fe fe-32 fe-clock mr-4"></span>
+                                        <div class="row my-4">
+                                            <span class="fe fe-32 fe-clock mr-4"></span>
                                             <div class="float-left mr-3">
                                                                         <select 
                                                                                 class="custom-select text-lg"
@@ -66,52 +65,604 @@
                                                                                 data-tasks="{{ json_encode(Session::get('tasks')) }}"
                                                                                 data-users="{{ json_encode(Session::get('users')) }}"
                                                                                 data-sites="{{ json_encode(Session::get('sites')) }}"
-                                                                                data-incidents="{{ json_encode(Session::get('incidents')) }}"
+                                                                                data-incidents="{{ json_encode($incidents) }}"
                                                                                 data-ids="{{ json_encode($tab_ids) }}"
-                                                                                data-departements="{{ json_encode(Session::get('departements')) }}"
                                                                                 data-created="{{ json_encode($tab_created) }}"
                                                                                 data-users_incidents="{{ json_encode(Session::get('users_incidents')) }}"
                                                                                 data-exited="{{ json_encode($tab_exited) }}"
                                                                                 >
+                                                                            @if(is_iterable($years))
                                                                             @foreach($years as $annee)
                                                                                 <option value="{{ $annee }}">{{ $annee }}</option>
                                                                             @endforeach
+                                                                            @endif
                                                                         </select>
                                             </div>
                                         </div>
-                                        <hr class="my-4">
-                                        <div class="row">
+
+                                        <hr style="margin-top: 4em;">
+
+                                        <div class="row my-4">
+                                                <h1 class="text-xl my-4"><i class="fe fe-32 fe-bell"></i><i style="font-size:18px;" class="fe fe-printer mr-2"></i>GENERATION FICHIER PDF INCIDENT</h1>
+                                        </div>
+                                        <div class="row mt-4 text-lg">
+                                            <form action="generation_incidents_entre_deux_date" method="GET">
+                                                <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="dfsite">Selectionnez Un Site</label>
+                                                    <select class="form-control border-primary text-xl" name="site_id" id="dfsite">
+                                                        <option value="">Choisissez...</option>
+                                                        @if(is_iterable(Session::get('sites')))
+                                                        @foreach(Session::get('sites') as $site)
+                                                            <option value="{{ $site->id }}">{{ $site->name }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="resi">Date Début</label>
+                                                    <input type="date" name="date_debut" id="resi" class="form-control border-primary text-xl">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="desi">Date Fin</label>
+                                                    <input type="date" name="date_fin" id="desi" class="form-control border-primary text-xl">
+                                                </div>
+                                                <div style="margin-top: 1.9em;" class="col-md-2">
+                                                    <button type="submit" class="btn btn-lg btn-primary"><i class="fe fe-file mr-2"></i>PDF</button>
+                                                </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <hr style="margin-top: 4em; margin-bottom: 3em;">
+
+                                        <div class="row my-4">
+                                                <div class="col-md-12">
+                                                    <div class="float-left">
+                                                            <h1 class="text-xl"><i class="fe fe-32 fe-bell"></i><i style="font-size:15px;" class="fe fe-home mr-2"></i>INCIDENT(S) PAR SITE</h1>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <form action="generation_incidents_par_site" method="get">
+                                                            <input type="hidden" name="annee" id="par_site">
+                                                            <button class="btn btn-primary">
+                                                                <i class="fe fe-file fe-16 mr-2"></i>
+                                                                <strong>Générer PDF Qté Incident Par Site</strong>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                        </div>
+
+                                        <div class="row justify-content-center">
+                                                <div class="col-md-12">
+                                                    <div class="card shadow">
+                                                        <div class="card-body">
+                                                            <table class="table table-hover datatables text-center" id="dataTable-1">
+                                                                        <thead class="thead-dark" style="font-family: Century Gothic;">
+                                                                            <tr style="font-size: 0.8em;">
+                                                                            <th>SITE</th>
+                                                                            <th><span class="dot dot-lg bg-primary mr-2"></span>Incident Encours</th>
+                                                                            <th><span class="dot dot-lg bg-dark mr-2"></span>Incident Annulé</th>
+                                                                            <th><span class="dot dot-lg bg-success mr-2"></span>Incident Clôturé </th>
+                                                                            <th><span class="dot dot-lg bg-warning mr-2"></span>Incident En-Retard</th>
+                                                                            <th>Incident Total</th>
+                                                                            <th>Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody style="font-size:1.3em; font-family: Century Gothic;">
+                                                                            @foreach($sites as $key => $site)
+                                                                            <?php
+                                                                                $encours = 0;
+                                                                                $cloture = 0;
+                                                                                $annuler = 0; 
+                                                                                $enretard = 0;                                                                               
+                                                                                $cites = $incidentSites[$key];
+                                                                                for ($k=0; $k < count($cites); $k++) { 
+                                                                                    $incid = $cites[$k];
+                                                                                    if($incid->status == "CLÔTURÉ"){
+                                                                                        $cloture +=1;
+                                                                                    }elseif($incid->status == "ENCOURS"){
+                                                                                        $encours +=1;
+                                                                                    }elseif ($incid->status == "ANNULÉ") {
+                                                                                        $annuler +=1;
+                                                                                    }
+                                                                                    
+                                                                                    if($incid->due_date){
+                                                                                        if(intval(str_replace("-", "", $incid->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                                                                                            $enretard +=1;
+                                                                                        }
+                                                                                    }
+                                                                
+                                                                                }
+                                                                            ?>
+                                                                            <tr>
+                                                                                <td>{{ $site->name }}</td>
+                                                                                <td>{{ $encours > 10 ? $encours : 0 ."". $encours }}</td>
+                                                                                <td>{{ $annuler > 10 ? $annuler : 0 ."". $annuler }}</td>
+                                                                                <td>{{ $cloture > 10 ? $cloture : 0 ."". $cloture }}</td>
+                                                                                <td>{{ $enretard > 10 ? $enretard : 0 ."". $enretard }}</td>
+                                                                                <td>{{ count($cites) >= 10 ? count($cites) : 0 ."". count($cites) }}</td>
+                                                                                <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                    <span class="text-muted sr-only">Action</span>
+                                                                                    </button>
+                                                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                                                    <a
+                                                                                        id="incident_janvier_year_selec"
+                                                                                        class="dropdown-item mb-1"
+                                                                                        href="#!"
+                                                                                        data-backdrop="static"
+                                                                                        data-keyboard="false"
+                                                                                        data-toggle="modal" 
+                                                                                        data-target="#modal_liste_incident">
+                                                                                        <span class="fe fe-eye mr-4"></span>Incident(s) Janvier
+                                                                                    </a>
+                                                                                    <a class="dropdown-item" href="#!">
+                                                                                        <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                    </a>
+                                                                                    <a class="dropdown-item" href="#!">
+                                                                                        <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                    </a>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        </div>
+
+
+                                        <hr style="margin-top: 4em; margin-bottom: 4em;">
+
+                                            <div class="row my-4">
+                                                <div class="col-md-12">
+                                                    <div class="float-left">
+                                                            <h1 class="text-xl"><i class="fe fe-32 fe-bell"></i><i style="font-size:15px;" class="fe fe-home mr-2"></i>INCIDENT(S) GLOBAL(S) (Pour L'année Choisit Plus Haut)</h1>
+                                                    </div>
+                                                    <div class="float-right">
+                                                        <form action="generation_incidents_annee_specifique" method="get">
+                                                            <input type="hidden" name="annee" id="par_global">
+                                                            <button class="btn btn-primary">
+                                                                <i class="fe fe-file fe-16 mr-2"></i>
+                                                                <strong>Générer PDF Qté Incident Global</strong>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row justify-content-center">
+                                                            <div class="col-md-12">
+                                                                <div class="card shadow">
+                                                                <div class="card-body">
+                                                                    <table class="table table-hover datatables text-center" id="dataTable-1">
+                                                                        <thead class="thead-dark" style="font-family: Century Gothic;">
+                                                                            <tr style="font-size: 0.8em;">
+                                                                            <th><span class="fe fe-calendar mr-2"></span> Mois</th>
+                                                                            <th><span class="dot dot-lg bg-primary mr-2"></span>Incident Encours</th>
+                                                                            <th><span class="dot dot-lg bg-dark mr-2"></span>Incident Annulé</th>
+                                                                            <th><span class="dot dot-lg bg-success mr-2"></span>Incident Clôturé </th>
+                                                                            <th><span class="dot dot-lg bg-warning mr-2"></span>Incident En-Retard</th>
+                                                                            <th>Incident Total</th>
+                                                                            <th>Action</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody style="font-size:1.3em; font-family: Century Gothic;">
+                                                                            <tr>
+                                                                            <td>Janvier</td>
+                                                                            <td id="janv_encour_year_selec">{{ $janvier_total_encours < 10 ? 0 ."". $janvier_total_encours : $janvier_total_encours }}</td>
+                                                                            <td id="janv_annuler_year_selec">{{ $janvier_total_annuler < 10 ? 0 ."". $janvier_total_annuler : $janvier_total_annuler }}</td>
+                                                                            <td id="janv_cloture_year_selec">{{ $janvier_total_cloture < 10 ? 0 ."". $janvier_total_cloture : $janvier_total_cloture  }}</td>
+                                                                            <td id="janv_enretard_year_selec">{{ $janvier_total_enretard < 10 ? 0 ."". $janvier_total_enretard : $janvier_total_enretard }}</td>
+                                                                            <td id="janv_total_year_selec">{{ $janvier_total_year < 10 ? 0 ."". $janvier_total_year : $janvier_total_year }}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_janvier_year_selec"
+                                                                                    class="dropdown-item mb-1"
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($janvier_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false"
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Janvier
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Fevrier</td>
+                                                                            <td id="fev_encour_year_selec">{{ $fevrier_total_encours < 10 ? 0 ."". $fevrier_total_encours : $fevrier_total_encours }}</td>
+                                                                            <td id="fev_annuler_year_selec">{{ $fevrier_total_annuler < 10 ? 0 ."". $fevrier_total_annuler : $fevrier_total_annuler }}</td>
+                                                                            <td id="fev_cloture_year_selec">{{ $fevrier_total_cloture < 10 ? 0 ."". $fevrier_total_cloture : $fevrier_total_cloture}}</td>
+                                                                            <td id="fev_enretard_year_selec">{{ $fevrier_total_enretard < 10 ? 0 ."". $fevrier_total_enretard : $fevrier_total_enretard}}</td>
+                                                                            <td id="fev_total_year_selec">{{ $fevrier_total_year < 10 ? 0 ."". $fevrier_total_year : $fevrier_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_fevrier_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($fevrier_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Fevrier
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Mars</td>
+                                                                            <td id="mars_encour_year_selec">{{ $mars_total_encours < 10 ? 0 ."". $mars_total_encours : $mars_total_encours}}</td>
+                                                                            <td id="mars_annuler_year_selec">{{ $mars_total_annuler < 10 ? 0 ."". $mars_total_annuler : $mars_total_annuler }}</td>
+                                                                            <td id="mars_cloture_year_selec">{{ $mars_total_cloture < 10 ? 0 ."". $mars_total_cloture : $mars_total_cloture}}</td>
+                                                                            <td id="mars_enretard_year_selec">{{ $mars_total_enretard < 10 ? 0 ."". $mars_total_enretard : $mars_total_enretard}}</td>
+                                                                            <td id="mars_total_year_selec">{{ $mars_total_year < 10 ? 0 ."". $mars_total_year : $mars_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_mars_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($mars_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Mars
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Avril</td>
+                                                                            <td id="avril_encour_year_selec">{{ $avril_total_encours < 10 ? 0 ."". $avril_total_encours : $avril_total_encours}}</td>
+                                                                            <td id="avril_annuler_year_selec">{{ $avril_total_annuler < 10 ? 0 ."". $avril_total_annuler : $avril_total_annuler}}</td>
+                                                                            <td id="avril_cloture_year_selec">{{ $avril_total_cloture < 10 ? 0 ."". $avril_total_cloture : $avril_total_cloture}}</td>
+                                                                            <td id="avril_enretard_year_selec">{{ $avril_total_enretard < 10 ? 0 ."". $avril_total_enretard : $avril_total_enretard}}</td>
+                                                                            <td id="avril_total_year_selec">{{ $avril_total_year < 10 ? 0 ."". $avril_total_year : $avril_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_avril_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($avril_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Avril
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Mai</td>
+                                                                            <td id="mai_encour_year_selec">{{ $mai_total_encours < 10 ? 0 ."". $mai_total_encours : $mai_total_encours}}</td>
+                                                                            <td id="mai_annuler_year_selec">{{ $mai_total_annuler < 10 ? 0 ."". $mai_total_annuler : $mai_total_annuler}}</td>
+                                                                            <td id="mai_cloture_year_selec">{{ $mai_total_cloture < 10 ? 0 ."". $mai_total_cloture : $mai_total_cloture}}</td>
+                                                                            <td id="mai_enretard_year_selec">{{ $mai_total_enretard < 10 ? 0 ."". $mai_total_enretard : $mai_total_enretard}}</td>
+                                                                            <td id="mai_total_year_selec">{{ $mai_total_year < 10 ? 0 ."". $mai_total_year : $mai_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_mai_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($mai_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Mai
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Juin</td>
+                                                                            <td id="juin_encour_year_selec">{{ $juin_total_encours < 10 ? 0 ."". $juin_total_encours : $juin_total_encours}}</td>
+                                                                            <td id="juin_annuler_year_selec">{{ $juin_total_annuler < 10 ? 0 ."". $juin_total_annuler : $juin_total_annuler}}</td>
+                                                                            <td id="juin_cloture_year_selec">{{ $juin_total_cloture < 10 ? 0 ."". $juin_total_cloture : $juin_total_cloture}}</td>
+                                                                            <td id="juin_enretard_year_selec">{{ $juin_total_enretard < 10 ? 0 ."". $juin_total_enretard : $juin_total_enretard}}</td>
+                                                                            <td id="juin_total_year_selec">{{ $juin_total_year < 10 ? 0 ."". $juin_total_year : $juin_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_juin_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($juin_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Juin
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                            </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Juillet</td>
+                                                                            <td id="juillet_encour_year_selec">{{ $juillet_total_encours < 10 ? 0 ."". $juillet_total_encours : $juillet_total_encours}}</td>
+                                                                            <td id="juillet_annuler_year_selec">{{ $juillet_total_annuler < 10 ? 0 ."". $juillet_total_annuler : $juillet_total_annuler}}</td>
+                                                                            <td id="juillet_cloture_year_selec">{{ $juillet_total_cloture < 10 ? 0 ."". $juillet_total_cloture : $juillet_total_cloture}}</td>
+                                                                            <td id="juillet_enretard_year_selec">{{ $juillet_total_enretard < 10 ? 0 ."". $juillet_total_enretard : $juillet_total_enretard}}</td>
+                                                                            <td id="juillet_total_year_selec">{{ $juillet_total_year < 10 ? 0 ."". $juillet_total_year :  $juillet_total_year }}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_juillet_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($juillet_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Juillet
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Août</td>
+                                                                            <td id="aout_encour_year_selec">{{ $aout_total_encours < 10 ? 0 ."". $aout_total_encours : $aout_total_encours}}</td>
+                                                                            <td id="aout_annuler_year_selec">{{ $aout_total_annuler < 10 ? 0 ."". $aout_total_annuler : $aout_total_annuler}}</td>
+                                                                            <td id="aout_cloture_year_selec">{{ $aout_total_cloture < 10 ? 0 ."". $aout_total_cloture : $aout_total_cloture}}</td>
+                                                                            <td id="aout_enretard_year_selec">{{ $aout_total_enretard < 10 ? 0 ."". $aout_total_enretard : $aout_total_enretard}}</td>
+                                                                            <td id="aout_total_year_selec">{{ $aout_total_year < 10 ? 0 ."". $aout_total_year : $aout_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_aout_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($aout_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Août
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Septembre</td>
+                                                                            <td id="septembre_encour_year_selec">{{ $septembre_total_encours < 10 ? 0 ."". $septembre_total_encours : $septembre_total_encours}}</td>
+                                                                            <td id="septembre_annuler_year_selec">{{ $septembre_total_annuler < 10 ? 0 ."". $septembre_total_annuler : $septembre_total_annuler}}</td>
+                                                                            <td id="septembre_cloture_year_selec">{{ $septembre_total_cloture < 10 ? 0 ."". $septembre_total_cloture : $septembre_total_cloture}}</td>
+                                                                            <td id="septembre_enretard_year_selec">{{ $septembre_total_enretard < 10 ? 0 ."". $septembre_total_enretard : $septembre_total_enretard}}</td>
+                                                                            <td id="septembre_total_year_selec">{{ $septembre_total_year < 10 ? 0 ."". $septembre_total_year : $septembre_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_septembre_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($septembre_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Septembre
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Octobre</td>
+                                                                            <td id="octobre_encour_year_selec">{{ $octobre_total_encours < 10 ? 0 ."". $octobre_total_encours : $octobre_total_encours}}</td>
+                                                                            <td id="octobre_annuler_year_selec">{{ $octobre_total_annuler < 10 ? 0 ."". $octobre_total_annuler : $octobre_total_annuler}}</td>
+                                                                            <td id="octobre_cloture_year_selec">{{ $octobre_total_cloture < 10 ? 0 ."". $octobre_total_cloture : $octobre_total_cloture}}</td>
+                                                                            <td id="octobre_enretard_year_selec">{{ $octobre_total_enretard < 10 ? 0 ."". $octobre_total_enretard : $octobre_total_enretard}}</td>
+                                                                            <td id="octobre_total_year_selec">{{ $octobre_total_year < 10 ? 0 ."". $octobre_total_year : $octobre_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_octobre_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($octobre_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Octobre
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                                </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Novembre</td>
+                                                                            <td id="novembre_encour_year_selec">{{ $novembre_total_encours < 10 ? 0 ."". $novembre_total_encours : $novembre_total_encours}}</td>
+                                                                            <td id="novembre_annuler_year_selec">{{ $novembre_total_annuler < 10 ? 0 ."". $novembre_total_annuler : $novembre_total_annuler}}</td>
+                                                                            <td id="novembre_cloture_year_selec">{{ $novembre_total_cloture < 10 ? 0 ."". $novembre_total_cloture : $novembre_total_cloture}}</td>
+                                                                            <td id="novembre_enretard_year_selec">{{ $novembre_total_enretard < 10 ? 0 ."". $novembre_total_enretard : $novembre_total_enretard}}</td>
+                                                                            <td id="novembre_total_year_selec">{{ $novembre_total_year < 10 ? 0 ."". $novembre_total_year : $novembre_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_novembre_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($novembre_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Novembre
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                            </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                            <td>Deccembre</td>
+                                                                            <td id="deccembre_encour_year_selec">{{ $deccembre_total_encours < 10 ? 0 ."". $deccembre_total_encours : $deccembre_total_encours}}</td>
+                                                                            <td id="deccembre_annuler_year_selec">{{ $deccembre_total_annuler < 10 ? 0 ."". $deccembre_total_annuler : $deccembre_total_annuler}}</td>
+                                                                            <td id="deccembre_cloture_year_selec">{{ $deccembre_total_cloture < 10 ? 0 ."". $deccembre_total_cloture : $deccembre_total_cloture}}</td>
+                                                                            <td id="deccembre_enretard_year_selec">{{ $deccembre_total_enretard < 10 ? 0 ."". $deccembre_total_enretard : $deccembre_total_enretard}}</td>
+                                                                            <td id="deccembre_total_year_selec">{{ $deccembre_total_year < 10 ? 0 ."". $deccembre_total_year : $deccembre_total_year}}</td>
+                                                                            <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                                <span class="text-muted sr-only">Action</span>
+                                                                                </button>
+                                                                                <div class="dropdown-menu dropdown-menu-right">
+                                                                                <a
+                                                                                    id="incident_deccembre_year_selec"
+                                                                                    class="dropdown-item mb-1" 
+                                                                                    href="#!"
+                                                                                    data-incident="{{ json_encode($deccembre_incident) }}"
+                                                                                    data-backdrop="static"
+                                                                                    data-keyboard="false" 
+                                                                                    data-toggle="modal" 
+                                                                                    data-target="#modal_liste_incident">
+                                                                                    <span class="fe fe-eye mr-4"></span>Incident(s) Deccembre
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-x mr-4"></span>Supprimer
+                                                                                </a>
+                                                                                <a class="dropdown-item" href="#!">
+                                                                                    <span class="fe fe-edit-2 mr-4"></span>Editer
+                                                                                </a>                              
+                                                                            </div>
+                                                                            </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                </div>
+                                                            </div>
+
+                                            </div>
+
+
+                                        <!-- <hr style="margin-top: 4em; margin-bottom: 3em;">
+
+                                        <div style="margin-top: 4em;" class="row">
                                             <div class="col-md-12">
                                                 <div class="float-left">
                                                             <h1 class="text-xl"><i class="fe fe-32 fe-bell"></i><i style="font-size:15px;" class="fe fe-home mr-2"></i>INCIDENT PAR SITE</h1>
                                                 </div>
                                                 <div class="float-right">
-                                                    <button class="btn btn-primary"><i class="fe fe-file mr-2"></i><strong>Générer PDF Qté Incident Par Site</strong></button>
+
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div>
                                                 <div class="row justify-content-center">
-                                                        <div class="col-12 my-4">
-                                                            <div class="row my-4">
-                                                                <div class="col ml-auto my-4">
+                                                    <div class="col-12 my-4">
+                                                        <div class="row my-4">
+                                                            <div class="col ml-auto my-4">
                                                                         <div class="float-left">
                                                                             <strong class="text-xl text-success" id="changer_site">DIRECTION GENERALE</strong>
                                                                         </div>
                                                                         <div class="dropdown float-right">
-                                                                        <button class="btn btn-secondary dropdown-toggle text-xl" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="fe fe-home mr-2"></span> SITE </button>
-                                                                        <div class="dropdown-menu" aria-labelledby="actionMenuButton">
-                                                                            @if(Session::has('sites'))
-                                                                            @if(is_iterable(Session::get('sites')))
-                                                                            @for($i=0; $i < count(Session::get('sites')); $i++)
-                                                                            <a href="#!" id="maison" class="dropdown-item" style="cursor:pointer;" class="text-xl text-white" data-site="{{ json_encode(Session::get('sites')[$i]) }}">{{ Session::get('sites')[$i]->name }}</a>
-                                                                            @endfor
-                                                                            @endif
-                                                                            @endif
+                                                                            <button class="btn btn-secondary dropdown-toggle text-xl" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="fe fe-home mr-2"></span> SITE </button>
+                                                                            <div class="dropdown-menu" aria-labelledby="actionMenuButton">
+                                                                                @if(Session::has('sites'))
+                                                                                @if(is_iterable(Session::get('sites')))
+                                                                                @for($i=0; $i < count(Session::get('sites')); $i++)
+                                                                                <a href="#!" id="maison" class="dropdown-item" style="cursor:pointer;" class="text-xl text-white" data-site="{{ json_encode(Session::get('sites')[$i]) }}">{{ Session::get('sites')[$i]->name }}</a>
+                                                                                @endfor
+                                                                                @endif
+                                                                                @endif
+                                                                            </div>
                                                                         </div>
-                                                                        </div>
-                                                                </div>
+                                                            </div>
                                                             <div class="col-md-12">
                                                                 <div class="card shadow">
                                                                 <div class="card-body">
@@ -508,16 +1059,20 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                        </div>
+                                        </div> -->
 
 
-                                        <hr class="my-4">
+                                        <hr style="margin-bottom: 4em;">
+
                                         <div class="row col-md-12">
                                             <div class="float-left col-md-6">
                                                 <h1 class="text-xl"><i class="fe fe-32 fe-bell"></i><i style="font-size:15px;" class="fe fe-globe mr-2"></i>INCIDENT PAR REGION</h1>
                                             </div>
                                             <div class="text-right col-md-6">
-                                                <button class="btn btn-primary"><i class="fe fe-file mr-2"></i><strong>Générer PDF Qté Incident Par Région</strong></button>
+                                                <form action="generation_incidents_par_region" method="get">
+                                                    <input type="hidden" id="par_region" name="annee">
+                                                    <button class="btn btn-primary"><i class="fe fe-file mr-2"></i><strong>Générer PDF Qté Incident Par Région</strong></button>
+                                                </form>
                                             </div>
                                         </div>
                                         <?php
@@ -830,40 +1385,9 @@
                                                                         </div>
                                                                     </td>
                                                                     </tr>
-                                                                    <tr id="collap-3954" class="collapse in p-3 bg-light">
-                                                                    <tr class="accordion-toggle collapsed" id="c-2429" data-toggle="collapse" data-parent="#c-2429" href="#collap-2429">
-                                                                    <td>{{ $regions[2] }}</td>
-                                                                    <td id="encour_sudouest">{{ $encour_sudouest < 10 ? 0 ."". $encour_sudouest : $encour_sudouest }}</td>
-                                                                    <td id="annule_sudouest">{{ $annule_sudouest < 10 ? 0 ."". $annule_sudouest : $annule_sudouest}}</td>
-                                                                    <td id="cloture_sudouest">{{ $cloture_sudouest < 10 ? 0 ."". $cloture_sudouest : $cloture_sudouest}}</td>
-                                                                    <td id="enretard_sudouest">{{ $enretard_sudouest < 10 ? 0 ."". $enretard_sudouest : $enretard_sudouest}}</td>
-                                                                    <td id="total_sudouest">{{ $sud_ouest < 10 ? 0 ."". $sud_ouest : $sud_ouest }}</td>
-                                                                    <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                        <span class="text-muted sr-only">Action</span>
-                                                                        </button>
-                                                                        <div class="dropdown-menu dropdown-menu-right">
-                                                                        <a 
-                                                                            id="incident_sudouest"
-                                                                            data-sudouest="{{ json_encode($inc_sud_ouest) }}"
-                                                                            class="dropdown-item" 
-                                                                            href="#!"
-                                                                            data-backdrop="static"
-                                                                            data-keyboard="false" 
-                                                                            data-toggle="modal" 
-                                                                            data-target="#modal_liste_incident">
-                                                                            <span class="fe fe-eye mr-2"></span> Incident(s) Sud-Ouest
-                                                                        </a>
-                                                                        <a class="dropdown-item" href="#!">
-                                                                            <span class="fe fe-x mr-4"></span>Supprimer
-                                                                        </a>
-                                                                        <a class="dropdown-item" href="#!">
-                                                                            <span class="fe fe-edit-2 mr-4"></span>Editer
-                                                                        </a>                              
-                                                                        </div>
-                                                                    </td>
-                                                                    </tr>
+
                                                                     <tr class="accordion-toggle collapsed" id="c-3987" data-toggle="collapse" data-parent="#c-3987" href="#collap-3987">
-                                                                    <td>{{ $regions[3] }}</td>
+                                                                    <td>{{ $regions[2] }}</td>
                                                                     <td id="encour_centre">{{ $encour_centre < 10 ? 0 ."". $encour_centre : $encour_centre }}</td>
                                                                     <td id="annule_centre">{{ $annule_centre < 10 ? 0 ."". $annule_centre : $annule_centre }}</td>
                                                                     <td id="cloture_centre">{{ $cloture_centre < 10 ? 0 ."". $cloture_centre : $cloture_centre}}</td>
@@ -892,7 +1416,7 @@
                                                                     </td>
                                                                     </tr>
                                                                     <tr class="accordion-toggle collapsed" id="c-3165" data-toggle="collapse" data-parent="#c-3987" href="#collap-3165">
-                                                                    <td>{{ $regions[4] }}</td>
+                                                                    <td>{{ $regions[3] }}</td>
                                                                     <td id="encour_littoral">{{ $encour_littoral < 10 ? 0 ."". $encour_littoral : $encour_littoral}}</td>
                                                                     <td id="annule_littoral">{{ $annule_littoral < 10 ? 0 ."". $annule_littoral : $annule_littoral}}</td>
                                                                     <td id="cloture_littoral">{{ $cloture_littoral < 10 ? 0 ."". $cloture_littoral : $cloture_littoral}}</td>
@@ -922,39 +1446,8 @@
                                                                         </div>
                                                                     </td>
                                                                     </tr>
-                                                                    <tr class="accordion-toggle collapsed" id="c-5429" data-toggle="collapse" data-parent="#c-5429" href="#collap-5429">
-                                                                    <td>{{ $regions[5] }}</td>
-                                                                    <td id="encour_extremenord">{{ $encour_extremenord < 10 ? 0 ."". $encour_extremenord : $encour_extremenord}}</td>
-                                                                    <td id="annule_extremenord">{{ $annule_extremenord < 10 ? 0 ."". $annule_extremenord : $annule_extremenord}}</td>
-                                                                    <td id="cloture_extremenord">{{ $cloture_extremenord < 10 ? 0 ."". $cloture_extremenord : $cloture_extremenord}}</td>
-                                                                    <td id="enretard_extremenord">{{ $enretard_extremenord < 10 ? 0 ."". $enretard_extremenord : $enretard_extremenord}}</td>
-                                                                    <td id="total_extremenord">{{ $extreme_nord < 10 ? 0 ."". $extreme_nord : $extreme_nord }}</td>
-                                                                    <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                        <span class="text-muted sr-only">Action</span>
-                                                                        </button>
-                                                                        <div class="dropdown-menu dropdown-menu-right">
-                                                                        <a 
-                                                                            id="incident_extremenord"
-                                                                            data-extremenord="{{ json_encode($inc_extreme_nord) }}"
-                                                                            class="dropdown-item" 
-                                                                            href="#!"
-                                                                            data-backdrop="static"
-                                                                            data-keyboard="false" 
-                                                                            data-toggle="modal" 
-                                                                            data-target="#modal_liste_incident">
-                                                                            <span class="fe fe-eye mr-2"></span> Incident(s) Extreme-Nord
-                                                                        </a>
-                                                                        <a class="dropdown-item" href="#!">
-                                                                            <span class="fe fe-x mr-4"></span>Supprimer
-                                                                        </a>
-                                                                        <a class="dropdown-item" href="#!">
-                                                                            <span class="fe fe-edit-2 mr-4"></span>Editer
-                                                                        </a>                              
-                                                                        </div>
-                                                                    </td>
-                                                                    </tr>
                                                                     <tr class="accordion-toggle collapsed" id="c-3951" data-toggle="collapse" data-parent="#c-3951" href="#collap-3951">
-                                                                    <td>{{ $regions[6] }}</td>
+                                                                    <td>{{ $regions[4] }}</td>
                                                                     <td id="encour_sud">{{ $encour_sud < 10 ? 0 ."". $encour_sud : $encour_sud}}</td>
                                                                     <td id="annule_sud">{{ $annule_sud < 10 ? 0 ."". $annule_sud : $annule_sud}}</td>
                                                                     <td id="cloture_sud">{{ $cloture_sud < 10 ? 0 ."". $cloture_sud : $cloture_sud}}</td>
@@ -984,39 +1477,9 @@
                                                                         </div>
                                                                     </td>
                                                                     </tr>
+
                                                                     <tr class="accordion-toggle collapsed" id="c-3599" data-toggle="collapse" data-parent="#c-3599" href="#collap-3599">
-                                                                    <td>{{ $regions[7] }}</td>
-                                                                    <td id="encour_nord">{{ $encour_nord < 10 ? 0 ."". $encour_nord : $encour_nord}}</td>
-                                                                    <td id="annule_nord">{{ $annule_nord < 10 ? 0 ."". $annule_nord : $annule_nord}}</td>
-                                                                    <td id="cloture_nord">{{ $cloture_nord < 10 ? 0 ."". $cloture_nord : $cloture_nord}}</td>
-                                                                    <td id="enretard_nord">{{ $enretard_nord < 10 ? 0 ."". $enretard_nord : $enretard_nord}}</td>
-                                                                    <td id="total_nord">{{ $nord < 10 ? 0 ."". $nord : $nord }}</td>
-                                                                    <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                        <span class="text-muted sr-only">Action</span>
-                                                                        </button>
-                                                                        <div class="dropdown-menu dropdown-menu-right">
-                                                                        <a 
-                                                                            id="incident_nord"
-                                                                            data-nord="{{ json_encode($inc_nord) }}"
-                                                                            class="dropdown-item" 
-                                                                            href="#!"
-                                                                            data-backdrop="static"
-                                                                            data-keyboard="false" 
-                                                                            data-toggle="modal" 
-                                                                            data-target="#modal_liste_incident">
-                                                                            <span class="fe fe-eye mr-2"></span> Incident(s) Nord
-                                                                        </a>
-                                                                        <a class="dropdown-item" href="#!">
-                                                                            <span class="fe fe-x mr-4"></span>Supprimer
-                                                                        </a>
-                                                                        <a class="dropdown-item" href="#!">
-                                                                            <span class="fe fe-edit-2 mr-4"></span>Editer
-                                                                        </a>                              
-                                                                        </div>
-                                                                    </td>
-                                                                    </tr>
-                                                                    <tr class="accordion-toggle collapsed" id="c-3599" data-toggle="collapse" data-parent="#c-3599" href="#collap-3599">
-                                                                    <td>{{ $regions[8] }}</td>
+                                                                    <td>{{ $regions[5] }}</td>
                                                                     <td id="encour_adamaoua">{{ $encour_adamaoua < 10 ? 0 ."". $encour_adamaoua : $encour_adamaoua }}</td>
                                                                     <td id="annule_adamaoua">{{ $annule_adamaoua < 10 ? 0 ."". $annule_adamaoua : $annule_adamaoua}}</td>
                                                                     <td id="cloture_adamaoua">{{ $cloture_adamaoua < 10 ? 0 ."". $cloture_adamaoua : $cloture_adamaoua}}</td>
@@ -1047,7 +1510,7 @@
                                                                     </td>
                                                                     </tr>
                                                                     <tr class="accordion-toggle collapsed" id="c-3599" data-toggle="collapse" data-parent="#c-3599" href="#collap-3599">
-                                                                    <td>{{ $regions[9] }}</td>
+                                                                    <td>{{ $regions[6] }}</td>
                                                                     <td id="encour_est">{{ $encour_est < 10 ? 0 ."". $encour_est : $encour_est}}</td>
                                                                     <td id="annule_est">{{ $annule_est < 10 ? 0 ."". $annule_est : $annule_est }}</td>
                                                                     <td id="cloture_est">{{ $cloture_est < 10 ? 0 ."". $cloture_est : $cloture_est }}</td>
@@ -1093,41 +1556,21 @@
         </div>
     </div>
 
-    <!-- Modal error validation-->
-    <div class="modal" id="editIncidentError" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
-            style="font-family:Century Gothic;">
-                                  <div class="modal-dialog modal-xs modal-dialog-centered">
-                                    <div class="modal-content">
-                                      <div class="modal-header" style="background-color:red;">
-                                        <h5 class="modal-title" id="exampleModalLabel" style="color:white;">Erreur</h5>
-                                      </div>
-                                      <div class="modal-body">
-                                          <div class="form-group">
-                                          <textarea id="validtion_edii" disabled style="width:100%; height:12em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
-                                          </div>
-                                      </div>
-                                      <div class="modal-footer">
-                                        <button id="dismiss_btn_edii" type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
-                                      </div>
-                                    </div>
-                                  </div>
-    </div>
-
     <!-- Modal error annulation incident-->
-    <div class="modal" id="annulationError" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+    <div class="modal" id="annulationE" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
             style="font-family:Century Gothic;">
                                   <div class="modal-dialog modal-xs modal-dialog-centered">
                                     <div class="modal-content">
                                       <div class="modal-header" style="background-color:red;">
-                                        <h5 class="modal-title" id="exampleModalLabel" style="color:white;">Erreur D'annulation</h5>
+                                        <h5 class="modal-title text-xl" id="exampleModalLabel" style="color:white;">Erreur</h5>
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validtion_annu" disabled style="width:100%; height:4em;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
+                                          <textarea rows="5" id="validtitor" disabled style="width:100%;border-style:none; resize: none;color:white; background-color: #495057; font-size:19px;" class="form-control"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
-                                        <button id="dismiss_btn_annu" type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
                                       </div>
                                     </div>
                                   </div>

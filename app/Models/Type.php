@@ -12,7 +12,8 @@ class Type extends Model
 
     protected $fillable = [
         'id', 
-        'name', 
+        'name',
+        'description'
     ];
 
     public function sites()

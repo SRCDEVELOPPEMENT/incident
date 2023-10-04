@@ -3,31 +3,10 @@
 
 @section('content')
     <?php
-            $tab_ids = array();
-            $tab_created = array();
-            $tab_exited = array();
-            $tab_created_log = array();
-            $tab_id_log = array();
 
             $filesss = DB::table('fichiers')->get();
 
-            if(Session::has('incidents')){
-            if(is_iterable(Session::get('incidents'))){
-            for ($j=0; $j < count(Session::get('incidents')); $j++) {
-                $indi = Session::get('incidents')[$j];
-                array_push($tab_ids, $indi->number);
-                array_push($tab_exited, $indi->due_date);
-                array_push($tab_created, substr(strval($indi->created_at), 0, 10));
-            }}}
-  
-            if(Session::has('logs')){
-            if(is_iterable(Session::get('logs'))){
-            for ($z=0; $z < count(Session::get('logs')); $z++) { 
-                $l = Session::get('logs')[$z];
-                array_push($tab_id_log, $l->id);
-                array_push($tab_created_log, substr(strval($l->created_at), 0, 10));
-            }}}
-    ?>
+      ?>
 
     <div class="main-content">
         <div class="container-fluid">
@@ -37,7 +16,7 @@
                             <div class="row" style="font-family: Century Gothic;">
                                 <div class="col-md-7 text-left my-4">
                                     @if($number_incident)
-                                        <a title="Retour A La Liste Des Incidents" href="{{ URL::to('incidents') }}" style="border-radius: 3em;" class="btn btn-outline-primary"><span class="fe fe-corner-up-left fe-16 mr-2"></span><span class="text">Retour</span></a>
+                                        <a title="Retour A La Liste Des Incidents" href="{{ route('incidents', ['in' => $in]) }}" style="border-radius: 3em;" class="btn btn-outline-primary"><span class="fe fe-corner-up-left fe-16 mr-2"></span><span class="text">Retour</span></a>
                                     @endif
                                 </div>
                                 <div class="col-md-5 text-right my-4">
@@ -58,19 +37,18 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-3 text-left text-xl text-uppercase">
+                                <div class="col-md-4 text-left text-xl text-uppercase">
                                     <h2 class="mb-2">
-                                    <span class="fe fe-info mr-2"></span>    
+                                    <span class="fe fe-info mr-2"></span>
                                     Liste Tâches</h2>
                                 </div>
-                                <div class="col-md-9 text-right" style="font-family: Century Gothic;">
+                                <div class="col-md-8 text-right" style="font-family: Century Gothic;">
                                     @can('creer-tache')
                                         @if($number_incident)
                                         <button 
                                                 id="toto"
-                                                data-sites="{{ json_encode(Session::get('sites')) }}"
+                                                data-sites="{{ json_encode($sites) }}"
                                                 data-incident="{{ json_encode($incident) }}"
-                                                data-departements="{{ json_encode(Session::get('departements')) }}"
                                                 title="Ajout D'une Tâche"
                                                 class="btn btn-primary btn-icon-split"
                                                 >
@@ -111,28 +89,8 @@
                                                         <div class="invalid-feedback"> Please select a valid state. </div>
                                             </div>
                                             <div class="col-md-2">
-                                                        <select class="custom-select border-primary my-3" id="departe">
-                                                            <optgroup label="Liste Département">
-                                                                <option selected value="">Choisissez...</option>
-                                                                @if(Session::has('departements'))
-                                                                @if(is_iterable(Session::get('departements')))
-                                                                @foreach(Session::get('departements') as $departement)
-                                                                <option value="{{ $departement->name }}">{{ $departement->name }}</option>
-                                                                @endforeach
-                                                                @endif
-                                                                @endif
-                                                            </optgroup>
-                                                        </select>
-                                                        <div class="invalid-feedback"> Please select a valid state. </div>
-                                            </div>
-                                            <div class="col-md-2">
                                                 <div class="input-group mb-3">
                                                     <input type="date" class="form-control border-primary my-3" id="searchDate" aria-describedby="button-addon2">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group">
-                                                    <input class="form-control border-primary my-3" id="searchMonth" type="month">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
@@ -148,16 +106,14 @@
                                                     <th>N°</th>
                                                     <th></th>
                                                     <th>Description Tâche</th>
-                                                    @if(!$number_incident)
-                                                        <th>Incident</th>
-                                                    @endif
+                                                    <th></th>
                                                     <th>Statut</th>
-                                                    <th>Déclaration</th>
-                                                    <th>Echéance</th>
-                                                    <th>Clôture</th>
+                                                    <th>Date Déclaration</th>
+                                                    <th>Date Echéance</th>
+                                                    <th>Date Clôture</th>
                                                     <th>Emétteur</th>
                                                     <th>Récepteur</th>
-                                                    <th>Dégré Réalisation</th>
+                                                    <th>Taux De Réalisation</th>
                                                     <th>Fichier</th>
                                                     <th></th>
                                                     <th>Log</th>
@@ -168,8 +124,6 @@
                                                 @if(is_iterable($taches))
                                                 @foreach($taches as $key => $task)
                                                     <?php
-
-                                                        $degre = $task->resolution_degree;
                                                         
                                                         $nombre_fichiers = 0;
                                                         
@@ -181,125 +135,39 @@
                                                         }
 
                                                         $nombre_log = 0;
-
-                                                        if(Session::has('logs')){
-                                                        if(is_iterable(Session::get('logs'))){
-                                                        for ($index=0; $index < count(Session::get('logs')); $index++) {
-                                                            $log = Session::get('logs')[$index];
-                                                            if($log->tache_id == $task->id){
+                                                        for ($s=0; $s < count($logs); $s++) {
+                                                            $log = $logs[$s];
+                                                            if(intval($log->tache_id) == intval($task->id)){
                                                                 $nombre_log +=1;
                                                             }
-                                                        }}}
-                                                        
-                                                        $mon_user_incident = NULL;
-                                                        if(Session::has('users_incidents')){
-                                                        if(is_iterable(Session::get('users_incidents'))){
-                                                        for ($d=0; $d < count(Session::get('users_incidents')); $d++) {
-                                                            $iu = Session::get('users_incidents')[$d];
-                                                            
-                                                            if(
-                                                                ($iu->incident_number == $task->incident_number) &&
-                                                                ($iu->isTriggerPlus == TRUE)
-                                                              )
-                                                            {
-                                                                $mon_user_incident = $iu;
-                                                                break;
-                                                            }
-                                                        }}}
-
-                                                        $utilisateur = NULL;
-                                                        if($mon_user_incident){
-                                                            if(Session::has('users')){
-                                                            if(is_iterable(Session::get('users'))){
-                                                            for ($l=0; $l < count(Session::get('users')); $l++) {
-                                                                $user = Session::get('users')[$l];
-                                                                if($user->id == $mon_user_incident->user_id){
-                                                                    $utilisateur = $user;
-                                                                }
-                                                            }}}
                                                         }
 
-                                                        $emetteur = NULL;
-                                                        if($utilisateur){
-                                                            if($utilisateur->site_id){
-                                                                if(Session::has('sites')){
-                                                                if(is_iterable(Session::get('sites'))){
-                                                                for ($o=0; $o < count(Session::get('sites')); $o++) {
-                                                                    $site = Session::get('sites')[$o];
-                                                                    if($site->id == $utilisateur->site_id){
-                                                                        $emetteur = $site;
-                                                                    }
-                                                                }}}
-                                                            }elseif ($utilisateur->departement_id) {
-                                                                if(Session::has('departements')){
-                                                                if(is_iterable(Session::get('departements'))){
-                                                                for ($f=0; $f < count(Session::get('departements')); $f++) { 
-                                                                    $depar = Session::get('departements')[$f];
-                                                                    if($depar->id == $utilisateur->departement_id){
-                                                                        $emetteur = $depar;
-                                                                    }
-                                                                }}}
-                                                            }
-                                                        }
-                                                        
-                                                        $user_incident_verif = NULL;
-                                                        if(Session::has('users_incidents')){
-                                                        if(is_iterable(Session::get('users_incidents'))){
-                                                        for ($j=0; $j < count(Session::get('users_incidents')); $j++) {
-                                                            $ui = Session::get('users_incidents')[$j];
-
-                                                            if(($ui->incident_number == $task->incident_number)){
-
-                                                                if(intval($ui->user_id) == intval(Auth::user()->id)){
-                                                                    $user_incident_verif  = $ui;
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }}}
-                                                    
                                                     ?>
                                                     <tr>
                                                         <td>{{ $key+1 }}</td>
                                                         <td>
-                                                        @if($user_incident_verif)
-                                                            @if($user_incident_verif->isCoordo)
+                                                        @if($task->site_emetteur == Auth::user()->site_id)
                                                                 <span class="badge badge-light">Emise</span>
-                                                            @else
-                                                                <span class="badge badge-light mr-1">Reçue</span>
-                                                            @endif
                                                         @else
-                                                            <span class="badge badge-light mr-1">Reçue</span>
+                                                                <span class="badge badge-light mr-1">Reçue</span>
                                                         @endif
                                                         </td>
                                                         <td><p style="font-size:0.7em;">{{ $task->description }}</p></td>
-                                                        @if(!$number_incident)
                                                         <td>
-                                                            <strong class="badge badge-light text-lg">
-                                                                <a href="#!"
-                                                                   title="Voir Plus Concernant L'incident"
-                                                                   id="InfIncs"
-                                                                   data-key="{{ $key+1 }}"
-                                                                   data-users="{{ json_encode(Session::get('users')) }}"
-                                                                   data-users_incidents="{{ json_encode(Session::get('users_incidents')) }}"
-                                                                   data-ids="{{ json_encode($tab_ids) }}"
-                                                                   data-exited="{{ json_encode($tab_exited) }}"
-                                                                   data-created="{{ json_encode($tab_created) }}"
-                                                                   data-tasks="{{ json_encode(Session::get('tasks')) }}"
-                                                                   data-number="{{ $task->incident_number }}"
-                                                                   data-incidents="{{ json_encode(Session::get('incidents')) }}"
-                                                                   data-departements="{{ json_encode(Session::get('departements')) }}"
-                                                                   data-sites="{{ json_encode(Session::get('sites')) }}"
-                                                                   style="text-decoration:none;"
-                                                                   data-backdrop="static"
-                                                                   data-keyboard="false"
-                                                                   data-toggle="modal"
-                                                                   data-target="#modal_infos_incidant">
-                                                                   {{ $task->incident_number }}
-                                                                   <i class="fe fe-eye ml-2"></i>
-                                                                </a>
-                                                            </strong>
+                                                                <a 
+                                                                    class="badge badge-light"
+                                                                    data-backdrop="static"
+                                                                    data-keyboard="false"
+                                                                    data-toggle="modal"
+                                                                    data-target="#modal_infos_incidant"
+                                                                    id="vue_other_infos_incident"
+                                                                    data-sites="{{ json_encode($sites) }}"
+                                                                    data-processus="{{ json_encode($processus) }}"
+                                                                    data-categories="{{ json_encode($categories) }}" 
+                                                                    data-number="{{ $task->incident_number }}"
+
+                                                                    href="#!">{{ $task->incident_number }}</a>
                                                         </td>
-                                                        @endif
                                                         <td style="font-size:0.7em;">    
                                                                     <a
 
@@ -312,8 +180,6 @@
                                                                         @endif
                                                                             href="#!"
                                                                             title="Modifier Le Statut De La Tâche"
-                                                                            @if($user_incident_verif)
-                                                                                @if($user_incident_verif->isTrigger)
                                                                                     id="modif_stay_tach"
                                                                                     data-key="{{ $key+1 }}"
                                                                                     data-task="{{ json_encode($task) }}"
@@ -321,8 +187,7 @@
                                                                                     data-keyboard="false"
                                                                                     data-toggle="modal"
                                                                                     data-target="#change_status"
-                                                                                @endif
-                                                                            @endif>
+                                                                    >
                                                                         {{ $task->status }}
                                                                     </a>
                                                         </td>
@@ -339,9 +204,7 @@
                                                                 @endif
                                                             >
                                                                     <a 
-                                                                        href="#!"
-                                                                        @if($user_incident_verif)
-                                                                            @if($user_incident_verif->isTrigger)
+                                                                                href="#!"
                                                                                 @if(($task->status != "RÉALISÉE") && ($task->status != "EN-ATTENTE"))
                                                                                     data-key="{{ $key }}"
                                                                                     data-task="{{ json_encode($task) }}"
@@ -351,8 +214,6 @@
                                                                                     data-toggle="modal"
                                                                                     data-target="#define_dat_echean"
                                                                                 @endif
-                                                                            @endif
-                                                                        @endif
 
                                                                         title="Ajuster La Date D'échéance"
                                                                         @if(intval(str_replace("-", "", $task->maturity_date)) < intval(str_replace("-", "", date('Y-m-d'))))
@@ -371,16 +232,14 @@
 
                                                         <td style="font-size:0.7em;">{{ $task->closure_date ? $task->closure_date : '' }}</td>
                                                         <td style="font-size:0.7em;">
-                                                            {{ $emetteur ? $emetteur->name : ""}}
+                                                            {{ $task->site_emetteur ? $task->sitemetteurs->name : ""}}
                                                         </td>
-                                                        <td style="font-size:0.7em;">{{ $task->departement_id ? "SERVICE " . $task->departements->name : ($task->site_id ? $task->sites->name : "")}}</td>
+                                                        <td style="font-size:0.7em;">{{ $task->site_id ? $task->sites->name : "" }}</td>
                                                         <td>
                                                                     <a  
                                                                         
                                                                         href="#!"
                                                                         style="text-decoration:none; padding-left:2em;"
-                                                                        @if($user_incident_verif)
-                                                                            @if($user_incident_verif->isTrigger)
                                                                                 @if(($task->status != "RÉALISÉE") && ($task->status != "EN-ATTENTE"))
                                                                                     id="set_priority_degr"
                                                                                     data-task="{{ json_encode($task) }}"
@@ -390,8 +249,6 @@
                                                                                     data-toggle="modal"
                                                                                     data-target="#update_degree"
                                                                                 @endif
-                                                                            @endif
-                                                                        @endif
                                                                         >
                                                                        {{ $task->resolution_degree == 1 ? "00" : $task->resolution_degree }} %
                                                                     </a>
@@ -402,8 +259,6 @@
                                                                             href="#!"
                                                                             style="text-decoration:none;" 
                                                                             title="Joindre Le Fichier Justificatif"
-                                                                            @if($user_incident_verif)
-                                                                                @if($user_incident_verif->isTrigger)
                                                                                     @if($task->status == "ENCOURS")
                                                                                         data-key="{{ $key+1 }}"
                                                                                         data-task="{{ json_encode($task) }}"
@@ -413,8 +268,6 @@
                                                                                         data-target="#defaultModal"
                                                                                         class="files_id"
                                                                                     @endif
-                                                                                @endif
-                                                                            @endif
                                                                             >
                                                                             <div class="row">
                                                                                 <small class="text-lg mr-3">{{ $nombre_fichiers < 10 ? 0 .''. $nombre_fichiers : $nombre_fichiers}}</small>
@@ -424,8 +277,6 @@
                                                                     @endcan
                                                         </td>
                                                         <td class="mr-3">
-                                                            @if($user_incident_verif)
-                                                                @if($user_incident_verif->isTrigger)
                                                                     @can('telecharger-fichier')
                                                                         <a 
                                                                             data-key="{{ $key+1 }}"
@@ -441,17 +292,6 @@
                                                                             class="fe fe-download-cloud fe-32 down_id">
                                                                         </a>
                                                                     @endcan
-                                                                @else
-                                                                    @can('telecharger-fichier')
-                                                                        <a 
-                                                                            style="text-decoration:none; color:white;"
-                                                                            href="#!" 
-                                                                            title="Télécharger Le Fichier De La Tâche"
-                                                                            class="fe fe-download-cloud fe-32">
-                                                                        </a>
-                                                                    @endcan
-                                                                @endif
-                                                            @endif
                                                         </td>
                                                         <td>{{ $nombre_log < 10 ? 0 .''. $nombre_log : $nombre_log }}</td>
                                                         <td>
@@ -496,9 +336,7 @@
                                                                         id="log_task"
                                                                         data-task="{{ json_encode($task) }}"
                                                                         data-incident=""
-                                                                        data-logs="{{ json_encode(Session::get('logs')) }}"
-                                                                        data-created_log="{{ json_encode($tab_created_log) }}"
-                                                                        data-tab_id_log="{{ json_encode($tab_id_log) }}"
+                                                                        data-logs="{{ json_encode($logs) }}"
                                                                         href="#!"
                                                                         data-backdrop="static"
                                                                         data-keyboard="false"
@@ -506,7 +344,20 @@
                                                                         data-target="#modal_log_tasks"><span class="fe fe-eye mr-4"></span> Log(s) Tâche
                                                                     </a>
                                                                 @endcan
-
+                                                                <a 
+                                                                        class="dropdown-item"
+                                                                        id="infos_incident"
+                                                                        href="#!"
+                                                                        data-backdrop="static"
+                                                                        data-keyboard="false"
+                                                                        data-toggle="modal"
+                                                                        data-target="#modal_infos_incidant"
+                                                                        data-sites="{{ json_encode($sites) }}"
+                                                                        data-processus="{{ json_encode($processus) }}"
+                                                                        data-categories="{{ json_encode($categories) }}" 
+                                                                        data-number="{{ $task->incident_number }}"
+                                                                        ><span class="fe fe-eye mr-4"></span> Infos Incident
+                                                                </a>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -662,7 +513,7 @@
                                         <i class="fe fe-battery-charging mr-3" style="font-size:20px;"></i>
                                     Statut Tâche
                                 </h5>
-                                <button id="btnExitModalCloture" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <button id="btnExitModalStatus" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -690,7 +541,7 @@
                                     <div id="segment">
                                     </div>
                                     <div class="form-group">
-                                        <button id="tasch_m" data-fichiers="{{ json_encode($filesss) }}" data-task="" class="btn btn-outline-success btn-block">
+                                        <button id="tasch_m" data-task="" class="btn btn-outline-success btn-block">
                                             <span class="fe fe-battery-charging fe-16 mr-3"></span>
                                             Modifier Le Statut
                                         </button>
@@ -761,11 +612,10 @@
                                                     <div class="form-group my-4">
                                                         <label for="deepartes">
                                                             <span class="fe fe-home fe-16 mr-2"></span>
-                                                            (Département | Site) Chargé De Resoudre L'incident <span style="color:red;"> *</span>
+                                                            Site Chargé De Resoudre L'incident <span style="color:red;"> *</span>
                                                         </label>
                                                         <select 
                                                                 style="font-size: 1.2em;" 
-                                                                data-departements="{{ json_encode(Session::get('departements')) }}" 
                                                                 data-types="{{ json_encode(Session::get('types')) }}" 
                                                                 data-sites="{{ json_encode(Session::get('sites')) }}" 
                                                                 class="custom-select border-primary" 
@@ -774,25 +624,12 @@
                                                                 data-number="{{ $number_incident }}" 
                                                                 data-users_incidents="">
 
-                                                            <optgroup label="Liste Département">
                                                                         <option selected value="">Choisissez...</option>
-                                                                        @if(Session::has('departements'))
-                                                                        @if(is_iterable(Session::get('departements')))
-                                                                        @foreach(Session::get('departements') as $departement)
-                                                                        <option value="{{ $departement->id }}">{{ $departement->name }}</option>
+                                                                        @if(is_iterable($sites))
+                                                                        @foreach($sites as $site)
+                                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                                         @endforeach
                                                                         @endif
-                                                                        @endif
-                                                            </optgroup>
-                                                            <optgroup label="Liste Type Site">
-                                                                        @if(Session::has('types'))
-                                                                        @if(is_iterable(Session::get('types')))
-                                                                        @foreach(Session::get('types') as $type)
-                                                                        <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                                        @endforeach
-                                                                        @endif
-                                                                        @endif
-                                                            </optgroup>
                                                         </select>
                                                     </div>
                                                     <div id="devdocs"></div>
@@ -933,6 +770,42 @@
                                             <div class="list-group list-group-flush my-n3">
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <small><strong></strong></small>
+                                                            <div class="my-0 big"><span class="declarateur"></span></div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <small class="badge badge-pill badge-light text-uppercase">Déclarateur De L'incident</small>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- / .row -->
+
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <small><strong></strong></small>
+                                                            <div class="my-0 big"><span class="site_de_lincident"></span></div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <small class="badge badge-pill badge-light text-uppercase">Site De L'incident</small>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- / .row -->
+
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <small><strong></strong></small>
+                                                            <div class="my-0 big"><span class="deja_pris_encompte"></span></div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <small class="badge badge-pill badge-light text-uppercase">Etat De L'incident</small>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- / .row -->
+
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
                                                     <div class="col">
                                                     <small><strong></strong></small>
                                                     <div class="my-0 big"><span class="creat_dat"></span></div>
@@ -1039,28 +912,6 @@
                                                         </div>
                                                         <div class="col-auto">
                                                             <small class="badge badge-pill badge-light text-uppercase">Tâches</small>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- / .row -->
-                                                <div class="list-group-item">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <small><strong></strong></small>
-                                                            <div class="my-0 big"><span class="site_emeter"></span></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <small class="badge badge-pill badge-light text-uppercase">Entité Emétteur</small>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- / .row -->
-                                                <div class="list-group-item">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <small><strong></strong></small>
-                                                            <div class="my-0 big"><span class="syte_receppt"></span></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                          <small class="badge badge-pill badge-light text-uppercase">Entité Récèpteur</small>
                                                         </div>
                                                     </div>
                                                 </div> <!-- / .row -->
@@ -1227,25 +1078,14 @@
                                                                 data-number="{{ $number_incident }}" 
                                                                 data-users_incidents="">
 
-                                                            <optgroup label="Liste Département">
                                                                         <option selected value="">Choisissez...</option>
-                                                                        @if(Session::has('departements'))
-                                                                        @if(is_iterable(Session::get('departements')))
-                                                                        @foreach(Session::get('departements') as $departement)
-                                                                        <option value="{{ $departement->id }}">{{ $departement->name }}</option>
+                                                                        @if(Session::has('sites'))
+                                                                        @if(is_iterable(Session::get('sites')))
+                                                                        @foreach(Session::get('sites') as $site)
+                                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                                         @endforeach
                                                                         @endif
                                                                         @endif
-                                                            </optgroup>
-                                                            <optgroup label="Liste Type Site">
-                                                                        @if(Session::has('types'))
-                                                                        @if(is_iterable(Session::get('types')))
-                                                                        @foreach(Session::get('types') as $type)
-                                                                        <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                                        @endforeach
-                                                                        @endif
-                                                                        @endif
-                                                            </optgroup>
                                                         </select>
                                                     </div>
                                                     <div id="devdocs_edit"></div>
@@ -1318,6 +1158,7 @@
                                                     <input type="hidden" value="" name="id" id="id_task">
                                                     <input type="hidden" value="{{ Auth::user()->id }}" name="user_id">
                                                     <input type="hidden" value="" name="numero">
+                                                    <input type="hidden" value="{{ $ta }}" name="ta">
 
                                                     <div class="form-group">
                                                         <input type="file" multiple="multiple" class="form-control" name="file[]" id="inputfile">

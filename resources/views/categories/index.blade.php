@@ -43,12 +43,15 @@
                                             <th></th>
                                             <th>#</th>
                                             <th>Catégorie D'incident</th>
-                                            <th>Département De La Catégorie</th>
+                                            <th>Site De La Catégorie</th>
+                                            <th>Type De La Catégorie</th>
                                             <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody>
+                                          @if(is_iterable($categories))
                                           @foreach($categories as $key => $cat)
+                                            
                                             <tr>
                                                 <td>
                                                 <div class="custom-control custom-checkbox">
@@ -58,7 +61,18 @@
                                                 </td>
                                                 <td>{{ $key+1 }}</td>
                                                 <td>{{ $cat->name }}</td>
-                                                <td>{{ $cat->departements ? $cat->departements->name : $cat->type }}</td>
+                                                <td>{{ $cat->sites ? $cat->sites->name : "" }}</td>
+
+                                                @if($cat->sites)
+                                                    @if($cat->sites->types)
+                                                        <td>{{ $cat->sites->types->name }}</td>
+                                                    @else
+                                                    <td></td>
+                                                    @endif
+                                                @else
+                                                    <td></td>
+                                                @endif
+
                                                 <td>
                                                     <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         <span class="text-muted sr-only">Action</span>
@@ -89,6 +103,7 @@
                                                 </td>
                                             </tr>
                                           @endforeach
+                                          @endif
                                         </tbody>
                                     </table>
                                 </div>
@@ -120,18 +135,22 @@
                                                             @csrf
                                                             @method('POST')
                                                         <div class="my-3">
-                                                            <label for="dept">Département <span style="color:red;"> *</span></label>
-                                                            <select style="font-family: Century Gothic; font-size:20px;" class="custom-select" name="departement_id" id="dept">
+                                                            <label for="dept">Site <span style="color:red;"> *</span></label>
+                                                            <select style="font-family: Century Gothic; font-size:20px;" class="custom-select" name="site_id" id="sitesss">
                                                                 <optgroup label="Liste Département">
                                                                     <option selected value="">Choisissez...</option>
-                                                                    @foreach($departements as $dept)
-                                                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                                                    @if(is_iterable($sites))
+                                                                    @foreach($sites as $site)
+                                                                    <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                                     @endforeach
+                                                                    @endif
                                                                 </optgroup>
                                                                 <optgroup label="Liste Type">
+                                                                    @if(is_iterable($types))
                                                                     @foreach($types as $type)
                                                                     <option value="{{ $type->name }}">{{ $type->name }}</option>
                                                                     @endforeach
+                                                                    @endif
                                                                 </optgroup>
                                                             </select>
                                                             <div class="invalid-feedback"> Please select a valid state. </div>
@@ -187,18 +206,22 @@
                                                             <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                                         </div>
                                                         <div class="mb-4">
-                                                            <label for="dept">Département <span style="color:red;"> *</span></label>
-                                                            <select style="font-family: Century Gothic; font-size:20px;" class="custom-select" name="departement_id" id="depts">
+                                                            <label for="dept">Site <span style="color:red;"> *</span></label>
+                                                            <select style="font-family: Century Gothic; font-size:20px;" class="custom-select" name="site_id" id="depts">
                                                                 <optgroup label="Liste Département">
                                                                     <option selected value="">Choisissez...</option>
-                                                                    @foreach($departements as $dept)
-                                                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                                                    @if(is_iterable($sites))
+                                                                    @foreach($sites as $site)
+                                                                    <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                                     @endforeach
+                                                                    @endif
                                                                 </optgroup>
                                                                 <optgroup label="Liste Type">
+                                                                    @if(is_iterable($types))
                                                                     @foreach($types as $type)
                                                                     <option value="{{ $type->name }}">{{ $type->name }}</option>
                                                                     @endforeach
+                                                                    @endif
                                                                 </optgroup>
                                                             </select>
                                                             <div class="invalid-feedback"> Please select a valid state. </div>

@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>TRACKING-INCIDENT</title>
+    <!-- <link rel="stylesheet" href="{{ url('css/atlantis.min.css') }}"> -->
 
     <!-- Simple bar CSS -->
     
@@ -84,9 +85,9 @@
             </a>
             </li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle text-muted pr-0" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <a class="nav-link dropdown-toggle text-muted pr-0" href="#!" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="avatar avatar-sm mt-2">
-                  <img src="{{ asset('img/sorepco.jpg') }}" alt="..." class="avatar-img rounded-circle">
+                  <img src="{{ asset('img/sorepco.jpg') }}" alt="" class="rounded-circle">
                 </span>
               </a>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
@@ -110,7 +111,7 @@
 
         
         <aside class="sidebar-left border-right bg-white shadow" id="leftSidebar" data-simplebar>
-          <a href="#" class="btn collapseSidebar toggle-btn d-lg-none text-muted ml-2 mt-3" data-toggle="toggle">
+          <a href="#!" class="btn collapseSidebar toggle-btn d-lg-none text-muted ml-2 mt-3" data-toggle="toggle">
             <i class="fe fe-x"><span class="sr-only"></span></i>
           </a>
           <nav class="vertnav navbar navbar-light" style="font-family: Century Gothic;">
@@ -120,30 +121,25 @@
             </div>
 
             <ul class="navbar-nav flex-fill w-100 mb-2">
-              <li class="nav-item w-100">
+              <li class="w-100">
                 <a class="nav-link mb-2" href="{{ URL::to('dashboard') }}">
                   <i class="fe fe-home fe-16"></i>
                   <span class="item-text text-lg ml-3">Tableau De Bord</span>
                 </a>
               </li>
             </ul>
+
             @can('parametrage')
             <p class="text-muted nav-heading mt-4 mb-1">
-              <span>Gestion Extra</span>
+              <span></span>
             </p>
             <ul class="navbar-nav flex-fill w-100 mb-2">
-              <li class="nav-item dropdown">
+              <li class="dropdown">
                 <a href="#ui-elements" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
                   <i class="fe fe-settings fe-16"></i>
                   <span class="ml-3 item-text text-xl">Paramétrage</span>
                 </a>
                 <ul class="collapse list-unstyled pl-4 w-100" id="ui-elements">
-                  @can('lister-departement')
-                  <li class="nav-item">
-                    <a class="nav-link pl-3" href="{{ URL::to('departements') }}"><span class="ml-1 item-text"><i class="fe fe-home fe-16 mr-3"></i>Département</span>
-                    </a>
-                  </li>
-                  @endcan
                   @can('lister-categorie')
                   <li class="nav-item">
                     <a class="nav-link pl-3" href="{{ URL::to('categories') }}"><span class="ml-1 item-text"><i class="fe fe-airplay fe-16 mr-3"></i>Catégorie</span></a>
@@ -157,7 +153,7 @@
 
                   @can('lister-site')
                   <li class="nav-item">
-                    <a class="nav-link pl-3" href="{{ URL::to('sites') }}"><span class="ml-1 item-text"><i class="fe fe-home fe-16 mr-3"></i>Site</span></a>
+                    <a class="nav-link pl-3" href="{{ URL::to('sites') }}"><span class="ml-1 item-text"><i class="fe fe-home fe-16 mr-3"></i>Site/Service</span></a>
                   </li>
                   @endcan
                   <li class="nav-item">
@@ -167,15 +163,16 @@
               </li>
             </ul>
             @endcan
+
             @can('gestion-utilisateur')
             <p class="text-muted nav-heading mt-4 mb-1">
-              <span>Gestion Utilisateur</span>
+              <span></span>
             </p>
             <ul class="navbar-nav flex-fill w-100 mb-2">
-              <li class="nav-item dropdown">
+              <li class="dropdown">
                 <a href="#profile" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
                   <i class="fe fe-user fe-16"></i>
-                  <span class="ml-3 item-text text-xl">Profile</span>
+                  <span class="ml-3 item-text text-lg">Gestion Utilisateur</span>
                 </a>
                 <ul class="collapse list-unstyled pl-4 w-100" id="profile">
                   @can('lister-role')
@@ -191,27 +188,41 @@
               </li>
             </ul>
             @endcan
+
             @can('gestion-incident')
             <p class="text-muted nav-heading mt-4 mb-1">
-              <span>Gestion Incident</span>
+              <span></span>
             </p>
-            
+
             <ul class="navbar-nav flex-fill w-100 mb-2">
-              <li class="nav-item w-100">
-                <a class="nav-link mb-2" href="{{ URL::to('incidents') }}">
+              <li class="w-100">
+                <a class="nav-link mb-2" href="{{ route('incidents', ['in' => 1]) }}">
                   <i class="fe fe-bell fe-16"></i>
-                  <span class="ml-3 item-text text-xl">Incident</span>
+                  <span class="item-text text-lg ml-3">Incident</span>
                 </a>
+              </li>
+            </ul>
 
-                <a class="nav-link" href="{{ URL::to('archivage') }}">
-                  <i class="fe fe-archive fe-16"></i>
-                  <span class="ml-3 item-text text-lg">Incident Archivé</span>
+            <ul class="navbar-nav flex-fill w-100 mb-2">
+              <li class="w-100">
+                <a class="nav-link mb-2" href="{{ route('archivage', ['arc' => 1]) }}">
+                  <i class="fe fe-bell fe-16"></i>
+                  <span class="item-text text-lg ml-3">Incident Archivé</span>
                 </a>
+              </li>
+            </ul>
 
-                <a class="nav-link mb-2" href="{{ URL::to('tasks') }}">
-                  <i class="fe fe-anchor fe-16"></i>
-                  <span class="ml-3 item-text text-xl">Suivi Tâche(s)</span>
+            <ul class="navbar-nav flex-fill w-100 mb-2">
+              <li class="w-100">
+                <a class="nav-link mb-2" href="{{ route('tasks', ['ta' => 1]) }}">
+                  <i class="fe fe-bell fe-16"></i>
+                  <span class="item-text text-lg ml-3">Suivi Tâche(s)</span>
                 </a>
+              </li>
+            </ul>
+
+            <ul class="navbar-nav flex-fill w-100 mb-2">
+              <li class="w-100">
 
                 @if(
                     Auth::user()->roles[0]->name == "COORDONATEUR" ||
@@ -220,7 +231,7 @@
                   )
                   <a class="nav-link mb-2" href="{{ URL::to('tableau_statistique') }}">
                     <i class="fe fe-columns fe-12"></i>
-                    <span class="ml-2 item-text text-lg">Tableau Statistique</span>
+                    <span class="ml-3 item-text text-sm">Tableau De Pilotage</span>
                   </a>
                 @endif
               </li>
@@ -237,40 +248,25 @@
               <li class="nav-item text-center my-1" style="margin-right: 4em;">
                 @if(Auth::user()->site_id)
                 <span class="badge badge-pill badge-success">
-                  AGENCE
-                </span>
-                @elseif(Auth::user()->departement_id)
-                <span class="badge badge-pill badge-success">
-                  SERVICE
+                  SITE
                 </span>
                 @endif
               </li>
               <li class="nav-item text-center w-100">
                 <span>
-                  @if(Auth::user()->site_id)
-
+                {{ Auth::user()->site_id ? Auth::user()->sites->name : "" }}
+                  <!-- @if(Auth::user()->site_id)
                       @if(Session::has('sites'))
                         @if(is_iterable(Session::get('sites')))
                           @for($i=0; $i< count(Session::get('sites')); $i++)
                               @if(intval(Session::get('sites')[$i]->id) == intval(Auth::user()->site_id))
                                   {{ Session::get('sites')[$i]->name }}
+                                  @break
                               @endif
                           @endfor
                         @endif
                       @endif
-                  @elseif(Auth::user()->departement_id)
-
-                    @if(Session::has('departements'))
-                      @if(is_iterable(Session::get('departements')))
-                        @for($i=0; $i< count(Session::get('departements')); $i++)
-                            @if(intval(Session::get('departements')[$i]->id) == intval(Auth::user()->departement_id))
-                                {{ Session::get('departements')[$i]->name }}
-                            @endif
-                        @endfor
-                      @endif
-                    @endif
-                  @else
-                  @endif
+                  @endif -->
                 </span>
               </li>
             </ul>
@@ -607,21 +603,20 @@
       });
     </script>
 
-    <script src="{{ url('js/d3.min.js') }}"></script>
-    <script src="{{ url('js/topojson.min.js') }}"></script>
+    <!-- <script src="{{ url('js/d3.min.js') }}"></script> -->
+    <!-- <script src="{{ url('js/topojson.min.js') }}"></script>
     <script src="{{ url('js/datamaps.all.min.js') }}"></script>
     <script src="{{ url('js/datamaps-zoomto.js') }}"></script>
-    <script src="{{ url('js/datamaps.custom.js') }}"></script>
-    <script src="{{ url('js/Chart.min.js') }}"></script>
-    <script>
-      /* defind global options */
+    <script src="{{ url('js/datamaps.custom.js') }}"></script> -->
+    <!-- <script src="{{ url('js/Chart.min.js') }}"></script> -->
+    <!-- <script>
       Chart.defaults.global.defaultFontFamily = base.defaultFontFamily;
       Chart.defaults.global.defaultFontColor = colors.mutedColor;
-    </script>
+    </script> -->
     <script src="{{ url('js/gauge.min.js') }}"></script>
     <script src="{{ url('js/jquery.sparkline.min.js') }}"></script>
-    <script src="{{ url('js/apexcharts.min.js') }}"></script>
-    <script src="{{ url('js/apexcharts.custom.js') }}"></script>
+    <!-- <script src="{{ url('js/apexcharts.min.js') }}"></script> -->
+    <!-- <script src="{{ url('js/apexcharts.custom.js') }}"></script> -->
     <script src="{{ url('js/jquery.mask.min.js') }}"></script>
     <script src="{{ url('js/select2.min.js') }}"></script>
     <script src="{{ url('js/jquery.steps.min.js') }}"></script>

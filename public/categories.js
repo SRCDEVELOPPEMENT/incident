@@ -8,9 +8,9 @@ $('#btn_add_cate').on('click', function(){
         message+="Veuillez Renseigner Une Catégorie !\n";
     }
 
-    if(!$('#dept').val().trim()){
+    if(!$('#sitesss').val().trim()){
         good = false;
-        message+="Veuillez Choisir Un Département !\n";
+        message+="Veuillez Choisir Un Site !\n";
     }
 
     if(!good){
@@ -197,7 +197,7 @@ $(document).on('click', '#btn_edite_cate', function(){
     }
     if(!$('#depts').val()){
         good = false;
-        message+="Veuillez Choisir Un Département !\n";
+        message+="Veuillez Choisir Un Site !\n";
     }
     if(!good){
         good = false;

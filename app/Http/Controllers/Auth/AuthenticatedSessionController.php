@@ -15,7 +15,7 @@ use App\Models\User;
 use App\Models\Site;
 use App\Models\Type;
 use App\Models\Categorie;
-use App\Models\Departement;
+use App\Models\Users_incident;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -61,15 +61,15 @@ class AuthenticatedSessionController extends Controller
         $roles = DB::table('roles')->get();
         $files = DB::table('fichiers')->get();
         $logs = Logtache::with('users', 'tasks')->get();
-        $users = User::with('sites', 'departements')->get();
+        $users = User::with('sites')->get();
         $sites = Site::with('types')->get();
         $types = DB::table('types')->get();
         $tasks = array();
         $processus = DB::table('pros')->get();
-        $categories = Categorie::with('departements')->get();
-        $departements = Departement::get();
-        $all_users_incidents = DB::table('users_incidents')->get();
-        $users_incidents = DB::table('users_incidents')->where('user_id', '=', $user->id)->get();
+        $categories = Categorie::with('sites')->get();
+        $all_users_incidents = Users_incident::with('users')->get();
+        $users_incidents = Users_incident::with('users')->where('user_id', '=', $user->id)->get();
+
 
         if(
             ($user->roles[0]->name == "EMPLOYE") ||
@@ -82,14 +82,14 @@ class AuthenticatedSessionController extends Controller
         for ($m=0; $m < count($users_incidents); $m++) {
             $ui = $users_incidents[$m];
 
-            $problem = Incident::with('categories.departements', 'processus', 'sites')
+            $problem = Incident::with('categories', 'processus', 'sites')
             ->where('number', '=', $ui->incident_number)->get()->first();
 
-            $ttaches = Tache::with('departements', 'sites.types')
+            $ttaches = Tache::with('sites.types')
             ->where('incident_number', '=', $problem->number)
             ->get();
 
-            for ($xe=0; $xe < count($ttaches); $xe++) { 
+            for ($xe=0; $xe < count($ttaches); $xe++) {
                 $tachi = $ttaches[$xe];
                 array_push($tasks, $tachi);
             }
@@ -99,35 +99,33 @@ class AuthenticatedSessionController extends Controller
         }}}
         elseif (
             ($user->roles[0]->name == "ADMINISTRATEUR") ||
-            ($user->roles[0]->name == "CONTROLLEUR")
+            ($user->roles[0]->name == "CONTROLLEUR") ||
+            ($user->roles[0]->name == "SuperAdmin")
         )
         {
-            $all_incidents = Incident::with('categories.departements', 'processus', 'sites')
+            $all_incidents = Incident::with('categories', 'processus', 'sites')
             ->get();
+            
         }else {
             $all_incidents = array();
         }
 
         //IMPORTANT
         Session ([
-            'incidents' => count($incidents) > 0 ? $incidents : (count($all_incidents) > 0 ? $all_incidents : []),
             'logs' => $logs,
-            'files' => $files,
             'roles' => $roles,
             'users' => $users,
             'sites' => $sites,
             'types' => $types,
-            'tasks' => $tasks,
+            'times' => 1,
             'processus' => $processus,
             'categories' => $categories,
-            'departements' => $departements,
-            'users_incidents' => $all_users_incidents,
-            'users_incidents_logIn' => $users_incidents,
         ]);
 
         Session::save();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return redirect()->to('tasksencours?ta=1');
+        //return redirect()->intended(RouteServiceProvider::HOME);
         }
     }
 

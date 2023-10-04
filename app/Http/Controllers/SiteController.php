@@ -27,12 +27,6 @@ class SiteController extends Controller
         $this->middleware('permission:supprimer-site', ['only' => ['destroy']]);
     }
 
-    public function getSites()
-    {
-        return Session::get('sites');
-    }
-
-
     /**
      * Display a listing of the resource.
      *
@@ -54,8 +48,14 @@ class SiteController extends Controller
             "ADAMAOUA",
             "EST",
         ];
+
+        $sites = Site::with('types')->get();
+        $types = DB::table('types')->get();
+
         return view('sites.index',
         [
+         'types' => $types,
+         'sites' => $sites,
          'regions' => $regions,
         ]);
     }
@@ -70,7 +70,7 @@ class SiteController extends Controller
     {
         $input = $request->all();
 
-        $get_sites = $this->getSites();
+        $get_sites = Site::with('types')->get();
         $oui = true;
 
         foreach ($get_sites as $site) {
@@ -94,17 +94,6 @@ class SiteController extends Controller
             $site->save();
 
             $site = Site::with('types')->get()->last();
-
-            if(Session::has('sites')){
-                $newSites = array();
-                array_push($newSites, $site);
-
-                for ($w=0; $w < count($get_sites); $w++) { 
-                    $sit = $get_sites[$w];
-                    array_push($newSites, $sit);
-                }
-                Session::put('sites', $newSites);
-            }
 
             smilify('success', 'Site Enrégistrer Avec Succèss !');
 
@@ -135,7 +124,7 @@ class SiteController extends Controller
      */
     public function update(Request $request)
     {
-        $sites = $this->getSites();
+        $sites = Site::with('types')->get();
 
         $Qte = 0;
         $tab = array();
@@ -166,30 +155,6 @@ class SiteController extends Controller
                 'type_id' => intval($request->input('type')),
             ]);
             
-            if(Session::has('sites')){
-
-                $site_edit = NULL;
-                $newSites = array();
-    
-                for ($j=0; $j < count($sites); $j++) {
-                        $site_courant = $sites[$j];
-                        if(intval($request->input('id')) == intval($site_courant->id)){
-
-                            $site_edit = $site_courant;
-                            $site_edit->name = $request->name;
-                            $site_edit->region = $request->region;
-                            $site_edit->type_id = intval($request->input('type'));
-
-                        } else{
-                            array_push($newSites, $site_courant);
-                        }
-                }
-
-                array_push($newSites, $site_edit);
-
-                Session::put('sites', $newSites);
-            }
-
             smilify('success', 'Site Modifier Avec Succèss !');
 
             return response()->json([1]);    
@@ -205,20 +170,6 @@ class SiteController extends Controller
     public function destroy(Request $request)
     {
         DB::table('sites')->where('id', $request->id)->delete();
-
-        if(Session::has('sites')){
-            $newSites = array();
-            $sites = $this->getSites();
-
-            for ($j=0; $j < count($sites); $j++) {
-                $site_courant = $sites[$j];
-                if(intval($request->id) != intval($site_courant->id)){
-                    array_push($newSites, $site_courant);
-                }
-            }
-
-            Session::put('sites', $newSites);
-        }
 
         smilify('success', 'Site Supprimer Avec Succèss !');
         

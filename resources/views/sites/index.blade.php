@@ -12,7 +12,7 @@
                                 <div class="col-md-5 text-left text-xl text-uppercase">
                                     <h1 class="mb-2">
                                     <span class="fe fe-info mr-2"></span>    
-                                    Liste Sites Notable</h1>
+                                    Liste Sites</h1>
                                 </div>
                                     <div class="col-md-7 text-right">
                                         <button 
@@ -52,9 +52,8 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                        @if(Session::has('departements'))
-                                                        @if(is_iterable(Session::get('departements')))
-                                                        @foreach(Session::get('sites') as $site)
+                                                        @if(is_iterable($sites))
+                                                        @foreach($sites as $site)
                                                             <tr style="font-size:15px;">
                                                                 <td><label>{{ $site->name }}</label></td>
                                                                 <td><label>{{ $site->types ? $site->types->name : '' }}</label></td>
@@ -90,7 +89,6 @@
                                                             </tr>
                                                         @endforeach
                                                         @endif
-                                                        @endif
                                                 </tbody>
                                             </table>
                                     </div>
@@ -125,21 +123,21 @@
                                                             <label for="site"> Région Du Site <span style="color:red;"> *</span></label>
                                                             <select style="font-size:20px;" class="form-control" id="site_region" name="region">
                                                                 <option value="">Choisissez...</option>
+                                                                @if(is_iterable($regions))
                                                                 @foreach($regions as $region)
                                                                 <option value="{{ $region }}">{{ $region }}</option>
                                                                 @endforeach
+                                                                @endif
                                                             </select>
                                                         </div>
                                                         <div class="form-group col-md-12 my-4">
                                                             <label for="site"> Type Du Site <span style="color:red;"> *</span></label>
                                                             <select style="font-size:20px;" class="form-control" id="site_type" name="type">
                                                                 <option value="">Choisissez...</option>
-                                                                @if(Session::has('types'))
-                                                                @if(is_iterable(Session::get('types')))
-                                                                @foreach(Session::get('types') as $type)
+                                                                @if(is_iterable($types))
+                                                                @foreach($types as $type)
                                                                 <option value="{{ $type->id }}">{{ $type->name }}</option>
                                                                 @endforeach
-                                                                @endif
                                                                 @endif
                                                             </select>
                                                         </div>
@@ -230,21 +228,21 @@
                                                             <label for="site_regions"> Région Du Site <span style="color:red;"> *</span></label>
                                                             <select style="font-size:20px;" class="form-control" id="site_regions" name="region">
                                                                 <option value="">Choisissez...</option>
+                                                                @if(is_iterable($regions))
                                                                 @foreach($regions as $region)
                                                                 <option value="{{ $region }}">{{ $region }}</option>
                                                                 @endforeach
+                                                                @endif
                                                             </select>
                                                     </div>
                                                     <div class="form-group my-4">
                                                         <label for="site"> Type Du Site <span style="color:red;"> *</span></label>
                                                         <select style="font-size:20px;" class="form-control" id="site_types" name="type">
                                                             <option value="">Choisissez...</option>
-                                                            @if(Session::has('types'))
-                                                            @if(is_iterable(Session::get('types')))
-                                                            @foreach(Session::get('types') as $type)
+                                                            @if(is_iterable($types))
+                                                            @foreach($types as $type)
                                                                 <option value="{{ $type->id }}">{{ $type->name }}</option>
                                                             @endforeach
-                                                            @endif
                                                             @endif
                                                         </select>
                                                     </div>

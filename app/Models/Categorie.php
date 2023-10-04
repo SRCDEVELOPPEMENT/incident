@@ -4,27 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Departement;
 use App\Models\Incident;
+use App\Models\Site;
 
 class Categorie extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'id', 
+        'id',
         'name',
         'created_at',
-        'departement_id',
+        'site_id',
     ];
 
-    public function incients()
+    public function incidents()
     {
         return $this->hasMany(Incident::class);
     }
 
-    public function departements()
+    public function sites()
     {
-        return $this->belongsTo(Departement::class, 'departement_id');
+        return $this->belongsTo(Site::class, 'site_id');
     }
 }

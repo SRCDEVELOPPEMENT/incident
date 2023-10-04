@@ -1,11 +1,14 @@
 $('#annee_total').change( function(){
     if($(this).val()){
         
+        $('#par_region').val($(this).val());
+        $('#par_site').val($(this).val());
+        $('#par_global').val($(this).val());
+
         let ids = JSON.parse($(this).attr('data-ids'));
         let dates = JSON.parse($(this).attr('data-created'));
         let due_dates = JSON.parse($(this).attr('data-exited'));
         let incidents = JSON.parse($(this).attr('data-incidents'));
-        let departements = JSON.parse($(this).attr('data-departements'));
         let tab = [];
         let incident_direction = [];
 
@@ -506,57 +509,6 @@ $('#annee_total').change( function(){
         $('#ann').replaceWith(`<span class="h5 text-gray-300" id="ann">${ann < 10 ? 0 +""+ ann : ann}</span>`);
         $('#en_retar').replaceWith(`<span class="h5 text-warning" id="en_retar">${enretard < 10 ? 0 +""+ enretard : enretard}</span>`);
 
-        $('#progress_cloture').replaceWith(`
-            <div
-                 id="progress_cloture"
-                 class="progress-bar bg-success"
-                 role="progressbar" 
-                 style="width: ${tab.length > 0 ? (cls/tab.length) * 100 > 0 ? (cls/tab.length) * 100 : 3 : 3}%;" 
-                 aria-valuenow="${tab.length > 0 ? (cls/tab.length) * 100 > 0 ? (cls/tab.length) * 100 : 3 : 3}" 
-                 aria-valuemin="0" 
-                 aria-valuemax="100"
-                >${tab.length > 0 ? (cls/tab.length) * 100 > 0 ? Math.floor((cls/tab.length) * 100) : 0 : 0}%
-            </div>
-        `);
-
-        $('#progress_encours').replaceWith(`
-            <div 
-                 id="progress_encours" 
-                 class="progress-bar bg-primary" 
-                 role="progressbar" 
-                 style="width: ${tab.length > 0 ? (ens/tab.length) * 100 > 0 ? (ens/tab.length) * 100 : 3 : 3}%;" 
-                 aria-valuenow="${tab.length > 0 ? (ens/tab.length) * 100 > 0 ? (ens/tab.length) * 100 : 3 : 3}" 
-                 aria-valuemin="0" 
-                 aria-valuemax="100"
-                >${tab.length > 0 ? (ens/tab.length) * 100 > 0 ? Math.floor((ens/tab.length) * 100) : 0 : 0}%
-            </div>
-        `);
-
-        $('#progress_annule').replaceWith(`
-            <div  
-                 id="progress_annule" 
-                 class="progress-bar bg-light" 
-                 role="progressbar" 
-                 style="width: ${tab.length > 0 ? (ann/tab.length) * 100 > 0 ? (ann/tab.length) * 100 : 3 : 3}%;" 
-                 aria-valuenow="${tab.length > 0 ? (ann/tab.length) * 100 > 0 ? (ann/tab.length) * 100 : 3 : 3}" 
-                 aria-valuemin="0" aria-valuemax="100"
-                > ${tab.length > 0 ? (ann/tab.length) * 100 > 0 ? Math.floor((ann/tab.length) * 100) : 0 : 0}% 
-            </div>
-        `);
-
-        $('#progress_enretard').replaceWith(`
-            <div 
-                id="progress_enretard"
-                class="progress-bar bg-warning" 
-                role="progressbar" 
-                style="width: ${tab.length > 0 ? (enretard/ens) * 100 > 0 ? (enretard/ens) * 100 : 3 : 3 }%;"
-                aria-valuenow="${tab.length > 0 ? (enretard/ens) * 100 > 0 ? (enretard/ens) * 100 : 3 : 3 }"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                >${tab.length > 0 ? (enretard/ens) * 100 > 0 ? Math.floor((enretard/ens) * 100) : 0 : 0 }%
-            </div>
-        `);
-
         //TOTAL
         $('#total_ouest').replaceWith(`<td id="total_ouest">${ouest < 10 ? 0 +""+ ouest : ouest }</td>`);
         $('#total_nordouest').replaceWith(`<td id="total_nordouest">${nord_ouest < 10 ? 0 +""+ nord_ouest : nord_ouest}</td>`);
@@ -616,153 +568,6 @@ $('#annee_total').change( function(){
         $('#enretard_nord').replaceWith(`<td id="enretard_nord">${enretard_nord < 10 ? 0 +""+ enretard_nord : enretard_nord}</td>`);
         $('#enretard_adamaoua').replaceWith(`<td id="enretard_adamaoua">${enretard_adamaoua < 10 ? 0 +""+ enretard_adamaoua : enretard_adamaoua}</td>`);
         $('#enretard_est').replaceWith(`<td id="enretard_est">${enretard_est < 10 ? 0 +""+ enretard_est : enretard_est}</td>`);
-
-        let incidentsDepartement = [];
-
-        for (let indexx = 0; indexx < departements.length; indexx++) {
-            const depart = departements[indexx];
-            
-            var nombre_incident_dept = 0;
-            var nbr_incident_dept = [];
-            var nbr_incident_date = [];
-            let cloture = 0;
-            let anuler = 0
-            let encou = 0;
-            let enretard = 0;
-
-            let jan_dept = 0;
-            let fev_dept = 0;
-            let mars_dept = 0;
-            let avril_dept = 0;
-            let mai_dept = 0;
-            let jui_dept = 0;
-            let juil_dept = 0;
-            let aout_dept = 0;
-            let sept_dept = 0;
-            let oct_dept = 0;
-            let nov_dept = 0;
-            let decc_dept = 0;
-
-            for (let v = 0; v < tab.length; v++) {
-                const incident = tab[v];
-
-                if(incident.categories){
-                    if(incident.categories.departement_id){
-                        if(parseInt(incident.categories.departements.id) == parseInt(depart.id)){
-                            nombre_incident_dept +=1;
-                            nbr_incident_dept.push(incident);
-                            nbr_incident_date.push(incident.created_at)
-                        }
-                    }
-                }
-            }
-
-            incidentsDepartement.push(nbr_incident_dept);
-
-            $(`#instances${indexx}`).replaceWith(`
-                <span id="instances${indexx}" style="font-size: 2em;" class="small text-white">
-                    ${nombre_incident_dept}
-                </span>`
-            );
-            
-            for (let index = 0; index < nbr_incident_dept.length; index++) {
-                const incide = nbr_incident_dept[index];
-
-                let index_declaration = -1;
-
-                if(incide.status == "CLÔTURÉ"){
-                    cloture +=1;
-                }else if(incide.status == "ANNULÉ"){
-                    anuler +=1;
-                }else if(incide.status == "ENCOURS"){
-                    encou +=1;
-                }
-
-                for (let y = 0; y < ids.length; y++) {
-                    const number = ids[y];
-                    if(number == incide.number){
-                        index_declaration = y;
-                    }
-                }
-
-                if((index_declaration == 0) || (index_declaration > 0)){ 
-                    if(incide.due_date){
-                        if(incide.status == "ENCOURS"){
-
-                            let due_date = (parseInt(due_dates[index_declaration].replaceAll("-", "")));
-                            let today = parseInt(new Date().toISOString().split('T')[0].replaceAll("-", ""));
-
-                            if(due_date < today){
-                                enretard +=1;
-                            }
-                        }    
-                    }
-
-                    switch (dates[index_declaration].substring(5, 7)) {
-                        case '01':
-                            jan_dept +=1;
-                            break;
-                        case '02':
-                            fev_dept +=1;
-                            break;
-                        case '03':
-                            mars_dept +=1;
-                            break;
-                        case '04':
-                            avril_dept +=1;
-                            break;
-                        case '05':
-                            mai_dept +=1;
-                            break;
-                        case '06':
-                            jui_dept +=1;
-                            break;
-                        case '07':
-                            juil_dept +=1;
-                            break;
-                        case '08':
-                            aout_dept +=1;
-                            break;
-                        case '09':
-                            sept_dept +=1;
-                            break;
-                        case '10':
-                            oct_dept +=1;
-                            break;
-                        case '11':
-                            nov_dept +=1;
-                            break;
-                        case '12':
-                            decc_dept +=1;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-            
-            $(`#janvier_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="janvier_dept${indexx}">${jan_dept < 10 ? 0 +""+ jan_dept : jan_dept}</span>`);
-            $(`#fevrier_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="fevrier_dept${indexx}">${fev_dept < 10 ? 0 +""+ fev_dept : fev_dept}</span>`);
-            $(`#mars_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="mars_dept${indexx}">${mars_dept < 10 ? 0 +""+ mars_dept : mars_dept}</span>`);
-            $(`#avril_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="avril_dept${indexx}">${avril_dept < 10 ? 0 +""+ avril_dept : avril_dept}</span>`);
-            $(`#mai_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="mai_dept${indexx}">${mai_dept < 10 ? 0 +""+ mai_dept : mai_dept}</span>`);
-            $(`#juin_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="juin_dept${indexx}">${jui_dept < 10 ? 0 +""+ jui_dept : jui_dept}</span>`);
-            $(`#juillet_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="juillet_dept${indexx}">${juil_dept < 10 ? 0 +""+ juil_dept : juil_dept}</span>`);
-            $(`#aout_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="aout_dept${indexx}">${aout_dept < 10 ? 0 +""+ aout_dept : aout_dept}</span>`);
-            $(`#septembre_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="septembre_dept${indexx}">${sept_dept < 10 ? 0 +""+ sept_dept : sept_dept}</span>`);
-            $(`#octobre_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="octobre_dept${indexx}">${oct_dept < 10 ? 0 +""+ oct_dept : oct_dept}</span>`);
-            $(`#novembre_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="novembre_dept${indexx}">${nov_dept < 10 ? 0 +""+ nov_dept : nov_dept}</span>`);
-            $(`#deccembre_dept${indexx}`).replaceWith(`<span class="text-xs text-white" id="deccembre_dept${indexx}">${decc_dept < 10 ? 0 +""+ decc_dept : decc_dept}</span>`);
-
-            $(`#ko${indexx}`).replaceWith(`<span id="ko${indexx}">${cloture}</span>`);
-            $(`#del${indexx}`).replaceWith(`<span id="del${indexx}">${anuler}</span>`);
-            $(`#en${indexx}`).replaceWith(`<span id="en${indexx}">${encou}</span>`);
-            $(`#retardataire${indexx}`).replaceWith(`<span id="retardataire${indexx}" class="small text-xl">${enretard}</span>`);
-        }
-
-        for (let k = 0; k < departements.length; k++) {
-            $(`.btnLst${k}`).attr('data-incidentsDepartement', JSON.stringify(incidentsDepartement[k]));
-        }
 
         let janvier_total = 0;
         let fevrier_total = 0;
@@ -1134,70 +939,70 @@ $('#annee_total').change( function(){
         $('#incident_deccembre').attr('data-incident', JSON.stringify(deccembre_incident));
 
 
-        $('#janv_total').replaceWith(`<td id="janv_total">${janvier_total < 10 ? 0 +""+ janvier_total : janvier_total}</td>`);
-        $('#fev_total').replaceWith(`<td id="fev_total">${fevrier_total < 10 ? 0 +""+ fevrier_total : fevrier_total}</td>`);
-        $('#mars_total').replaceWith(`<td id="mars_total">${mars_total < 10 ? 0 +""+ mars_total : mars_total}</td>`);
-        $('#avril_total').replaceWith(`<td id="avril_total">${avril_total < 10 ? 0 +""+ avril_total : avril_total}</td>`);
-        $('#mai_total').replaceWith(`<td id="mai_total">${mai_total < 10 ? 0 +""+ mai_total : mai_total}</td>`);
-        $('#juin_total').replaceWith(`<td id="juin_total">${juin_total < 10 ? 0 +""+ juin_total : juin_total}</td>`);
-        $('#juillet_total').replaceWith(`<td id="juillet_total">${juillet_total < 10 ? 0 +""+ juillet_total : juillet_total}</td>`);
-        $('#aout_total').replaceWith(`<td id="aout_total">${aout_total < 10 ? 0 +""+ aout_total : aout_total}</td>`);
-        $('#septembre_total').replaceWith(`<td id="septembre_total">${septembre_total < 10 ? 0 +""+ septembre_total : septembre_total}</td>`);
-        $('#octobre_total').replaceWith(`<td id="octobre_total">${octobre_total < 10 ? 0 +""+ octobre_total : octobre_total}</td>`);
-        $('#novembre_total').replaceWith(`<td id="novembre_total">${novembre_total < 10 ? 0 +""+ novembre_total : novembre_total}</td>`);
-        $('#deccembre_total').replaceWith(`<td id="deccembre_total">${deccembre_total < 10 ? 0 +""+ deccembre_total : deccembre_total}</td>`);
+        // $('#janv_total').replaceWith(`<td id="janv_total">${janvier_total < 10 ? 0 +""+ janvier_total : janvier_total}</td>`);
+        // $('#fev_total').replaceWith(`<td id="fev_total">${fevrier_total < 10 ? 0 +""+ fevrier_total : fevrier_total}</td>`);
+        // $('#mars_total').replaceWith(`<td id="mars_total">${mars_total < 10 ? 0 +""+ mars_total : mars_total}</td>`);
+        // $('#avril_total').replaceWith(`<td id="avril_total">${avril_total < 10 ? 0 +""+ avril_total : avril_total}</td>`);
+        // $('#mai_total').replaceWith(`<td id="mai_total">${mai_total < 10 ? 0 +""+ mai_total : mai_total}</td>`);
+        // $('#juin_total').replaceWith(`<td id="juin_total">${juin_total < 10 ? 0 +""+ juin_total : juin_total}</td>`);
+        // $('#juillet_total').replaceWith(`<td id="juillet_total">${juillet_total < 10 ? 0 +""+ juillet_total : juillet_total}</td>`);
+        // $('#aout_total').replaceWith(`<td id="aout_total">${aout_total < 10 ? 0 +""+ aout_total : aout_total}</td>`);
+        // $('#septembre_total').replaceWith(`<td id="septembre_total">${septembre_total < 10 ? 0 +""+ septembre_total : septembre_total}</td>`);
+        // $('#octobre_total').replaceWith(`<td id="octobre_total">${octobre_total < 10 ? 0 +""+ octobre_total : octobre_total}</td>`);
+        // $('#novembre_total').replaceWith(`<td id="novembre_total">${novembre_total < 10 ? 0 +""+ novembre_total : novembre_total}</td>`);
+        // $('#deccembre_total').replaceWith(`<td id="deccembre_total">${deccembre_total < 10 ? 0 +""+ deccembre_total : deccembre_total}</td>`);
         
-        $('#janv_encour').replaceWith(`<td id="janv_encour">${janvier_encours < 10 ? 0 +""+ janvier_encours : janvier_encours}</td>`);
-        $('#fev_encour').replaceWith(`<td id="fev_encour">${fevrier_encours < 10 ? 0 +""+ fevrier_encours : fevrier_encours}</td>`);
-        $('#mars_encour').replaceWith(`<td id="mars_encour">${mars_encours < 10 ? 0 +""+ mars_encours : mars_encours}</td>`);
-        $('#avril_encour').replaceWith(`<td id="avril_encour">${avril_encours < 10 ? 0 +""+ avril_encours : avril_encours}</td>`);
-        $('#mai_encour').replaceWith(`<td id="mai_encour">${mai_encours < 10 ? 0 +""+ mai_encours : mai_encours}</td>`);
-        $('#juin_encour').replaceWith(`<td id="juin_encour">${juin_encours < 10 ? 0 +""+ juin_encours : juin_encours}</td>`);
-        $('#juillet_encour').replaceWith(`<td id="juillet_encour">${juillet_encours < 10 ? 0 +""+ juillet_encours : juillet_encours}</td>`);
-        $('#aout_encour').replaceWith(`<td id="aout_encour">${aout_encours < 10 ? 0 +""+ aout_encours : aout_encours}</td>`);
-        $('#septembre_encour').replaceWith(`<td id="septembre_encour">${septembre_encours < 10 ? 0 +""+ septembre_encours : septembre_encours}</td>`);
-        $('#octobre_encour').replaceWith(`<td id="octobre_encour">${octobre_encours < 10 ? 0 +""+ octobre_encours : octobre_encours}</td>`);
-        $('#novembre_encour').replaceWith(`<td id="novembre_encour">${novembre_encours < 10 ? 0 +""+ novembre_encours : novembre_encours}</td>`);
-        $('#deccembre_encour').replaceWith(`<td id="deccembre_encour">${deccembre_encours < 10 ? 0 +""+ deccembre_encours : deccembre_encours}</td>`);
+        // $('#janv_encour').replaceWith(`<td id="janv_encour">${janvier_encours < 10 ? 0 +""+ janvier_encours : janvier_encours}</td>`);
+        // $('#fev_encour').replaceWith(`<td id="fev_encour">${fevrier_encours < 10 ? 0 +""+ fevrier_encours : fevrier_encours}</td>`);
+        // $('#mars_encour').replaceWith(`<td id="mars_encour">${mars_encours < 10 ? 0 +""+ mars_encours : mars_encours}</td>`);
+        // $('#avril_encour').replaceWith(`<td id="avril_encour">${avril_encours < 10 ? 0 +""+ avril_encours : avril_encours}</td>`);
+        // $('#mai_encour').replaceWith(`<td id="mai_encour">${mai_encours < 10 ? 0 +""+ mai_encours : mai_encours}</td>`);
+        // $('#juin_encour').replaceWith(`<td id="juin_encour">${juin_encours < 10 ? 0 +""+ juin_encours : juin_encours}</td>`);
+        // $('#juillet_encour').replaceWith(`<td id="juillet_encour">${juillet_encours < 10 ? 0 +""+ juillet_encours : juillet_encours}</td>`);
+        // $('#aout_encour').replaceWith(`<td id="aout_encour">${aout_encours < 10 ? 0 +""+ aout_encours : aout_encours}</td>`);
+        // $('#septembre_encour').replaceWith(`<td id="septembre_encour">${septembre_encours < 10 ? 0 +""+ septembre_encours : septembre_encours}</td>`);
+        // $('#octobre_encour').replaceWith(`<td id="octobre_encour">${octobre_encours < 10 ? 0 +""+ octobre_encours : octobre_encours}</td>`);
+        // $('#novembre_encour').replaceWith(`<td id="novembre_encour">${novembre_encours < 10 ? 0 +""+ novembre_encours : novembre_encours}</td>`);
+        // $('#deccembre_encour').replaceWith(`<td id="deccembre_encour">${deccembre_encours < 10 ? 0 +""+ deccembre_encours : deccembre_encours}</td>`);
 
-        $('#janv_annuler').replaceWith(`<td id="janv_annuler">${janvier_annuler < 10 ? 0 +""+ janvier_annuler : janvier_annuler}</td>`);
-        $('#fev_annuler').replaceWith(`<td id="fev_annuler">${fevrier_annuler < 10 ? 0 +""+ fevrier_annuler : fevrier_annuler}</td>`);
-        $('#mars_annuler').replaceWith(`<td id="mars_annuler">${mars_annuler < 10 ? 0 +""+ mars_annuler : mars_annuler}</td>`);
-        $('#avril_annuler').replaceWith(`<td id="avril_annuler">${avril_annuler < 10 ? 0 +""+ avril_annuler : avril_annuler}</td>`);
-        $('#mai_annuler').replaceWith(`<td id="mai_annuler">${mai_annuler < 10 ? 0 +""+ mai_annuler : mai_annuler}</td>`);
-        $('#juin_annuler').replaceWith(`<td id="juin_annuler">${juin_annuler < 10 ? 0 +""+ juin_annuler : juin_annuler}</td>`);
-        $('#juillet_annuler').replaceWith(`<td id="juillet_annuler">${juillet_annuler < 10 ? 0 +""+ juillet_annuler : juillet_annuler}</td>`);
-        $('#aout_annuler').replaceWith(`<td id="aout_annuler">${aout_annuler < 10 ? 0 +""+ aout_annuler : aout_annuler}</td>`);
-        $('#septembre_annuler').replaceWith(`<td id="septembre_annuler">${septembre_annuler < 10 ? 0 +""+ septembre_annuler : septembre_annuler}</td>`);
-        $('#octobre_annuler').replaceWith(`<td id="octobre_annuler">${octobre_annuler < 10 ? 0 +""+ octobre_annuler : octobre_annuler}</td>`);
-        $('#novembre_annuler').replaceWith(`<td id="novembre_annuler">${novembre_annuler < 10 ? 0 +""+ novembre_annuler : novembre_annuler}</td>`);
-        $('#deccembre_annuler').replaceWith(`<td id="deccembre_annuler">${deccembre_annuler < 10 ? 0 +""+ deccembre_annuler : deccembre_annuler}</td>`);
+        // $('#janv_annuler').replaceWith(`<td id="janv_annuler">${janvier_annuler < 10 ? 0 +""+ janvier_annuler : janvier_annuler}</td>`);
+        // $('#fev_annuler').replaceWith(`<td id="fev_annuler">${fevrier_annuler < 10 ? 0 +""+ fevrier_annuler : fevrier_annuler}</td>`);
+        // $('#mars_annuler').replaceWith(`<td id="mars_annuler">${mars_annuler < 10 ? 0 +""+ mars_annuler : mars_annuler}</td>`);
+        // $('#avril_annuler').replaceWith(`<td id="avril_annuler">${avril_annuler < 10 ? 0 +""+ avril_annuler : avril_annuler}</td>`);
+        // $('#mai_annuler').replaceWith(`<td id="mai_annuler">${mai_annuler < 10 ? 0 +""+ mai_annuler : mai_annuler}</td>`);
+        // $('#juin_annuler').replaceWith(`<td id="juin_annuler">${juin_annuler < 10 ? 0 +""+ juin_annuler : juin_annuler}</td>`);
+        // $('#juillet_annuler').replaceWith(`<td id="juillet_annuler">${juillet_annuler < 10 ? 0 +""+ juillet_annuler : juillet_annuler}</td>`);
+        // $('#aout_annuler').replaceWith(`<td id="aout_annuler">${aout_annuler < 10 ? 0 +""+ aout_annuler : aout_annuler}</td>`);
+        // $('#septembre_annuler').replaceWith(`<td id="septembre_annuler">${septembre_annuler < 10 ? 0 +""+ septembre_annuler : septembre_annuler}</td>`);
+        // $('#octobre_annuler').replaceWith(`<td id="octobre_annuler">${octobre_annuler < 10 ? 0 +""+ octobre_annuler : octobre_annuler}</td>`);
+        // $('#novembre_annuler').replaceWith(`<td id="novembre_annuler">${novembre_annuler < 10 ? 0 +""+ novembre_annuler : novembre_annuler}</td>`);
+        // $('#deccembre_annuler').replaceWith(`<td id="deccembre_annuler">${deccembre_annuler < 10 ? 0 +""+ deccembre_annuler : deccembre_annuler}</td>`);
 
-        $('#janv_cloture').replaceWith(`<td id="janv_cloture">${janvier_cloture < 10 ? 0 +""+ janvier_cloture : janvier_cloture}</td>`);
-        $('#fev_cloture').replaceWith(`<td id="fev_cloture">${fevrier_cloture < 10 ? 0 +""+ fevrier_cloture : fevrier_cloture}</td>`);
-        $('#mars_cloture').replaceWith(`<td id="mars_cloture">${mars_cloture < 10 ? 0 +""+ mars_cloture : mars_cloture}</td>`);
-        $('#avril_cloture').replaceWith(`<td id="avril_cloture">${avril_cloture < 10 ? 0 +""+ avril_cloture : avril_cloture}</td>`);
-        $('#mai_cloture').replaceWith(`<td id="mai_cloture">${mai_cloture < 10 ? 0 +""+ mai_cloture : mai_cloture}</td>`);
-        $('#juin_cloture').replaceWith(`<td id="juin_cloture">${juin_cloture < 10 ? 0 +""+ juin_cloture : juin_cloture}</td>`);
-        $('#juillet_cloture').replaceWith(`<td id="juillet_cloture">${juillet_cloture < 10 ? 0 +""+ juillet_cloture : juillet_cloture}</td>`);
-        $('#aout_cloture').replaceWith(`<td id="aout_cloture">${aout_cloture < 10 ? 0 +""+ aout_cloture : aout_cloture}</td>`);
-        $('#septembre_cloture').replaceWith(`<td id="septembre_cloture">${septembre_cloture < 10 ? 0 +""+ septembre_cloture : septembre_cloture}</td>`);
-        $('#octobre_cloture').replaceWith(`<td id="octobre_cloture">${octobre_cloture < 10 ? 0 +""+ octobre_cloture : octobre_cloture}</td>`);
-        $('#novembre_cloture').replaceWith(`<td id="novembre_cloture">${novembre_cloture < 10 ? 0 +""+ novembre_cloture : novembre_cloture}</td>`);
-        $('#deccembre_cloture').replaceWith(`<td id="deccembre_cloture">${deccembre_cloture < 10 ? 0 +""+ deccembre_cloture : deccembre_cloture}</td>`);
+        // $('#janv_cloture').replaceWith(`<td id="janv_cloture">${janvier_cloture < 10 ? 0 +""+ janvier_cloture : janvier_cloture}</td>`);
+        // $('#fev_cloture').replaceWith(`<td id="fev_cloture">${fevrier_cloture < 10 ? 0 +""+ fevrier_cloture : fevrier_cloture}</td>`);
+        // $('#mars_cloture').replaceWith(`<td id="mars_cloture">${mars_cloture < 10 ? 0 +""+ mars_cloture : mars_cloture}</td>`);
+        // $('#avril_cloture').replaceWith(`<td id="avril_cloture">${avril_cloture < 10 ? 0 +""+ avril_cloture : avril_cloture}</td>`);
+        // $('#mai_cloture').replaceWith(`<td id="mai_cloture">${mai_cloture < 10 ? 0 +""+ mai_cloture : mai_cloture}</td>`);
+        // $('#juin_cloture').replaceWith(`<td id="juin_cloture">${juin_cloture < 10 ? 0 +""+ juin_cloture : juin_cloture}</td>`);
+        // $('#juillet_cloture').replaceWith(`<td id="juillet_cloture">${juillet_cloture < 10 ? 0 +""+ juillet_cloture : juillet_cloture}</td>`);
+        // $('#aout_cloture').replaceWith(`<td id="aout_cloture">${aout_cloture < 10 ? 0 +""+ aout_cloture : aout_cloture}</td>`);
+        // $('#septembre_cloture').replaceWith(`<td id="septembre_cloture">${septembre_cloture < 10 ? 0 +""+ septembre_cloture : septembre_cloture}</td>`);
+        // $('#octobre_cloture').replaceWith(`<td id="octobre_cloture">${octobre_cloture < 10 ? 0 +""+ octobre_cloture : octobre_cloture}</td>`);
+        // $('#novembre_cloture').replaceWith(`<td id="novembre_cloture">${novembre_cloture < 10 ? 0 +""+ novembre_cloture : novembre_cloture}</td>`);
+        // $('#deccembre_cloture').replaceWith(`<td id="deccembre_cloture">${deccembre_cloture < 10 ? 0 +""+ deccembre_cloture : deccembre_cloture}</td>`);
 
-        $('#janv_enretard').replaceWith(`<td id="janv_enretard">${janvier_enretard < 10 ? 0 +""+ janvier_enretard : janvier_enretard}</td>`);
-        $('#fev_enretard').replaceWith(`<td id="fev_enretard">${fevrier_enretard < 10 ? 0 +""+ fevrier_enretard : fevrier_enretard}</td>`);
-        $('#mars_enretard').replaceWith(`<td id="mars_enretard">${mars_enretard < 10 ? 0 +""+ mars_enretard : mars_enretard}</td>`);
-        $('#avril_enretard').replaceWith(`<td id="avril_enretard">${avril_enretard < 10 ? 0 +""+ avril_enretard : avril_enretard}</td>`);
-        $('#mai_enretard').replaceWith(`<td id="mai_enretard">${mai_enretard < 10 ? 0 +""+ mai_enretard : mai_enretard}</td>`);
-        $('#juin_enretard').replaceWith(`<td id="juin_enretard">${juin_enretard < 10 ? 0 +""+ juin_enretard : juin_enretard}</td>`);
-        $('#juillet_enretard').replaceWith(`<td id="juillet_enretard">${juillet_enretard < 10 ? 0 +""+ juillet_enretard : juillet_enretard}</td>`);
-        $('#aout_enretard').replaceWith(`<td id="aout_enretard">${aout_enretard < 10 ? 0 +""+ aout_enretard : aout_enretard}</td>`);
-        $('#septembre_enretard').replaceWith(`<td id="septembre_enretard">${septembre_enretard < 10 ? 0 +""+ septembre_enretard : septembre_enretard}</td>`);
-        $('#octobre_enretard').replaceWith(`<td id="octobre_enretard">${octobre_enretard < 10 ? 0 +""+ octobre_enretard : octobre_enretard}</td>`);
-        $('#novembre_enretard').replaceWith(`<td id="novembre_enretard">${novembre_enretard < 10 ? 0 +""+ novembre_enretard : novembre_enretard}</td>`);
-        $('#deccembre_enretard').replaceWith(`<td id="deccembre_enretard">${deccembre_enretard < 10 ? 0 +""+ deccembre_enretard : deccembre_enretard}</td>`);
+        // $('#janv_enretard').replaceWith(`<td id="janv_enretard">${janvier_enretard < 10 ? 0 +""+ janvier_enretard : janvier_enretard}</td>`);
+        // $('#fev_enretard').replaceWith(`<td id="fev_enretard">${fevrier_enretard < 10 ? 0 +""+ fevrier_enretard : fevrier_enretard}</td>`);
+        // $('#mars_enretard').replaceWith(`<td id="mars_enretard">${mars_enretard < 10 ? 0 +""+ mars_enretard : mars_enretard}</td>`);
+        // $('#avril_enretard').replaceWith(`<td id="avril_enretard">${avril_enretard < 10 ? 0 +""+ avril_enretard : avril_enretard}</td>`);
+        // $('#mai_enretard').replaceWith(`<td id="mai_enretard">${mai_enretard < 10 ? 0 +""+ mai_enretard : mai_enretard}</td>`);
+        // $('#juin_enretard').replaceWith(`<td id="juin_enretard">${juin_enretard < 10 ? 0 +""+ juin_enretard : juin_enretard}</td>`);
+        // $('#juillet_enretard').replaceWith(`<td id="juillet_enretard">${juillet_enretard < 10 ? 0 +""+ juillet_enretard : juillet_enretard}</td>`);
+        // $('#aout_enretard').replaceWith(`<td id="aout_enretard">${aout_enretard < 10 ? 0 +""+ aout_enretard : aout_enretard}</td>`);
+        // $('#septembre_enretard').replaceWith(`<td id="septembre_enretard">${septembre_enretard < 10 ? 0 +""+ septembre_enretard : septembre_enretard}</td>`);
+        // $('#octobre_enretard').replaceWith(`<td id="octobre_enretard">${octobre_enretard < 10 ? 0 +""+ octobre_enretard : octobre_enretard}</td>`);
+        // $('#novembre_enretard').replaceWith(`<td id="novembre_enretard">${novembre_enretard < 10 ? 0 +""+ novembre_enretard : novembre_enretard}</td>`);
+        // $('#deccembre_enretard').replaceWith(`<td id="deccembre_enretard">${deccembre_enretard < 10 ? 0 +""+ deccembre_enretard : deccembre_enretard}</td>`);
 
     }
 });
@@ -1211,7 +1016,7 @@ $(document).on('click', '#vues', function(){
     let users_incidents = JSON.parse($(this).attr('data-users_incidents'));
     let departements = JSON.parse($(this).attr('data-departements'));
     let sites = JSON.parse($(this).attr('data-sites'));
-    console.log(sites)
+    
     $('.no').replaceWith(`<i class="badge badge-success text-xl no ml-2">${incident.number}</i>`);
     $('.desc').replaceWith(`<span class="text-xl desc">${incident.description}</span>`);
     $('.cose').replaceWith(`<span class="text-xl desc">${incident.cause}</span>`);
@@ -1271,6 +1076,9 @@ $(document).on('click', '#vues', function(){
 $(document).ready(function(){
 
     $('#annee_total').val(new Date().getFullYear());
+    $('#par_region').val($('#annee_total').val());
+    $('#par_site').val($('#annee_total').val());
+    $('#par_global').val($('#annee_total').val());
 
     $("#searchDepartement").on("change", function() {
       var value = $(this).val().toLowerCase();
@@ -2066,6 +1874,7 @@ $(document).on('click', '#liste_taches', function(){
     }
 });
 
+//EVENT MOIS
 
 $(document).on('click', '#incident_janvier', function(){
 
@@ -4071,4 +3880,140 @@ $(document).on('click', '#incident_est', function(){
         `);
     }
 
+});
+
+//FIN EVEN MOIS 
+
+// $(document).on('click', '#btn_print_incident_specific', function(){
+//     $.ajax({
+//         type: 'GET',
+//         url: "generation_incidents_annee_specifique",
+//         data: {
+//             annee: $('#annee_total').val()
+//         },
+//          headers:{
+//              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//          },
+//          success: function(){
+
+//          }
+        
+//     })
+// });
+
+
+// $(document).on('click', '#btn_print_incident_siting', function(){
+//     $.ajax({
+//         type: 'GET',
+//         url: "generation_incidents_par_site",
+//         data: {
+//             annee: $('#annee_total').val()
+//         },
+//          headers:{
+//              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//          },
+//          success: function(){
+
+//          }
+        
+//     })
+// });
+
+
+// $(document).on('click', '#print_region', function(){
+//     console.log($('#annee_total').val())
+//     $.ajax({
+//         type: 'GET',
+//         url: "generation_incidents_par_region",
+//         data: {
+//             annee: $('#annee_total').val()
+//         },
+//          headers:{
+//              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//          },
+//          success: function(){
+
+//          }
+        
+//     })
+// });
+
+
+$(document).on('click', '#btn_print_entre_debut_et_fin', function(){
+    let date_debut = $('#resi').val().replaceAll("-", "");
+    let date_fin = $('#desi').val().replaceAll("-", "");
+    
+    if(!$('#resi').val() || !$('#desi').val() || (date_debut > date_fin)){
+
+        let message = "";
+        message+="Veuillez Renseigner Une Date De Début ! \n";
+        message +="Veuillez Renseigner Une Date De Fin ! \n";
+        message +="Veuillez Vous Rassurrer Que La Date De Début Est Inférieur A la Date De Fin ! \n";
+
+        $('#validtitor').val(message);
+        $('#annulationE').attr('data-backdrop', 'static');
+        $('#annulationE').attr('data-keyboard', false);
+        $('#annulationE').modal('show');
+    
+    }else{
+
+        var _date_debut = $('#resi').val();
+        var _date_fin = $('#desi').val();
+        var _site_id = $('#dfsite').val();
+
+        $('#resi').val('');
+        $('#desi').val('');
+        $('#dfsite').val('');
+
+        $.ajax({
+            type: 'GET',
+            url: "generation_incidents_entre_deux_date",
+            data: {
+                date_debut: _date_debut,
+                date_fin: _date_fin,
+                site_id: _site_id,
+            },
+            headers:{
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+        })
+    }
+});
+
+$(document).on('click', '#btn_print_pdf_entre_deux_date_pour_departement', function(){
+    if(!$('#debut_departe').val() || !$('#fin_departe').val() || !$('#departement_coice').val()){
+
+        let message = "";
+        message+="Veuillez Choisir Un Département ! \n";
+        message+="Veuillez Renseigner Une Date De Début ! \n";
+        message +="Veuillez Renseigner Une Date De Fin ! \n";
+
+        $('#validtitor').val(message);
+        $('#annulationE').attr('data-backdrop', 'static');
+        $('#annulationE').attr('data-keyboard', false);
+        $('#annulationE').modal('show');
+    
+    }else{
+
+        var _date_debut = $('#debut_departe').val();
+        var _date_fin = $('#fin_departe').val();
+        var _departement_id = $('#departement_coice').val();
+
+        $('#debut_departe').val('');
+        $('#fin_departe').val('');
+        $('#departement_coice').val('');
+
+        $.ajax({
+            type: 'GET',
+            url: "generate_between_deux_date_departement",
+            data: {
+                date_debut: _date_debut,
+                date_fin: _date_fin,
+                departement_id: _departement_id,
+            },
+            headers:{
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+        })
+    }
 });

@@ -11,7 +11,6 @@ use Spatie\Permission\Traits\HasRoles;
 use App\Models\Logtache;
 use App\Models\Tache;
 use App\Models\Site;
-use App\Models\Departement;
 use App\Models\Users_incident;
 
 use Spatie\Permission\Models\Role;
@@ -33,15 +32,10 @@ class User extends Authenticatable
         'password',
         'see_password',
         'created_at',
-        'departement_id',
         'email',
         'responsable',
     ];
 
-    public function departements()
-    {
-        return $this->belongsTo(Departement::class, 'departement_id');
-    }
 
 
     public function sites()

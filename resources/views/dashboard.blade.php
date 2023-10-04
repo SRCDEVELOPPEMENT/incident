@@ -2,6 +2,8 @@
 
 @section('content')
     <!-- Begin Page Content -->
+    <script src="{{ url('js/charts.min.js') }}"></script>
+
     <div class="main-content">
         <div class="container-fluid">
             <div class="row justify-content-center">
@@ -22,10 +24,17 @@
                 
                   @can('dashboard_employe')
                       <?php 
+
                               $incidant_encours = array();
                               $incidant_cloturer = array();
                               $incidant_annuller = array();
+                              $incidant_enretard = array();
 
+                              $nombre_cloture_enretard = 0;
+                              $nombre_cloture_a_temps = 0;
+                              $a_temps = 0;
+                              $enretard = 0;
+  
                               $encour = 0;
                               $cloture = 0;
                               $annul = 0;
@@ -60,32 +69,7 @@
                               $cit = NULL;
                               $inciSites = array();
 
-                              $newIncidents = array();
                               $nombre_incidents = 0;
-
-                              if(is_iterable($users_incidents)){
-                              for ($gy=0; $gy < count($users_incidents); $gy++) {
-                                $ui = $users_incidents[$gy];
-
-                                if(is_iterable($incident_annee_encour)){
-                                for ($c=0; $c < count($incident_annee_encour); $c++) {
-                                  $tine = $incident_annee_encour[$c];
-                                  if($tine->number == $ui->incident_number){
-
-                                      if($ui->user_id == Auth::user()->id){
-                                        $nombre_incidents +=1;
-
-                                        array_push($newIncidents, $tine);
-
-                                        if($ui->isCoordo == TRUE){
-                                            $nbr_emis +=1;
-                                        }elseif ($ui->isCoordo == FALSE) {
-                                          $nbr_recus +=1;
-                                        }
-                                      }
-                                  }
-                                }}
-                              }}
 
                               $nbr_taches = 0;
 
@@ -97,15 +81,170 @@
                               $taches_emises = array();
                               $taches_recues = array();
 
-                              if(is_iterable($newIncidents)){
-                              for ($uv=0; $uv < count($newIncidents); $uv++) {
-                                
-                                $newI = $newIncidents[$uv];
-                                
-                                for ($yo=0; $yo < count($tasks); $yo++) {
+                              $janv = 0;
+                              $fev = 0;
+                              $mars = 0;
+                              $avril = 0;
+                              $mai = 0;
+                              $juin = 0;
+                              $juill = 0;
+                              $aout = 0;
+                              $sept = 0;
+                              $oct = 0;
+                              $nov = 0;
+                              $decc = 0;
+                              
+                              $janv_encours = 0;
+                              $fev_encours = 0;
+                              $mars_encours = 0;
+                              $avril_encours = 0;
+                              $mai_encours = 0;
+                              $juin_encours = 0;
+                              $juill_encours = 0;
+                              $aout_encours = 0;
+                              $sept_encours = 0;
+                              $oct_encours = 0;
+                              $nov_encours = 0;
+                              $decc_encours = 0;
+  
+                              $janv_cloturer = 0;
+                              $fev_cloturer = 0;
+                              $mars_cloturer = 0;
+                              $avril_cloturer = 0;
+                              $mai_cloturer = 0;
+                              $juin_cloturer = 0;
+                              $juill_cloturer = 0;
+                              $aout_cloturer = 0;
+                              $sept_cloturer = 0;
+                              $oct_cloturer = 0;
+                              $nov_cloturer = 0;
+                              $decc_cloturer = 0;
+  
+                              $janv_annuler = 0;
+                              $fev_annuler = 0;
+                              $mars_annuler = 0;
+                              $avril_annuler = 0;
+                              $mai_annuler = 0;
+                              $juin_annuler = 0;
+                              $juill_annuler = 0;
+                              $aout_annuler = 0;
+                              $sept_annuler = 0;
+                              $oct_annuler = 0;
+                              $nov_annuler = 0;
+                              $decc_annuler = 0;
+  
+                              if(is_iterable($incident_annee_encour)){
+                              for ($c=0; $c < count($incident_annee_encour); $c++) {
+                                  $tine = $incident_annee_encour[$c];
+
+                                  $extract_mois = intval(substr($tine->declaration_date, 5, 2));
+                                  switch ($extract_mois) {
+                                    case 1:
+                                      $janv +=1;
+                                      break;
+                                    case 2:
+                                      $fev +=1;
+                                      break;
+                                    case 3:
+                                      $mars +=1;
+                                      break;
+                                    case 4:
+                                      $avril +=1;
+                                      break;
+                                    case 5:
+                                      $mai +=1;
+                                      break;
+                                    case 6:
+                                      $juin +=1;
+                                      break;
+                                    case 7:
+                                      $juill +=1;
+                                      break;
+                                    case 8:
+                                      $aout +=1;
+                                      break;
+                                    case 9:
+                                      $sept +=1;
+                                      break;
+                                    case 10:
+                                      $oct +=1;
+                                      break;
+                                    case 11:
+                                      $nov +=1;
+                                      break;
+                                    case 12:
+                                      $decc +=1;
+                                      break;
+                                    default:
+                                      # code...
+                                      break;
+                                  }
+
+                                  //if($tine->number == $ui->incident_number){
+
+                                      //if($ui->user_id == Auth::user()->id){
+                                        $nombre_incidents +=1;
+
+                                        //array_push($newIncidents, $tine);
+                                        if($tine->status == "ENCOURS"){
+
+                                          $encour +=1;
+                                          array_push($incidant_encours, $tine);
+        
+                                          if($tine->due_date){
+                                            $auday = str_replace("-", "", date('Y-m-d'));
+                                            $date_echeance = str_replace("-", "", $tine->due_date);
+                                            if(intval($date_echeance) < intval($auday)){
+                                                $enretard +=1;
+                                                array_push($incidant_enretard, $tine);
+                                            }else{
+                                              $a_temps +=1;
+                                            }
+                                          }
+      
+                                        }elseif ($tine->status == "CLÔTURÉ") {
+        
+                                          $cloture +=1;
+                                          array_push($incidant_cloturer, $tine);
+        
+                                          if($tine->due_date && $tine->closure_date){
+                                            if(intval(str_replace("-", "", $tine->closure_date)) > intval(str_replace("-", "", $tine->due_date))){
+                                                $nombre_cloture_enretard +=1;
+                                            }else{
+                                                $nombre_cloture_a_temps +=1;
+                                            }
+                                          }
+
+                                        }elseif ($tine->status == "ANNULÉ") {
+        
+                                          $annul +=1;
+                                          array_push($incidant_annuller, $tine);
+        
+                                        }
+        
+                                        //ELEMENT IMPORTANT CA NE MARCHE PAS
+                                        if(Auth::user()->site_id){
+                                          if($tine->site_id){
+                                            if(intval(Auth::user()->site_id) == intval($tine->site_id)){
+                                              $nbr_emis +=1;
+                                            }else{
+                                              $nbr_recus +=1;
+                                            }
+                                          }
+                                        }elseif (Auth::user()->departement_id) {
+                                          if($tine->departement_id){
+                                            if(intval(Auth::user()->departement_id) == intval($tine->departement_id)){
+                                              $nbr_emis +=1;
+                                            }else{
+                                              $nbr_recus +=1;
+                                            }
+                                          }
+                                        }
+
+                                  for ($yo=0; $yo < count($tasks); $yo++) {
                                     $ta = $tasks[$yo];
 
-                                    if($ta->incident_number == $newI->number){
+                                    if($ta->incident_number == $tine->number){
                                         
                                       if($ta->site_id){
                                         if(Auth::user()->site_id){
@@ -115,40 +254,35 @@
                                                 array_push($tachess, $ta);
                                             }else {
 
-                                              if(is_iterable($users_incidents)){
-                                              for ($d=0; $d < count($users_incidents); $d++){
-                                                  $us = $users_incidents[$d];
+                                              // if(is_iterable($users_incidents)){
+                                              // for ($d=0; $d < count($users_incidents); $d++){
+                                              //     $us = $users_incidents[$d];
 
-                                                  if($us->user_id == Auth::user()->id){
-                                                      if($us->incident_number == $ta->incident_number){
-                                                          if($us->isCoordo == TRUE){
-                                                              $nbr_taches += 1;
-                                                          }
-                                                      }
-                                                  }
-                                              }}
+                                              //     if($us->user_id == Auth::user()->id){
+                                              //         if($us->incident_number == $ta->incident_number){
+                                              //             if($us->isCoordo == TRUE){
+                                              //                 $nbr_taches += 1;
+                                              //             }
+                                              //         }
+                                              //     }
+                                              // }}
                                           }
 
                                         }elseif (Auth::user()->departement_id){
-                                          if($ta->departement_id == Auth::user()->departement_id){
-                                              $nbr_taches += 1;
-                                              array_push($tachess, $ta);
-                                          }else{
 
-                                              if(is_iterable($users_incidents)){
-                                              for ($d=0; $d < count($users_incidents); $d++){
-                                                $us = $users_incidents[$d];
+                                          if(is_iterable($users_incidents)){
+                                            for ($d=0; $d < count($users_incidents); $d++){
+                                              $us = $users_incidents[$d];
 
-                                                if($us->user_id == Auth::user()->id){
-                                                  if($us->incident_number == $ta->incident_number){
-                                                      if($us->isCoordo == TRUE){
-                                                          $nbr_taches += 1;
-                                                          array_push($tachess, $ta);
-                                                      }
-                                                  }
+                                              if($us->user_id == Auth::user()->id){
+                                                if($us->incident_number == $ta->incident_number){
+                                                    if($us->isCoordo == TRUE){
+                                                        $nbr_taches += 1;
+                                                        array_push($tachess, $ta);
+                                                    }
+                                                }
                                               }
-                                            }}
-                                          }
+                                          }}
                                         }
                                       }elseif ($ta->departement_id) {
                                           if(Auth::user()->departement_id){
@@ -157,19 +291,19 @@
                                                   array_push($tachess, $ta);
                                               }else{
 
-                                                if(is_iterable($users_incidents)){
-                                                for ($d=0; $d < count($users_incidents); $d++){
-                                                  $us = $users_incidents[$d];
+                                                // if(is_iterable($users_incidents)){
+                                                // for ($d=0; $d < count($users_incidents); $d++){
+                                                //   $us = $users_incidents[$d];
 
-                                                  if($us->user_id == Auth::user()->id){
-                                                    if($us->incident_number == $ta->incident_number){
-                                                        if($us->isCoordo == TRUE){
-                                                            $nbr_taches += 1;
-                                                            array_push($tachess, $ta);
-                                                        }
-                                                    }
-                                                  }
-                                                }}
+                                                //   if($us->user_id == Auth::user()->id){
+                                                //     if($us->incident_number == $ta->incident_number){
+                                                //         if($us->isCoordo == TRUE){
+                                                //             $nbr_taches += 1;
+                                                //             array_push($tachess, $ta);
+                                                //         }
+                                                //     }
+                                                //   }
+                                                // }}
                                               }
                                           }elseif(Auth::user()->site_id){
                                             if(is_iterable($users_incidents)){
@@ -189,26 +323,12 @@
                                       }
                                         
                                     }
-                                }
-
-                                if($newI->status == "ENCOURS"){
-
-                                  $encour +=1;
-                                  array_push($incidant_encours, $newI);
-
-                                }elseif ($newI->status == "CLÔTURÉ") {
-
-                                  $cloture +=1;
-                                  array_push($incidant_cloturer, $newI);
-
-                                }elseif ($newI->status == "ANNULÉ") {
-
-                                  $annul +=1;
-                                  array_push($incidant_annuller, $newI);
-
-                                }
+                                  }
 
                               }}
+                              //}
+                            //}
+
                               
                               if(is_iterable($tachess)){
                               for ($tv=0; $tv < count($tachess); $tv++) {
@@ -302,14 +422,12 @@
 
                               if(count($incident_annee_encour) > 0){
 
-                                  if(count($newIncidents) > 0){
-                                    $width_encour = intval($encour/count($newIncidents)*100);
-                                    $width_annul = intval($annul/count($newIncidents)*100);
-                                    $width_cloture = intval($cloture/count($newIncidents)*100);
+                                    $width_encour = intval($encour/count($incident_annee_encour)*100);
+                                    $width_annul = intval($annul/count($incident_annee_encour)*100);
+                                    $width_cloture = intval($cloture/count($incident_annee_encour)*100);
                                     
-                                    $width_emis = intval($nbr_emis/count($newIncidents)*100);
-                                    $width_recus = intval($nbr_recus/count($newIncidents)*100);
-                                  }
+                                    $width_emis = intval($nbr_emis/count($incident_annee_encour)*100);
+                                    $width_recus = intval($nbr_recus/count($incident_annee_encour)*100);
 
                                   if($nbr_taches > 0){
                                     $width_tache_encour = intval($encourtache/$nbr_taches*100);
@@ -323,6 +441,148 @@
                                   }
                               }
 
+                              if(is_iterable($incidant_encours)){
+                              for ($fi=0; $fi < count($incidant_encours); $fi++) {
+                                $mon_i = $incidant_encours[$fi];
+                                $extrac_mois = intval(substr($mon_i->declaration_date, 5, 2));
+                                switch ($extrac_mois) {
+                                  case 1:
+                                    $janv_encours +=1;
+                                    break;
+                                  case 2:
+                                    $fev_encours +=1;
+                                    break;
+                                  case 3:
+                                    $mars_encours +=1;
+                                    break;
+                                  case 4:
+                                    $avril_encours +=1;
+                                    break;
+                                  case 5:
+                                    $mai_encours +=1;
+                                    break;
+                                  case 6:
+                                    $juin_encours +=1;
+                                    break;
+                                  case 7:
+                                    $juill_encours +=1;
+                                    break;
+                                  case 8:
+                                    $aout_encours +=1;
+                                    break;
+                                  case 9:
+                                    $sept_encours +=1;
+                                    break;
+                                  case 10:
+                                    $oct_encours +=1;
+                                    break;
+                                  case 11:
+                                    $nov_encours +=1;
+                                    break;
+                                  case 12:
+                                    $decc_encours +=1;
+                                    break;
+                                  default:
+                                    break;
+                                }
+  
+                              }}
+  
+                              if(is_iterable($incidant_cloturer)){
+                              for ($rs=0; $rs < count($incidant_cloturer); $rs++) {
+                                $monInci = $incidant_cloturer[$rs];
+                                $extra_mois = intval(substr($monInci->declaration_date, 5, 2));
+                                switch ($extra_mois) {
+                                  case 1:
+                                    $janv_cloturer +=1;
+                                    break;
+                                  case 2:
+                                    $fev_cloturer +=1;
+                                    break;
+                                  case 3:
+                                    $mars_cloturer +=1;
+                                    break;
+                                  case 4:
+                                    $avril_cloturer +=1;
+                                    break;
+                                  case 5:
+                                    $mai_cloturer +=1;
+                                    break;
+                                  case 6:
+                                    $juin_cloturer +=1;
+                                    break;
+                                  case 7:
+                                    $juill_cloturer +=1;
+                                    break;
+                                  case 8:
+                                    $aout_cloturer +=1;
+                                    break;
+                                  case 9:
+                                    $sept_cloturer +=1;
+                                    break;
+                                  case 10:
+                                    $oct_cloturer +=1;
+                                    break;
+                                  case 11:
+                                    $nov_cloturer +=1;
+                                    break;
+                                  case 12:
+                                    $decc_cloturer +=1;
+                                    break;
+                                  default:
+                                    break;
+                                }
+                              }}
+                              
+                              if(count($incidant_annuller) > 0){
+                              for ($do=0; $do < count($incidant_annuller); $do++) {
+                                $monIncid = $incidant_annuller[$do];
+                                
+                                $extr_mois = intval(substr($monIncid->declaration_date, 5, 2));
+                                switch ($extr_mois) {
+                                  case 1:
+                                    $janv_annuler +=1;
+                                    break;
+                                  case 2:
+                                    $fev_annuler +=1;
+                                    break;
+                                  case 3:
+                                    $mars_annuler +=1;
+                                    break;
+                                  case 4:
+                                    $avril_annuler +=1;
+                                    break;
+                                  case 5:
+                                    $mai_annuler +=1;
+                                    break;
+                                  case 6:
+                                    $juin_annuler +=1;
+                                    break;
+                                  case 7:
+                                    $juill_annuler +=1;
+                                    break;
+                                  case 8:
+                                    $aout_annuler +=1;
+                                    break;
+                                  case 9:
+                                    $sept_annuler +=1;
+                                    break;
+                                  case 10:
+                                    $oct_annuler +=1;
+                                    break;
+                                  case 11:
+                                    $nov_annuler +=1;
+                                    break;
+                                  case 12:
+                                    $decc_annuler +=1;
+                                    break;
+                                  default:
+                                    break;
+                                }
+  
+                              }}
+  
+
                               $tab_ids = array();
                               $tab_created = array();
                               $tab_exited = array();
@@ -332,7 +592,7 @@
                                 $indi = $incidents[$j];
                                 array_push($tab_ids, $indi->number);
                                 array_push($tab_exited, $indi->due_date);
-                                array_push($tab_created, substr(strval($indi->created_at), 0, 10));
+                                array_push($tab_created, substr(strval($indi->declaration_date), 0, 10));
                               }}
   
                       ?>
@@ -353,7 +613,6 @@
                                                   data-created="{{ json_encode($tab_created) }}"
                                                   data-exited="{{ json_encode($tab_exited) }}"
                                                   data-incidents="{{ json_encode($incidents) }}"
-                                                  data-departements="{{ json_encode($departements) }}"
                                                   data-sites="{{ json_encode($sites) }}"
                                                   data-users="{{ json_encode($users) }}"
                                                   data-users_incidents="{{ json_encode($users_incidents) }}"
@@ -375,7 +634,6 @@
                                                   data-created="{{ json_encode($tab_created) }}"
                                                   data-exited="{{ json_encode($tab_exited) }}"
                                                   data-incidents="{{ json_encode($incidents) }}"
-                                                  data-departements="{{ json_encode($departements) }}"
                                                   data-sites="{{ json_encode($sites) }}"
                                                   data-users="{{ json_encode($users) }}"
                                                   data-users_incidents="{{ json_encode($users_incidents) }}"
@@ -393,7 +651,7 @@
                                     <div class="card-body">
                                       <div class="row align-items-center">
                                         <div class="col my-4">
-                                          <span class="my-3 text-lg font-weight-bold">Nombre D'incidents TOTAL</span>
+                                          <span class="my-3 text-lg font-weight-bold">Nombre D'incident(s) TOTAL</span>
                                         </div>
                                         <div class="col-4 text-right">
                                           <span style="font-size:3em;" class="alters mb-0">
@@ -405,13 +663,51 @@
                                   </div> <!-- /. card -->
                                 </div> <!-- /. col -->
                       </div>
+                      <div class="row">
+                            <div class="col-md-4">
+                              <div class="card shadow border-danger mb-4">
+                                <div class="card-body">
+                                  <div class="row align-items-center">
+                                    <div class="col my-4">
+                                      <span class="text-lg text-danger font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg text-danger font-weight-bold"> EN-RETARD </span>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                      <h1 style="font-size:3em;" class="text-danger mb-0 cliotu">
+                                          {{ $enretard < 10 ? 0 ."". $enretard : $enretard }}
+                                      </h1>
+                                    </div>
+                                  </div> <!-- /. row -->
+                                </div> <!-- /. card-body -->
+                              </div> <!-- /. card -->
+                            </div> <!-- /. col -->
+                            <div class="col-md-4">
+                              <div class="card shadow border-secondary mb-4">
+                                <div class="card-body">
+                                  <div class="row align-items-center">
+                                    <div class="col my-4">
+                                      <span class="text-lg text-tertiary font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg text-tertiary font-weight-bold"> NON-EN-RETARD </span>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                      <h1 style="font-size:3em;" class="text-tertiary mb-0 cliotu">
+                                          {{ $a_temps < 10 ? 0 ."". $a_temps : $a_temps }}
+                                      </h1>
+                                    </div>
+                                  </div> <!-- /. row -->
+                                </div> <!-- /. card-body -->
+                              </div> <!-- /. card -->
+                            </div> <!-- /. col -->
+
+                      </div>
                       <div class="row justify-content-center" style="font-family: Century Gothic;">
                             <div class="col-md-4">
                               <div class="card shadow border-success mb-4">
                                 <div class="card-body">
                                   <div class="row align-items-center">
                                     <div class="col my-4">
-                                      <span class="mb-1 text-lg text-success font-weight-bold">Nombre D'incidents CLÔTURÉ</span>
+                                      <span class="mb-1 text-lg text-success font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg text-success font-weight-bold"> CLÔTURÉ(S) </span>
                                     </div>
                                     <div class="col-4 text-right">
                                       <span style="font-size:3em;" class="text-success mb-0 cloture_gros">
@@ -427,7 +723,8 @@
                                 <div class="card-body">
                                   <div class="row align-items-center">
                                     <div class="col my-4">
-                                      <span class="mb-1 text-lg text-primary font-weight-bold">Nombre D'incidents ENCOURS</span>
+                                      <span class="mb-1 text-lg text-primary font-weight-bold">Nombre D'incident(s) </span></br>
+                                      <span class="mb-1 text-lg text-primary font-weight-bold"> ENCOURS </span>
                                     </div>
                                     <div class="col-4 text-right">
                                       <h1 style="font-size:3em;" class="text-primary mb-0 encour_gros">
@@ -443,7 +740,8 @@
                                 <div class="card-body">
                                   <div class="row align-items-center">
                                     <div class="col my-4">
-                                      <span class="mb-1 text-lg font-weight-bold">Nombre D'incidents ANNULÉ</span>
+                                      <span class="mb-1 text-lg font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg font-weight-bold"> ANNULÉ(S) </span>
                                     </div>
                                     <div class="col-4 text-right">
                                       <h1 style="font-size:3em;" class="mb-0 annule_gros">
@@ -456,270 +754,164 @@
                             </div> <!-- /. col -->
                       </div>
 
+                      <hr style="margin-bottom:3em; margin-top:2em;">
+                      
+                      <div class="row" style="font-family: Century Gothic;">
+                          <div class="content">
+                            <div class="page-inner">
+                                    <h4 class="page-title"></h4>
+                                    <div class="page-category"></div>
+                                    <div class="row">
+                                      <div class="col-md-12">
+                                              <div class="card">
+                                                  <div class="card-header">
+                                                      <div class="card-title">Evolution Des Incidents Aucour De L'année</div>
+                                                  </div>
+                                                  <div class="card-body">
+                                                      <div style="visibility: hidden;" class="card-sub">
+                                                        Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                      </div>
+                                                      <div class="chart-container">
+                                                          <canvas class="w-100" id="lineChart"></canvas>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                      </div>
+                                    </div>
+                            </div>
+                          </div>
+                      </div>
+
+                      <div class="row my-4" style="font-family: Century Gothic;">
+                            <div class="content">
+                                <div class="page-inner">
+                                    <h4 class="page-title"></h4>
+                                    <div class="page-category"></div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Statuts Incident(s)</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100 h-100" id="pieChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Etats Incident(s) </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100 h-100" id="doughnutChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                        <!-- <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Radar Chart</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas id="radarChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Bubble Chart</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas id="bubbleChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                        <div class="col-md-6 my-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Statuts Incident(s)</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100 h-100" id="multipleLineChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 my-4">
+                                                    <div class="chart-container">
+                                                        <!-- <canvas class="w-100 h-100" id="multipleBarChart"></canvas> -->
+                                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                      </div>
+
                       <hr style="margin-bottom:4em; margin-top:2em;">
 
-                      <div class="row" style="font-family: Century Gothic;">
-                        <div class="col-md-5">
-                              <div class="card shadow">
-                                  <div class="card-body">
-                                    <div style="margin-bottom: 5em;" class="row align-items-center">
-                                        <div class="col jill">
-                                            <span class="h2 onesmore">
-                                              {{ $nombre_incidents < 10 ? 0 ."". $nombre_incidents : $nombre_incidents }}                                         
-                                            </span>
-                                            <p class="text-xl font-weight-bold text-gray mt-4"><span class="nomInci"> Nombre D'Incidents Total </span></p>
-                                            <p class="text-lg text-gray mt-2">{{ $cit ? $cit->name : "" }}</p>
-                                            <p class="text-xl text-gray mt-2"><span class="setDate"></span></p>
-                                            <p class="text-xl text-gray mt-2"><span class="getDate"></span></p>
-                                        </div>
-                                        <div class="col-auto">
-                                            <span class="fe fe-32 fe-bell text-muted mb-0"></span>
-                                        </div>
-                                    </div>
-
-                                    <hr style="background-color: gray; height: 2px;">
-
-                                    <div class="row align-items-center font-weight-bold my-4">
-                                            <div class="col text-lg">
-                                                <span class="emis_Inci">
-                                                    {{ $nbr_emis < 10 ? 0 ."". $nbr_emis : $nbr_emis }}
-                                                </span>
-                                                <p class="mt-1">ÉMIS</p>
-                                            </div>
-                                            <div class="col text-lg">
-                                                <span class="text-info recu_Inci">
-                                                    {{ $nbr_recus < 10 ? 0 ."". $nbr_recus : $nbr_recus }}
-                                                </span>
-                                                <p class="text-info text-uppercase mt-1">reçus</p>
-                                            </div>
-                                    </div>
-
-                                    <p style="border: 1px solid gray; width:100%;"></p>
-
-                                    <div class="row font-weight-bold align-items-center my-4">
-                                      <div class="col text-lg mr-4">
-                                          <span class="text-primary encours_Inci">
-                                              {{ $encour < 10 ? 0 ."". $encour : $encour }}
-                                          </span>
-                                          <p class="text-primary mt-1">ENCOURS</p>
-                                      </div>
-                                      <div class="col text-lg mr-4">
-                                          <span class="text-success cloture_Inci">
-                                              {{ $cloture < 10 ? 0 ."". $cloture : $cloture }}
-                                          </span>
-                                          <p class="text-success mt-1">CLÔTURÉ</p>
-                                      </div>
-                                      <div class="col text-lg">
-                                          <span class="text-gray annule_Inci">
-                                              {{ $annul < 10 ? 0 ."". $annul : $annul }}
-                                          </span>
-                                          <p class="text-gray mt-1">ANNULÉ</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                              </div>
-                        </div>
-                        <div class="col-md-7">
-                              <div class="">
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-white">ÉMIS</div>
-                                                <div class="col-md-6 text-right"><i class="fe fe-32 fe-trending-up text-secondary"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-secondary pg_emis_inci" role="progressbar" style="width: {{ $width_emis == 0 ? 3 : $width_emis }}%;" aria-valuenow="{{ $width_emis == 0 ? 3 : $width_emis }}" aria-valuemin="0" aria-valuemax="100">{{ $width_emis }}%</div>
-                                              </div>
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-info">REÇUS</div>
-                                                <div class="col-md-6 text-right"><i class="fe fe-32 fe-trending-down text-info"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-info pg_recu_inci" role="progressbar" style="width: {{ $width_recus == 0 ? 3 : $width_recus }}%;" aria-valuenow="{{ $width_recus == 0 ? 3 : $width_recus }}" aria-valuemin="0" aria-valuemax="100">{{ $width_recus }}%</div>
-                                              </div>
-
-                                              <hr style="margin-top:3em; margin-bottom:3em;">
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-primary">ENCOURS</div>
-                                                <div class="col-md-6 text-right"><i class="fe fe-32 fe-bell text-primary"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-primary pg_encou_inci" role="progressbar" style="width: {{ $width_encour == 0 ? 3 : $width_encour }}%;" aria-valuenow="{{ $width_encour == 0 ? 3 : $width_encour }}" aria-valuemin="0" aria-valuemax="100">{{ $width_encour }}%</div>
-                                              </div>
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-success">CLÔTURÉ</div>
-                                                <div class="col-md-6 text-right"><i class="fe fe-32 fe-bell text-success"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-success pg_clot_inci" role="progressbar" style="width: {{ $width_cloture == 0 ? 3 : $width_cloture }}%;" aria-valuenow="{{ $width_cloture == 0 ? 3 : $width_cloture }}" aria-valuemin="0" aria-valuemax="100">{{ $width_cloture }}%</div>
-                                              </div>
-
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-gray-500">ANNULÉ</div>
-                                                <div class="col-md-6 text-right" style="cursor:pointer;"><i class="fe fe-32 fe-bell text-gray-400"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-light pg_anne_inci" role="progressbar" style="width: {{ $width_annul == 0 ? 3 : $width_annul }}%;" aria-valuenow="{{ $width_annul == 0 ? 3 : $width_annul }}" aria-valuemin="0" aria-valuemax="100">{{ $width_annul }}%</div>
-                                              </div>
-
-                              </div>
-                        </div>
-                      </div>
-
-                      <hr style="margin-bottom:4em; margin-top:3em;">
-
-
-                      <div class="row" style="font-family: Century Gothic;">
-                        <div class="col-md-7">
-                              <div class="card shadow">
-                                  <div class="card-body">
-                                    <div style="margin-bottom: 5em;" class="row align-items-center">
-                                        <div class="col jill">
-                                            <span class="h2 nombre_tache_totals">
-                                              {{ $nbr_taches < 10 ? 0 ."". $nbr_taches : $nbr_taches }}
-                                            </span>
-                                            <p class="small text-xl font-weight-bold text-gray mt-4"> <span class="name_t">Nombre De Tâche Total</span> </p>
-                                            <p class="small text-lg text-gray mt-2">{{ $cit ? $cit->name : "" }}</p>
-                                            <p class="text-xl text-gray mt-2"><span class="setDate_taskss"></span></p>
-                                            <p class="text-xl text-gray mt-2"><span class="getDate_taskss"></span></p>
-
-                                        </div>
-                                        <div class="col-auto">
-                                            <span class="fe fe-32 fe-list text-muted mb-0"></span>
-                                            <span class="fe fe-32 fe-check text-muted mb-0"></span>
-                                        </div>
-                                    </div>
-
-                                    <hr style="background-color: gray; height: 2px;">
-
-                                    <div class="row font-weight-bold align-items-center my-4">
-                                            <div class="col text-lg">
-                                                <span class="nb_ta_emi">
-                                                    {{ $nbr_taches_emises < 10 ? 0 ."". $nbr_taches_emises : $nbr_taches_emises  }}
-                                                </span>
-                                                <p class="mt-1">ÉMISE</p>
-                                            </div>
-                                            <div class="col text-lg">
-                                                <span class="text-info nb_ta_rec">
-                                                    {{ $nbr_taches_recues < 10 ? 0 ."". $nbr_taches_recues : $nbr_taches_recues  }}
-                                                </span>
-                                                <p class="text-info text-uppercase mt-1">reçus</p>
-                                            </div>
-                                    </div>
-
-                                    <p style="border: 1px solid gray; width:100%;"></p>
-
-                                    <div class="row font-weight-bold align-items-center my-4">
-                                      <div class="col text-lg mr-4">
-                                          <span class="text-primary tach_enc_to">
-                                              {{ $encourtache < 10 ? 0 ."". $encourtache : $encourtache }}
-                                          </span>
-                                          <p class="text-primary mt-1">ENCOURS</p>
-                                      </div>
-                                      <div class="col text-lg mr-4">
-                                          <span class="text-success tach_real_to">
-                                              {{ $realisetache < 10 ? 0 ."". $realisetache : $realisetache }}
-                                          </span>
-                                          <p class="text-success mt-1">RÉALISÉE</p>
-                                      </div>
-                                      <div class="col text-lg">
-                                          <span class="text-warning tach_enA_to">
-                                              {{ $enAttentetache < 10 ? 0 ."". $enAttentetache : $enAttentetache }}
-                                          </span>
-                                          <p class="text-warning mt-1">EN-ATTENTE</p>
-                                      </div>
-                                      <div class="col text-lg">
-                                          <span class="text-gray-400 tach_an_to">
-                                              {{ $annultache < 10 ? 0 ."". $annultache : $annultache }}
-                                          </span>
-                                          <p class="text-gray-400 mt-1">ANNULÉE</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                              </div>
-                        </div>
-                        <div class="col-md-5">
-                              <div class="">
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-white">ÉMIS</div>
-                                                <div class="col-md-6 text-right"><i class="fe fe-32 fe-trending-up text-secondary"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-secondary pg_tache_emis" role="progressbar" style="width: {{ $width_tache_emise == 0 ? 3 : $width_tache_emise }}%;" aria-valuenow="{{ $width_tache_emise == 0 ? 3 : $width_tache_emise }}" aria-valuemin="0" aria-valuemax="100">{{ $width_tache_emise }}%</div>
-                                              </div>
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-info">REÇUS</div>
-                                                <div class="col-md-6 text-right"><i class="fe fe-32 fe-trending-down text-info"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-info pg_tache_recues" role="progressbar" style="width: {{ $width_tache_recues == 0 ? 3 : $width_tache_recues }}%;" aria-valuenow="{{ $width_tache_recues == 0 ? 3 : $width_tache_recues }}" aria-valuemin="0" aria-valuemax="100">{{ $width_tache_recues }}%</div>
-                                              </div>
-
-                                              <hr style="margin-top:3em; margin-bottom:3em;">
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-primary">ENCOURS</div>
-                                                <div class="col-md-6 text-right">
-                                                <i class="fe fe-16 fe-list text-primary"></i>
-                                                  <i class="fe fe-32 fe-check text-primary"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-primary pg_tache_encous" role="progressbar" style="width: {{ $width_tache_encour == 0 ? 3 : $width_tache_encour }}%;" aria-valuenow="{{ $width_tache_encour == 0 ? 3 : $width_tache_encour }}" aria-valuemin="0" aria-valuemax="100">{{ $width_tache_encour }}%</div>
-                                              </div>
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-success">RÉALISÉE</div>
-                                                <div class="col-md-6 text-right">
-                                                <i class="fe fe-16 fe-list text-success"></i>
-                                                  <i class="fe fe-32 fe-check text-success"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-success pg_tache_realis" role="progressbar" style="width: {{ $width_tache_realise == 0 ? 3 : $width_tache_realise }}%;" aria-valuenow="{{ $width_tache_realise == 0 ? 3 : $width_tache_realise }}" aria-valuemin="0" aria-valuemax="100">{{ $width_tache_realise }}%</div>
-                                              </div>
-
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-warning">EN-ATTENTE</div>
-                                                <div class="col-md-6 text-right">
-                                                <i class="fe fe-16 fe-list text-warning"></i>
-                                                  <i class="fe fe-32 fe-check text-warning"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-warning pg_tache_enatten" role="progressbar" style="width: {{ $width_tache_enAttente == 0 ? 3 : $width_tache_enAttente }}%;" aria-valuenow="{{ $width_tache_enAttente == 0 ? 3 : $width_tache_enAttente }}" aria-valuemin="0" aria-valuemax="100">{{ $width_tache_enAttente }}%</div>
-                                              </div>
-
-                                              <div class="row">
-                                                <div class="col-md-6 text-left text-gray-500">ANNULÉE</div>
-                                                <div class="col-md-6 text-right" style="cursor:pointer;">
-                                                <i class="fe fe-16 fe-list text-gray-400"></i>
-                                                <i class="fe fe-32 fe-check text-gray-400"></i></div>
-                                              </div>
-
-                                              <div class="progress text-lg mb-3" style="height: 30px;">
-                                                <div class="progress-bar bg-light pg_tache_annils" role="progressbar" style="width: {{ $width_tache_annul == 0 ? 3 : $width_tache_annul }}%;" aria-valuenow="{{ $width_tache_annul == 0 ? 3 : $width_tache_annul }}" aria-valuemin="0" aria-valuemax="100">{{ $width_annul }}%</div>
-                                              </div>
-
-                              </div>
-                        </div>
-                      </div>
+                    <script>
+                        var lineChart = document.getElementById('lineChart').getContext('2d');
+                        var myLineChart = new Chart(lineChart, {
+                          type: 'line',
+                          data: {
+                            labels: ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juill", "Aout", "Sep", "Oct", "Nov", "Dec"],
+                            datasets: [{
+                              label: "Evolution Incident",
+                              borderColor: "#1d7af3",
+                              pointBorderColor: "#FFF",
+                              pointBackgroundColor: "#1d7af3",
+                              pointBorderWidth: 2,
+                              pointHoverRadius: 4,
+                              pointHoverBorderWidth: 1,
+                              pointRadius: 4,
+                              backgroundColor: 'transparent',
+                              fill: true,
+                              borderWidth: 2,
+                              data: [{{$janv}}, {{$fev}}, {{$mars}}, {{$avril}}, {{$mai}}, {{$juin}}, {{$juill}}, {{$aout}}, {{$sept}}, {{$oct}}, {{$nov}}, {{$decc}}]
+                            }]
+                          },
+                          options : {
+                            responsive: true, 
+                            maintainAspectRatio: false,
+                            legend: {
+                              position: 'bottom',
+                              labels : {
+                                padding: 10,
+                                fontColor: '#1d7af3',
+                              }
+                            },
+                            tooltips: {
+                              bodySpacing: 4,
+                              mode:"nearest",
+                              intersect: 0,
+                              position:"nearest",
+                              xPadding:10,
+                              yPadding:10,
+                              caretPadding:10
+                            },
+                            layout:{
+                              padding:{left:15,right:15,top:15,bottom:15}
+                            }
+                          }
+                        });
+                    </script>
                   @endcan
 
                   @can('dashboard_coordo')
 
                     <?php
+
                             $incidant_encours = array();
                             $incidant_enretard = array();
                             $incidant_cloturer = array();
@@ -748,128 +940,327 @@
                             $tab_created = array();
                             $tab_exited = array();
 
-                            $newIncidents = array();
+                            $janv = 0;
+                            $fev = 0;
+                            $mars = 0;
+                            $avril = 0;
+                            $mai = 0;
+                            $juin = 0;
+                            $juill = 0;
+                            $aout = 0;
+                            $sept = 0;
+                            $oct = 0;
+                            $nov = 0;
+                            $decc = 0;
 
-                            if(is_iterable($users_incidents)){
-                            for ($gy=0; $gy < count($users_incidents); $gy++) {
-                              $ui = $users_incidents[$gy];
+                            $janv_encours = 0;
+                            $fev_encours = 0;
+                            $mars_encours = 0;
+                            $avril_encours = 0;
+                            $mai_encours = 0;
+                            $juin_encours = 0;
+                            $juill_encours = 0;
+                            $aout_encours = 0;
+                            $sept_encours = 0;
+                            $oct_encours = 0;
+                            $nov_encours = 0;
+                            $decc_encours = 0;
 
-                              for ($c=0; $c < count($incident_annee_encour); $c++) {
-                                $tine = $incident_annee_encour[$c];
-                                if($tine->number == $ui->incident_number){
+                            $janv_cloturer = 0;
+                            $fev_cloturer = 0;
+                            $mars_cloturer = 0;
+                            $avril_cloturer = 0;
+                            $mai_cloturer = 0;
+                            $juin_cloturer = 0;
+                            $juill_cloturer = 0;
+                            $aout_cloturer = 0;
+                            $sept_cloturer = 0;
+                            $oct_cloturer = 0;
+                            $nov_cloturer = 0;
+                            $decc_cloturer = 0;
 
-                                    if(intval($ui->user_id) == intval(Auth::user()->id)){
-                                      array_push($newIncidents, $tine);
+                            $janv_annuler = 0;
+                            $fev_annuler = 0;
+                            $mars_annuler = 0;
+                            $avril_annuler = 0;
+                            $mai_annuler = 0;
+                            $juin_annuler = 0;
+                            $juill_annuler = 0;
+                            $aout_annuler = 0;
+                            $sept_annuler = 0;
+                            $oct_annuler = 0;
+                            $nov_annuler = 0;
+                            $decc_annuler = 0;
+
+                            $tab_Qte_site = array();
+                            $tab_Qte_site_departement = array();
+                            if(is_iterable($sites)){
+                            for ($jh=0; $jh < count($sites); $jh++) {
+                              if($sites[$jh]->types->name == "AGENCE"){
+                                  $site_cour = $sites[$jh];
+                                  $value_cour = 0;
+                                  for ($g=0; $g < count($incident_annee_encour); $g++) {
+                                    $mon_inci = $incident_annee_encour[$g];
+                                    if($mon_inci->site_id){
+                                      if(intval($mon_inci->site_id) == intval($site_cour->id)){
+                                        $value_cour +=1;
+                                      }elseif (intval($mon_inci->site_declarateur) == intval($site_cour->id)) {
+                                        $value_cour +=1;
+                                      }
                                     }
+                                  }
+                                  array_push($tab_Qte_site, $value_cour);
+                              }elseif ($sites[$jh]->types->name == "DEPARTEMENT") {
+                                $site_cour = $sites[$jh];
+                                $value_cour = 0;
+                                for ($g=0; $g < count($incident_annee_encour); $g++) {
+                                  $mon_inci = $incident_annee_encour[$g];
+                                  if($mon_inci->site_id){
+                                    if(intval($mon_inci->site_id) == intval($site_cour->id)){
+                                      $value_cour +=1;
+                                    }elseif (intval($mon_inci->site_declarateur) == intval($site_cour->id)) {
+                                      $value_cour +=1;
+                                    }
+                                  }
                                 }
+                                array_push($tab_Qte_site_departement, $value_cour);
+
                               }
                             }}
 
-                            if(
-                              (Auth::user()->roles[0]->name == "EMPLOYE") ||
-                              (Auth::user()->roles[0]->name == "COORDONATEUR")
-                              ){
-                              
-                              if(is_iterable($newIncidents)){
-                              for ($i=0; $i < count($newIncidents); $i++) {
-                                  $inci = $newIncidents[$i];
+                            if(is_iterable($incident_annee_encour)){
+                            for ($c=0; $c < count($incident_annee_encour); $c++) {
+                                $tine = $incident_annee_encour[$c];
 
-                                  if($inci->status == "ENCOURS"){
-                                      $encour +=1;
-                                      array_push($incidant_encours, $inci);
+                                
+                                $extract_mois = intval(substr($tine->declaration_date, 5, 2));
+                                switch ($extract_mois) {
+                                  case 1:
+                                    $janv +=1;
+                                    break;
+                                  case 2:
+                                    $fev +=1;
+                                    break;
+                                  case 3:
+                                    $mars +=1;
+                                    break;
+                                  case 4:
+                                    $avril +=1;
+                                    break;
+                                  case 5:
+                                    $mai +=1;
+                                    break;
+                                  case 6:
+                                    $juin +=1;
+                                    break;
+                                  case 7:
+                                    $juill +=1;
+                                    break;
+                                  case 8:
+                                    $aout +=1;
+                                    break;
+                                  case 9:
+                                    $sept +=1;
+                                    break;
+                                  case 10:
+                                    $oct +=1;
+                                    break;
+                                  case 11:
+                                    $nov +=1;
+                                    break;
+                                  case 12:
+                                    $decc +=1;
+                                    break;
+                                  default:
+                                    break;
+                                }
 
-                                    if($inci->due_date){
-                                        $auday = str_replace("-", "", date('Y-m-d'));
-                                        $date_echeance = str_replace("-", "", $inci->due_date);
-                                        if(intval($date_echeance) < intval($auday)){
-                                            $enretard +=1;
-                                            array_push($incidant_enretard, $inci);
-                                        }else{
-                                          $a_temps +=1;
-                                        }
-                                    }
-                    
-                                  }elseif($inci->status == "CLÔTURÉ"){
-                                      $cloture +=1;
-                                      array_push($incidant_cloturer, $inci);
+                                if($tine->status == "ENCOURS"){
+                                  $encour +=1;
+                                  array_push($incidant_encours, $tine);
 
-                                      if($inci->due_date && $inci->closure_date){
-                                        if(intval(str_replace("-", "", $inci->closure_date)) > intval(str_replace("-", "", $inci->due_date))){
-                                            $nombre_cloture_enretard +=1;
-                                        }else{
-                                            $nombre_cloture_a_temps +=1;
-                                        }
-                                    }
-                    
-                                  }else{
-                                      $annul +=1;
-                                      array_push($incidant_annuller, $inci);
-                                  }
-                              }}
-
-                              if(count($newIncidents) > 0){
-                                $width_encour = intval($encour/count($newIncidents)*100);
-                                $width_annul = intval($annul/count($newIncidents)*100);
-                                $width_cloture = intval($cloture/count($newIncidents)*100);
-                                $width_enretard = $encour > 0 ? intval(($enretard/$encour) * 100) : 0;
-                                $width_non_enretard = $encour > 0 ? intval(($a_temps/$encour)*100) : 0;
-                                $width_non_cloture = intval((($encour + $annul)/count($newIncidents))*100);
-                                $width_non_encour = intval((($cloture + $annul)/count($newIncidents))*100);
-                                $width_non_annul = intval((($encour + $cloture)/count($newIncidents))*100);
-                              }
-                              
-                            }elseif(
-                              (Auth::user()->roles[0]->name == "SuperAdmin") ||
-                              (Auth::user()->roles[0]->name == "CONTROLLEUR")
-                              ) {
-
-                              if(is_iterable($incident_annee_encour)){
-                              for ($i=0; $i < count($incident_annee_encour); $i++) {
-                                $inci = $incident_annee_encour[$i];
-
-                                if($inci->status == "ENCOURS"){
-                                    $encour +=1;
-                                    array_push($incidant_encours, $inci);
-
-                                  if($inci->due_date){
+                                  if($tine->due_date){
                                       $auday = str_replace("-", "", date('Y-m-d'));
-                                      $date_echeance = str_replace("-", "", $inci->due_date);
+                                      $date_echeance = str_replace("-", "", $tine->due_date);
                                       if(intval($date_echeance) < intval($auday)){
                                           $enretard +=1;
-                                          array_push($incidant_enretard, $inci);
+                                          array_push($incidant_enretard, $tine);
                                       }else{
                                         $a_temps +=1;
                                       }
+                                  }else{
+                                    $a_temps +=1;
                                   }
-                  
-                                }elseif($inci->status == "CLÔTURÉ"){
+                
+                                }elseif($tine->status == "CLÔTURÉ"){
                                     $cloture +=1;
-                                    array_push($incidant_cloturer, $inci);
+                                    array_push($incidant_cloturer, $tine);
 
-                                    if($inci->due_date && $inci->closure_date){
-                                      if(intval(str_replace("-", "", $inci->closure_date)) > intval(str_replace("-", "", $inci->due_date))){
+                                    if($tine->due_date && $tine->closure_date){
+                                      if(intval(str_replace("-", "", $tine->closure_date)) > intval(str_replace("-", "", $tine->due_date))){
                                           $nombre_cloture_enretard +=1;
                                       }else{
                                           $nombre_cloture_a_temps +=1;
                                       }
-                                  }
+                                    }
                   
                                 }else{
                                     $annul +=1;
-                                    array_push($incidant_annuller, $inci);
+                                    array_push($incidant_annuller, $tine);
                                 }
-                              }}
 
-                              if(count($incident_annee_encour) > 0){
-                                $width_encour = intval($encour/count($incident_annee_encour)*100);
-                                $width_annul = intval($annul/count($incident_annee_encour)*100);
-                                $width_cloture = intval($cloture/count($incident_annee_encour)*100);
-                                $width_enretard = $encour > 0 ? intval(($enretard/$encour) * 100) : 0;
-                                $width_non_enretard = $encour > 0 ? intval(($a_temps/$encour)*100) : 0;
-                                $width_non_cloture = intval((($encour + $annul)/count($incident_annee_encour))*100);
-                                $width_non_encour = intval((($cloture + $annul)/count($incident_annee_encour))*100);
-                                $width_non_annul = intval((($encour + $cloture)/count($incident_annee_encour))*100);
+                            }}//dd($enretard);
+
+                            if(is_iterable($incidant_encours)){
+                            for ($p=0; $p < count($incidant_encours); $p++) {
+                              $mon_i = $incidant_encours[$p];
+                              $extrac_mois = intval(substr($mon_i->declaration_date, 5, 2));
+                              switch ($extrac_mois) {
+                                case 1:
+                                  $janv_encours +=1;
+                                  break;
+                                case 2:
+                                  $fev_encours +=1;
+                                  break;
+                                case 3:
+                                  $mars_encours +=1;
+                                  break;
+                                case 4:
+                                  $avril_encours +=1;
+                                  break;
+                                case 5:
+                                  $mai_encours +=1;
+                                  break;
+                                case 6:
+                                  $juin_encours +=1;
+                                  break;
+                                case 7:
+                                  $juill_encours +=1;
+                                  break;
+                                case 8:
+                                  $aout_encours +=1;
+                                  break;
+                                case 9:
+                                  $sept_encours +=1;
+                                  break;
+                                case 10:
+                                  $oct_encours +=1;
+                                  break;
+                                case 11:
+                                  $nov_encours +=1;
+                                  break;
+                                case 12:
+                                  $decc_encours +=1;
+                                  break;
+                                default:
+                                  break;
                               }
+
+                            }}
+
+                            if(is_iterable($incidant_cloturer)){
+                            for ($ee=0; $ee < count($incidant_cloturer); $ee++) {
+                              $monInci = $incidant_cloturer[$ee];
+                              $extra_mois = intval(substr($monInci->declaration_date, 5, 2));
+                              switch ($extra_mois) {
+                                case 1:
+                                  $janv_cloturer +=1;
+                                  break;
+                                case 2:
+                                  $fev_cloturer +=1;
+                                  break;
+                                case 3:
+                                  $mars_cloturer +=1;
+                                  break;
+                                case 4:
+                                  $avril_cloturer +=1;
+                                  break;
+                                case 5:
+                                  $mai_cloturer +=1;
+                                  break;
+                                case 6:
+                                  $juin_cloturer +=1;
+                                  break;
+                                case 7:
+                                  $juill_cloturer +=1;
+                                  break;
+                                case 8:
+                                  $aout_cloturer +=1;
+                                  break;
+                                case 9:
+                                  $sept_cloturer +=1;
+                                  break;
+                                case 10:
+                                  $oct_cloturer +=1;
+                                  break;
+                                case 11:
+                                  $nov_cloturer +=1;
+                                  break;
+                                case 12:
+                                  $decc_cloturer +=1;
+                                  break;
+                                default:
+                                  break;
+                              }
+
+                            }}
+
+                            if(is_iterable($incidant_annuller)){
+                            for ($bn=0; $bn < count($incidant_annuller); $bn++) {
+                              $monIncid = $incidant_annuller[$bn];
+                              $extr_mois = intval(substr($monIncid->declaration_date, 5, 2));
+                              switch ($extr_mois) {
+                                case 1:
+                                  $janv_annuler +=1;
+                                  break;
+                                case 2:
+                                  $fev_annuler +=1;
+                                  break;
+                                case 3:
+                                  $mars_annuler +=1;
+                                  break;
+                                case 4:
+                                  $avril_annuler +=1;
+                                  break;
+                                case 5:
+                                  $mai_annuler +=1;
+                                  break;
+                                case 6:
+                                  $juin_annuler +=1;
+                                  break;
+                                case 7:
+                                  $juill_annuler +=1;
+                                  break;
+                                case 8:
+                                  $aout_annuler +=1;
+                                  break;
+                                case 9:
+                                  $sept_annuler +=1;
+                                  break;
+                                case 10:
+                                  $oct_annuler +=1;
+                                  break;
+                                case 11:
+                                  $nov_annuler +=1;
+                                  break;
+                                case 12:
+                                  $decc_annuler +=1;
+                                  break;
+                                default:
+                                  break;
+                              }
+
+                            }}
+
+                            if(count($incident_annee_encour) > 0){
+                              $width_encour = intval($encour/count($incident_annee_encour)*100);
+                              $width_annul = intval($annul/count($incident_annee_encour)*100);
+                              $width_cloture = intval($cloture/count($incident_annee_encour)*100);
+                              $width_enretard = $encour > 0 ? intval(($enretard/$encour) * 100) : 0;
+                              $width_non_enretard = $encour > 0 ? intval(($a_temps/$encour)*100) : 0;
+                              $width_non_cloture = intval((($encour + $annul)/count($incident_annee_encour))*100);
+                              $width_non_encour = intval((($cloture + $annul)/count($incident_annee_encour))*100);
+                              $width_non_annul = intval((($encour + $cloture)/count($incident_annee_encour))*100);
                             }
 
                             if(is_iterable($incidents)){
@@ -877,7 +1268,7 @@
                               $indi = $incidents[$j];
                               array_push($tab_ids, $indi->number);
                               array_push($tab_exited, $indi->due_date);
-                              array_push($tab_created, substr(strval($indi->created_at), 0, 10));
+                              array_push($tab_created, substr(strval($indi->declaration_date), 0, 10));
                             }}
 
                             if(is_iterable($tasks)){
@@ -885,7 +1276,7 @@
                               $t = $tasks[$v];
                               array_push($taches_ids, $t->id);
                               array_push($taches_closure, $t->closure_date);
-                              array_push($taches_created, substr(strval($t->created_at), 0, 10));
+                              array_push($taches_created, substr(strval($t->declaration_date), 0, 10));
                             }}
 
                     ?>
@@ -895,7 +1286,7 @@
                       <legend style="padding: 2px;">Critère(s) De Recherche</legend>
                         <div class="row justify-content-center my-2">
                               <div style="margin-top:0.6em;"><i class="fe fe-16 fe-home"></i></div>
-                              <div class="col-md-3 mb-1 mr-4">
+                              <div class="col-md-5 mb-1 mr-4">
                                     <select 
                                             class="custom-select text-lg border-primary"
                                             id="citadelle"
@@ -908,7 +1299,6 @@
                                             data-created="{{ json_encode($tab_created) }}"
                                             data-exited="{{ json_encode($tab_exited) }}"
                                             data-incidents="{{ json_encode($incidents) }}"
-                                            data-departements="{{ json_encode($departements) }}"
                                             data-sites="{{ json_encode($sites) }}"
                                             data-users_incidents="{{ json_encode($users_incidents) }}"
                                             data-regions="{{ json_encode($regions) }}">
@@ -922,35 +1312,8 @@
                                     </select>
                               </div>
 
-                              <div style="margin-top:0.6em;"><i class="fe fe-16 fe-home"></i></div>
-                              <div class="col-md-4 mb-1 mr-4">
-                                    <select 
-                                            class="custom-select text-lg border-primary"
-                                            id="departes"
-                                            data-user_conneter="{{ json_encode(Auth::user()) }}"
-                                            data-taches_ids="{{ json_encode($taches_ids) }}"
-                                            data-taches_created="{{ json_encode($taches_created) }}"
-                                            data-users="{{ json_encode($users) }}"
-                                            data-tasks="{{ json_encode($tasks) }}"
-                                            data-ids="{{ json_encode($tab_ids) }}"
-                                            data-created="{{ json_encode($tab_created) }}"
-                                            data-exited="{{ json_encode($tab_exited) }}"
-                                            data-incidents="{{ json_encode($incidents) }}"
-                                            data-departements="{{ json_encode($departements) }}"
-                                            data-sites="{{ json_encode($sites) }}"
-                                            data-users_incidents="{{ json_encode($users_incidents) }}"
-                                            data-regions="{{ json_encode($regions) }}">
-                                        <option selected value="">Choisissez Un Département...</option>
-                                        @if(is_iterable($departements))
-                                        @foreach($departements as $departement)
-                                            <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                                        @endforeach
-                                        @endif
-                                    </select>
-                              </div>
-
                               <div style="margin-top:0.6em;"><i class="fe fe-16 fe-globe"></i></div>
-                              <div class="col-md-3 mb-1">
+                              <div class="col-md-5 mb-1">
                                     <select 
                                             class="custom-select text-lg border-primary"
                                             id="regionnn"
@@ -963,7 +1326,6 @@
                                             data-created="{{ json_encode($tab_created) }}"
                                             data-exited="{{ json_encode($tab_exited) }}"
                                             data-incidents="{{ json_encode($incidents) }}"
-                                            data-departements="{{ json_encode($departements) }}"
                                             data-users_incidents="{{ json_encode($users_incidents) }}"
                                             data-sites="{{ json_encode($sites) }}">
                                         <option selected value="">Choisissez Une Région...</option>
@@ -996,7 +1358,6 @@
                                               data-created="{{ json_encode($tab_created) }}"
                                               data-exited="{{ json_encode($tab_exited) }}"
                                               data-incidents="{{ json_encode($incidents) }}"
-                                              data-departements="{{ json_encode($departements) }}"
                                               data-sites="{{ json_encode($sites) }}"
                                               data-users_incidents="{{ json_encode($users_incidents) }}"
                                               data-regions="{{ json_encode($regions) }}">
@@ -1020,7 +1381,6 @@
                                               data-created="{{ json_encode($tab_created) }}"
                                               data-exited="{{ json_encode($tab_exited) }}"
                                               data-incidents="{{ json_encode($incidents) }}"
-                                              data-departements="{{ json_encode($departements) }}"
                                               data-sites="{{ json_encode($sites) }}"
                                               data-users_incidents="{{ json_encode($users_incidents) }}"
                                               data-regions="{{ json_encode($regions) }}">
@@ -1030,7 +1390,7 @@
                     </fieldset>
 
 
-                    <hr style="margin-bottom:4em; margin-top:2em;">
+                    <hr style="margin-bottom:2em; margin-top:2em;">
 
                       <div class="row">
                                 <div class="col-md-4">
@@ -1038,22 +1398,29 @@
                                     <div class="card-body">
                                       <div class="row align-items-center">
                                         <div class="col my-4">
-                                          <span class="my-3 text-lg font-weight-bold">Nombre D'incidents TOTAL</span>
+                                          <span class="text-lg font-weight-bold">Nombre D'incident(s)</span></br>
+                                          <span class="my-3 text-lg font-weight-bold">TOTAL</span>
                                         </div>
                                         <div class="col-4 text-right">
                                           <span style="font-size:3em;" class="mb-0 tout_ta_fait">
-                                            @if(
-                                              (Auth::user()->roles[0]->name == "SuperAdmin") ||
-                                              (Auth::user()->roles[0]->name == "CONTROLLEUR") ||
-                                              (Auth::user()->roles[0]->name == "ADMINISTRATEUR")
-                                              )
                                               {{ count($incident_annee_encour) < 10 ? 0 ."". count($incident_annee_encour) : count($incident_annee_encour) }}
-                                            
-                                            @elseif(
-                                              (Auth::user()->roles[0]->name == "EMPLOYE") ||
-                                              (Auth::user()->roles[0]->name == "COORDONATEUR"))
-                                              {{ count($newIncidents) < 10 ? 0 ."". count($newIncidents) : count($newIncidents) }}
-                                            @endif
+                                            </span>
+                                        </div>
+                                      </div> <!-- /. row -->
+                                    </div> <!-- /. card-body -->
+                                  </div> <!-- /. card -->
+                                </div>
+                                <div class="col-md-4">
+                                  <div class="card shadow border-info mb-4">
+                                    <div class="card-body">
+                                      <div class="row align-items-center">
+                                        <div class="col my-4">
+                                          <span class="text-lg font-weight-bold">Nombre D'incident(s)</span></br>
+                                          <span class="my-3 text-lg font-weight-bold">DEJA PRIS EN COMPTE</span>
+                                        </div>
+                                        <div class="col-4 text-right">
+                                          <span style="font-size:3em;" class="mb-0 tout_ta_fait">
+                                              {{ $deja_pris_en_compte < 10 ? 0 ."". $deja_pris_en_compte : $deja_pris_en_compte }}
                                             </span>
                                         </div>
                                       </div> <!-- /. row -->
@@ -1067,10 +1434,11 @@
                                 <div class="card-body">
                                   <div class="row align-items-center">
                                     <div class="col my-4">
-                                      <span class="mb-1 text-lg text-success font-weight-bold">Nombre D'incidents CLÔTURÉ</span>
+                                      <span class="text-lg text-success font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg text-success font-weight-bold">CLÔTURÉ(S)</span>
                                     </div>
                                     <div class="col-4 text-right">
-                                      <h1 style="font-size:3em;" class="text-success mb-0">
+                                      <h1 style="font-size:3em;" class="text-success mb-0 cliotu">
                                           {{ $cloture < 10 ? 0 ."". $cloture : $cloture }}
                                       </h1>
                                     </div>
@@ -1083,10 +1451,11 @@
                                 <div class="card-body">
                                   <div class="row align-items-center">
                                     <div class="col my-4">
-                                      <span class="mb-1 text-lg text-primary font-weight-bold">Nombre D'incidents ENCOURS</span>
+                                      <span class="mb-1 text-lg text-primary font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="text-lg text-primary font-weight-bold">ENCOURS</span>
                                     </div>
                                     <div class="col-4 text-right">
-                                      <h1 style="font-size:3em;" class="text-primary mb-0">
+                                      <h1 style="font-size:3em;" class="text-primary mb-0 encourgiant">
                                           {{ $encour < 10 ? 0 ."". $encour : $encour }}
                                       </h1>
                                     </div>
@@ -1099,11 +1468,48 @@
                                 <div class="card-body">
                                   <div class="row align-items-center">
                                     <div class="col my-4">
-                                      <span class="mb-1 text-lg font-weight-bold">Nombre D'incidents ANNULÉ</span>
+                                      <span class="mb-1 text-lg font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="text-lg font-weight-bold">ANNULÉ(S)</span>
                                     </div>
                                     <div class="col-4 text-right">
-                                      <h1 style="font-size:3em;" class="mb-0">
+                                      <h1 style="font-size:3em;" class="mb-0 annulegiant">
                                           {{ $annul < 10 ? 0 ."". $annul : $annul }}
+                                      </h1>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                      </div>
+                      <div class="row">
+                            <div class="col-md-4">
+                              <div class="card shadow border-danger mb-4">
+                                <div class="card-body">
+                                  <div class="row align-items-center">
+                                    <div class="col my-4">
+                                      <span class="text-lg text-danger font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg text-danger font-weight-bold"> EN-RETARD </span>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                      <h1 style="font-size:3em;" class="text-danger mb-0 cliotu">
+                                          {{ $enretard < 10 ? 0 ."". $enretard : $enretard }}
+                                      </h1>
+                                    </div>
+                                  </div> <!-- /. row -->
+                                </div> <!-- /. card-body -->
+                              </div> <!-- /. card -->
+                            </div> <!-- /. col -->
+                            <div class="col-md-4">
+                              <div class="card shadow border-secondary mb-4">
+                                <div class="card-body">
+                                  <div class="row align-items-center">
+                                    <div class="col my-4">
+                                      <span class="text-lg text-tertiary font-weight-bold">Nombre D'incident(s)</span></br>
+                                      <span class="mb-1 text-lg text-tertiary font-weight-bold"> DANS LES DELAIS </span>
+                                    </div>
+                                    <div class="col-4 text-right">
+                                      <h1 style="font-size:3em;" class="text-tertiary mb-0 cliotu">
+                                          {{ $a_temps < 10 ? 0 ."". $a_temps : $a_temps }}
                                       </h1>
                                     </div>
                                   </div> <!-- /. row -->
@@ -1112,301 +1518,296 @@
                             </div> <!-- /. col -->
                       </div>
 
+                    <hr style="margin-bottom: 3em; margin-top: 3em;">
 
-                    <hr style="margin-bottom: 3em; margin-top: 6em;">
-
-                    <div class="row" style="font-family: Century Gothic;">
-                        <div class="col-md-5 mb-4">
-                            <div class="card shadow">
-                                <div class="card-body">
-                                  <div style="margin-bottom: 5em;" class="row align-items-center">
-                                      <div class="col jill">
-                                          <span class="h2" id="tot">
-                                            @if(
-                                              (Auth::user()->roles[0]->name == "SuperAdmin") ||
-                                              (Auth::user()->roles[0]->name == "CONTROLLEUR") ||
-                                              (Auth::user()->roles[0]->name == "ADMINISTRATEUR")
-                                              )
-                                              {{ count($incident_annee_encour) < 10 ? 0 ."". count($incident_annee_encour) : count($incident_annee_encour) }}
-                                            
-                                            @elseif(
-                                              (Auth::user()->roles[0]->name == "EMPLOYE") ||
-                                              (Auth::user()->roles[0]->name == "COORDONATEUR"))
-                                              {{ count($newIncidents) < 10 ? 0 ."". count($newIncidents) : count($newIncidents) }}
-                                            @endif
-                                          </span>
-                                          <p class="small text-lg text-gray mt-4"><span id="namels"></span></p>
-                                          <p class="small text-xl font-weight-bold text-gray"><span id="nom_site_ou_departement"> Nombre D'Incidents Total</span></p>
-                                          <p class="small text-lg text-gray mt-1"><span id="date_du"></span></p>
-                                      </div>
-                                      <div class="col-auto">
-                                          <span class="fe fe-32 fe-bell text-muted mb-0"></span>
-                                      </div>
-                                  </div>
-
-                                  <hr style="background-color: gray; height: 2px;">
-
-                                  <div class="row align-items-center my-4">
-                                    <div class="col text-lg mr-4">
-                                        <span class="text-primary" id="enc">
-                                            {{ $encour < 10 ? 0 ."". $encour : $encour }}
-                                        </span>
-                                        <p class="text-primary mt-1">ENCOURS</p>
-                                    </div>
-                                    <div class="col text-lg mr-4">
-                                        <span class="text-success" id="clot">
-                                            {{ $cloture < 10 ? 0 ."". $cloture : $cloture }}
-                                        </span>
-                                        <p class="text-success mt-1">CLÔTURÉ</p>
-                                    </div>
-                                    <div class="col text-lg">
-                                        <span class="text-gray-400" id="ann">
-                                            {{ $annul < 10 ? 0 ."". $annul : $annul }}
-                                        </span>
-                                        <p class="text-gray-400 mt-1">ANNULÉ</p>
-                                    </div>
-                                  </div>
-
-                                  <p style="border: 1px solid gray; width:100%; margin-bottom:2em;"></p>
-
-                                  <div style="margin-bottom: 4em;" class="row align-items-center">
-                                      <div class="col-xl-4 mr-4">
-                                        <div class="row">
-                                          <span class="text-primary mr-4">
-                                              <span id="encour_a_temps" class="text-lg">
-                                                {{ $a_temps < 10 ? 0 ."". $a_temps : $a_temps }}
-                                              </span>
-                                              <p style="font-size:0.8em;" class="text-primary mt-1"> DELAIS</p>
-                                          </span>
-                                          <span class="text-warning">
-                                              <span id="en_retar" class="text-lg">
-                                                {{ $enretard < 10 ? 0 ."". $enretard : $enretard }}
-                                              </span>
-                                              <p style="font-size:0.8em;" class="text-warning mt-1"> EN RETARD</p>
-                                          </span>
+                      <!-- <div class="row" style="font-family: Century Gothic;">
+                          <div class="content">
+                              <div class="page-inner">
+                                      <h4 class="page-title"></h4>
+                                      <div class="page-category"></div>
+                                      <div class="row">
+                                        <div class="col-md-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <div class="card-title">Evolution Des Incidents Aucour De L'année</div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div style="visibility: hidden;" class="card-sub">
+                                                          Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                        </div>
+                                                        <div class="chart-container">
+                                                            <canvas class="w-100" id="lineChart"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                         </div>
                                       </div>
-                                      <div class="col-xl-4">
-                                        <div class="row">
-                                          <span class="text-success mr-4">
-                                              <span id="clot_a_temp" class="text-lg">
-                                                {{ $nombre_cloture_a_temps < 10 ? 0 ."". $nombre_cloture_a_temps : $nombre_cloture_a_temps }}
-                                              </span>
-                                              <p style="font-size:0.8em;" class="text-success mt-1"> DELAIS</p>
-                                          </span>
-                                          <span class="text-warning">
-                                              <span id="clot_hors_delai" class="text-lg">
-                                                {{ $nombre_cloture_enretard < 10 ? 0 ."". $nombre_cloture_enretard : $nombre_cloture_enretard }}
-                                              </span>
-                                              <p style="font-size:0.8em;" class="text-warning mt-1"> HORS DELAI</p>
-                                          </span>
+                              </div>
+                          </div>
+                      </div> -->
+
+                      <div class="row my-4" style="font-family: Century Gothic;">
+                            <div class="content">
+                                      <div class="page-inner">
+                                          <h4 class="page-title"></h4>
+                                          <div class="page-category"></div>
+                                          <div class="row">
+                                          <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                  <div class="card-title">Evolution Des Incidents Par Agence</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div style="visibility: hidden;" class="card-sub mb-0">
+                                                      Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                    </div>
+
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100" id="barChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          </div>
+                                          </div>
+                                      </div>
+                            </div>
+                      </div>
+
+                      <div class="row my-4" style="font-family: Century Gothic;">
+                            <div class="content">
+                                      <div class="page-inner">
+                                          <h4 class="page-title"></h4>
+                                          <div class="page-category"></div>
+                                          <div class="row">
+                                          <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                  <div class="card-title">Evolution Des Incidents Par Procéssus</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div style="visibility: hidden;" class="card-sub mb-0">
+                                                      Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                    </div>
+
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100" id="barChartProcessus11"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          </div>
+                                          </div>
+                                      </div>
+                            </div>
+                      </div>
+
+                      <div class="row my-4" style="font-family: Century Gothic;">
+                            <div class="content">
+                                      <div class="page-inner">
+                                          <h4 class="page-title"></h4>
+                                          <div class="page-category"></div>
+                                          <div class="row">
+                                          <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                  <div class="card-title">Evolution Des Incidents Par Département</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div style="visibility: hidden;" class="card-sub mb-0">
+                                                      Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                    </div>
+
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100" id="barChartDepartement"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          </div>
+                                          </div>
+                                      </div>
+                            </div>
+                      </div>
+
+                      <div class="row my-4" style="font-family: Century Gothic;">
+                            <div class="content">
+                                <div class="page-inner">
+                                    <h4 class="page-title"></h4>
+                                    <div class="page-category"></div>
+                                    <div class="row">
+                                        <div class="col-md-12 my-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Comparaison Evolution Incident(s) Par Statut</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div style="visibility: hidden;" class="card-sub mb-0">
+                                                      Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                    </div>
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100" id="multipleLineChart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                      </div>
-                                  </div>
-
-                                  <div class="row align-items-center my-4">
-                                      <div class="col mr-4">
-                                          <button 
-                                                  data-encours="{{ json_encode($incidant_encours) }}"
-                                                  title="INCIDENT ENCOURS" 
-                                                  id="floder_encour" 
-                                                  class="btn btn-xs btn-outline-primary survol1"
-                                                  data-backdrop="static" 
-                                                  data-keyboard="false"
-                                                  data-toggle="modal" 
-                                                  data-target="#modal_liste_incident">
-                                            <span class="fe fe-16 fe-plus"></span>
-                                          </button>
-                                      </div>
-                                      <div class="col mr-4">
-                                          <button 
-                                                  data-clotures="{{ json_encode($incidant_cloturer) }}" 
-                                                  title="INCIDENT CLÔTURÉ" 
-                                                  id="floder_cloture" 
-                                                  class="btn btn-xs btn-outline-success survol"
-                                                  data-backdrop="static" 
-                                                  data-keyboard="false"
-                                                  data-toggle="modal" 
-                                                  data-target="#modal_liste_incident">
-                                            <span class="fe fe-16 fe-plus"></span>
-                                          </button>
-                                      </div>
-                                      <div class="col">
-                                          <button 
-                                                  data-annules="{{ json_encode($incidant_annuller) }}" 
-                                                  title="INCIDENT ANNULÉ"
-                                                  id="floder_annuler"
-                                                  class="btn btn-xs btn-outline-light survol"
-                                                  data-backdrop="static" 
-                                                  data-keyboard="false"
-                                                  data-toggle="modal" 
-                                                  data-target="#modal_liste_incident">
-                                            <span class="fe fe-16 fe-plus"></span>
-                                          </button>
-                                      </div>
-
-                                  </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-7">
-                            <div class="mt-0">
-                                            <div class="row">
-                                              <div class="col-md-6 text-left text-success">CLÔTURÉ</div>
-                                              <div class="col-md-6 text-right"><i class="fe fe-32 fe-bell text-success"></i></div>
-                                            </div>
-                                            <!-- <p class="mb-1"><span class="text-success">CLÔTURÉ</span><span style="margin-left:10em;" class="text-right"><i class="fe fe-32 fe-folder-plus"></i></span></p> -->
-                                            <div class="progress text-lg mb-3" style="height: 30px;">
-                                              <div id="progress_cloture" class="progress-bar bg-success" role="progressbar" style="width: {{ $width_cloture == 0 ? 3 : $width_cloture }}%;" aria-valuenow="{{ $width_cloture == 0 ? 3 : $width_cloture }}" aria-valuemin="0" aria-valuemax="100">{{ $width_cloture }}%</div>
-                                            </div>
+                      </div>
 
-                                            <div class="col-md-12 text-right">NON-CLÔTURÉ</div>
-                                            <div class="progress justify-content-end mb-3">
-                                                <div id="progress_non_cloture" class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{ $width_non_cloture == 0 ? 3 : $width_non_cloture }}%" aria-valuenow="{{ $width_non_cloture == 0 ? 3 : $width_non_cloture }}" aria-valuemin="0" aria-valuemax="100">{{ $width_non_cloture }}%</div>
+                      <div class="row my-4" style="font-family: Century Gothic;">
+                            <div class="content">
+                                <div class="page-inner">
+                                    <h4 class="page-title"></h4>
+                                    <div class="page-category"></div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Statuts Incident(s)</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div style="visibility: hidden;" class="card-sub mb-0">
+                                                      Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.
+                                                    </div>
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100" id="pieChart"></canvas>
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            <div class="row">
-                                              <div class="col-md-6 text-left text-primary">ENCOURS</div>
-                                              <div  class="col-md-6 text-right"><i class="fe fe-32 fe-bell text-primary"></i></div>
+                                        </div>
+                                        <!-- <div class="col-md-6 my-4">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="card-title">Comparaison Evolution Incident(s) Par Statut</div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="chart-container">
+                                                        <canvas class="w-100 h-100" id="multipleLineChart"></canvas>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <!-- <p class="mb-1"><span class="text-primary">ENCOURS</span></p> -->
-                                            <div class="progress text-lg mb-3" style="height: 30px;">
-                                              <div id="progress_encours" class="progress-bar bg-primary" role="progressbar" style="width: {{ $width_encour == 0 ? 3 : $width_encour }}%;" aria-valuenow="{{ $width_encour == 0 ? 3 : $width_encour }}" aria-valuemin="0" aria-valuemax="100">{{ $width_encour }}%</div>
-                                            </div>
-
-                                            <div class="col-md-12 text-right">CLÔTURÉ-ANNULÉ</div>
-                                            <div class="progress justify-content-end mb-3">
-                                                <div id="progress_non_encours" class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: {{ $width_non_encour == 0 ? 3 : $width_non_encour }}%" aria-valuenow="{{ $width_non_encour == 0 ? 3 : $width_non_encour }}" aria-valuemin="0" aria-valuemax="100">{{ $width_non_encour }}%</div>
-                                            </div>
-
-                                            <div class="row">
-                                              <div class="col-md-6 text-left text-warning">EN-RETARD</div>
-                                              <div class="col-md-6 text-right"><i class="fe fe-32 fe-bell text-warning"></i></div>
-                                            </div>
-                                            <!-- <p class="mb-1"><span class="text-warning">EN-RETARD</span></p> -->
-                                            <div class="progress text-lg mb-3" style="height: 30px;">
-                                              <div id="progress_enretard" class="progress-bar bg-warning" role="progressbar" style="width: {{ $width_enretard == 0 ? 3 : $width_enretard }}%;" aria-valuenow="{{ $width_enretard == 0 ? 3 : $width_enretard }}" aria-valuemin="0" aria-valuemax="100">{{ $width_enretard }}%</div>
-                                            </div>
-
-                                            <div class="col-md-12 text-right">NON-ENRETARD</div>
-                                            <div class="progress justify-content-end mb-3">
-                                                <div id="progress_non_enretard" class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: {{ $width_non_enretard == 0 ? 3 : $width_non_enretard }}%" aria-valuenow="{{ $width_non_enretard == 0 ? 3 : $width_non_enretard }}" aria-valuemin="0" aria-valuemax="100">{{ $width_non_enretard }}%</div>
-                                            </div>
-
-                                            <div class="row">
-                                              <div class="col-md-6 text-left text-gray-500">ANNULÉ</div>
-                                              <div class="col-md-6 text-right" style="cursor:pointer;"><i class="fe fe-32 fe-bell text-gray-400"></i></div>
-                                            </div>
-                                            <!-- <p class="mb-1"><span class="text-gray-500">ANNULÉ</span></p> -->
-                                            <div class="progress text-lg mb-3" style="height: 30px;">
-                                              <div id="progress_annule" class="progress-bar bg-light" role="progressbar" style="width: {{ $width_annul == 0 ? 3 : $width_annul }}%;" aria-valuenow="{{ $width_annul == 0 ? 3 : $width_annul }}" aria-valuemin="0" aria-valuemax="100">{{ $width_annul }}%</div>
-                                            </div>
-
-                                            <div class="col-md-12 text-right">NON-ANNULÉ</div>
-                                            <div class="progress justify-content-end mb-3">
-                                                <div id="progress_non_annuler" class="progress-bar progress-bar-striped bg-light" role="progressbar" style="width: {{ $width_non_annul == 0 ? 3 : $width_non_annul }}%" aria-valuenow="{{ $width_non_enretard == 0 ? 3 : $width_non_annul }}" aria-valuemin="0" aria-valuemax="100">{{ $width_non_annul }}%</div>
-                                            </div>
-
+                                        </div> -->
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                      </div>
+
+
+                      <hr class="my-4">
+                      <!-- <h1 class="text-xl" style="margin-bottom: 3em;"><i class="fe fe-32 fe-bell"></i><i style="font-size:15px;" class="fe fe-percent mr-2"></i>POURCENTAGE INCIDENT  PAR SERVICE</h1> -->
+                      
+                    <script>
+
+                      		let barChart = document.getElementById('barChart').getContext('2d');
+                          let allSites = Array();
+                          let syty = {!! json_encode($sites); !!}
+                              syty.forEach(site => {
+                                if(site.types.name == "AGENCE"){
+                                allSites.push(site.name.substr(8));
+                              }
+                          });
+
+                          let values = {!! json_encode($tab_Qte_site); !!}
+
+                          var myBarChart = new Chart(barChart, {
+                            type: 'bar',
+                            data: {
+                              labels: allSites,
+                              datasets : [{
+                                label: "Nombre D'incident",
+                                backgroundColor: 'rgb(23, 125, 255)',
+                                borderColor: 'rgb(23, 125, 255)',
+                                data: values,
+                              }],
+                            },
+                            options: {
+                              responsive: true, 
+                              maintainAspectRatio: false,
+                              scales: {
+                                yAxes: [{
+                                  ticks: {
+                                    beginAtZero:true
+                                  }
+                                }]
+                              },
+                            }
+                          });
+
+
+                          let barChartDepartement = document.getElementById('barChartDepartement').getContext('2d');
+                          let alldepartement = Array();
+                              syty.forEach(site => {barChartDepartement
+                                if(site.types.name == "DEPARTEMENT"){
+                                  alldepartement.push(site.name);
+                              }
+                          });
+                          
+                          let valuesDepart = {!! json_encode($tab_Qte_site_departement); !!}
+
+                          var myBarChartD = new Chart(barChartDepartement, {
+                            type: 'bar',
+                            data: {
+                              labels: alldepartement,
+                              datasets : [{
+                                label: "Nombre D'incident",
+                                backgroundColor: 'rgb(23, 125, 255)',
+                                borderColor: 'rgb(23, 125, 255)',
+                                data: valuesDepart,
+                              }],
+                            },
+                            options: {
+                              responsive: true, 
+                              maintainAspectRatio: false,
+                              scales: {
+                                yAxes: [{
+                                  ticks: {
+                                    beginAtZero:true
+                                  }
+                                }]
+                              },
+                            }
+                          });
+
+                          //BAR CHAR PROCESSUS
+                          let barChartProces = document.getElementById('barChartProcessus11').getContext('2d');
+                          let allProcess = Array();
+                          let possessus = {!! json_encode($processus_incident); !!}
+                              possessus.forEach(Pros => {
+                              allProcess.push(Pros);
+                          });
+
+                          let allValueProsessus = Array();
+                          let values_proces = {!! json_encode($incident_par_processus); !!}
+                          var myBarChartProcessus = new Chart(barChartProces, {
+                            type: 'bar',
+                            data: {
+                              labels: allProcess,
+                              datasets : [{
+                                label: "NOMBRE D'INCIDENT",
+                                backgroundColor: 'rgb(23, 125, 255)',
+                                borderColor: 'rgb(23, 125, 255)',
+                                data: values_proces,
+                              }],
+                            },
+                            options: {
+                              responsive: true, 
+                              maintainAspectRatio: false,
+                              scales: {
+                                yAxes: [{
+                                  ticks: {
+                                    beginAtZero:true
+                                  }
+                                }]
+                              },
+                            }
+                          });
+
+                    </script>
                   @endcan
+
             </div>
         </div>
     </div>
     
-    <?php
-      $mon_departement = NULL;
-      $id_departement = Auth::user()->departement_id;
-      if($id_departement){
-        if(is_iterable($departements)){
-        for ($co=0; $co < count($departements); $co++) {
-            $de = $departements[$co];
-            if($de->id == $id_departement){
-              $mon_departement = $de;
-            }
-        }}
-      }
-    ?>
-    
-    @if($mon_departement)
-      @if($mon_departement->name == "COORDINATION")
-        <hr class="my-4">
-        <h1 class="text-xl" style="margin-bottom: 3em;"><i class="fe fe-32 fe-bell"></i><i style="font-size:15px;" class="fe fe-percent mr-2"></i>POURCENTAGE INCIDENT  PAR SERVICE</h1>
-        
-        @if(is_iterable($departements))
-        @foreach($departements as $key => $departement)
-          <div class="row" style="font-family: Century Gothic;">
-              <div class="col-md-6 text-left">{{$departement->name}}</div>
-          </div>
-
-          <div class="progress" style="height: 2em;">
-              <div  
-                    id="depi{{ $key }}"
-                    class="progress-bar bg-success text-lg" 
-                    role="progressbar" 
-                    style="width: {{ count($incident_direction_generale) > 0 ? (count($incidentsDepartement[$key])/count($incident_direction_generale)) * 100 > 0 ? (count($incidentsDepartement[$key])/count($incident_direction_generale)) * 100 : 2 : 2 }}%" 
-                    aria-valuenow="{{ count($incident_direction_generale) > 0 ? (count($incidentsDepartement[$key])/count($incident_direction_generale)) * 100 > 0 ? (count($incidentsDepartement[$key])/count($incident_direction_generale)) * 100 : 2 : 2 }}%" 
-                    aria-valuemin="0" 
-                    aria-valuemax="100"
-                    >
-                    {{ count($incident_direction_generale) > 0 ? ((count($incidentsDepartement[$key])/count($incident_direction_generale)) * 100) > 0 ? intval((count($incidentsDepartement[$key])/count($incident_direction_generale)) * 100) : 0 : 0 }}%
-              </div>
-          </div>
-          </br>
-        @endforeach
-        @endif
-
-        <hr class="my-4">
-        <h1 class="text-xl" style="margin-bottom: 3em;">
-          <i class="fe fe-32 fe-bell"></i>
-          <i style="font-size:15px;" class="fe fe-percent mr-2"></i>
-          POURCENTAGE INCIDENT  PAR AGENCE
-        </h1>
-        
-        <?php
-              $nombre_incidents_un_site = array();
-              $nombre_inc_sites_annee_encour = 0;
-
-              if(is_iterable($incidentSites)){
-              for ($o=0; $o < count($incidentSites); $o++) {
-
-                $element = $incidentSites[$o];
-
-                $nombre_inc_sites_annee_encour += count($element);
-
-                array_push($nombre_incidents_un_site, count($element));
-              }}
-
-        ?>
-
-        <div class="row" style="font-family: Century Gothic; margin-left: 0.5em;">
-          @if(is_iterable($sites))
-          @foreach($sites as $key => $site)
-            <span style="margin-right: -5em; position: relative;" id="identi{{$key}}">
-            {{ $nombre_inc_sites_annee_encour > 0 ? ($nombre_incidents_un_site[$key]/$nombre_inc_sites_annee_encour) * 100  > 0 ? intval(($nombre_incidents_un_site[$key]/$nombre_inc_sites_annee_encour) * 100) : 0 : 0 }}%
-            </span>
-            <div class="my-4" id="adenti{{$key}}">
-              <div class="barcontainer">
-                <div 
-                      class="bar bg-primary font-weight-bold text-sm" 
-                      style="height:{{ $nombre_inc_sites_annee_encour > 0 ? ($nombre_incidents_un_site[$key]/$nombre_inc_sites_annee_encour) * 100  > 0 ? ($nombre_incidents_un_site[$key]/$nombre_inc_sites_annee_encour) * 100 : 0 : 0 }}%; 
-                      text-align:center;
-                      ">
-                </div>
-              </div>
-              <span style="writing-mode:vertical-rl; font-size:0.9em; margin-right: 2em; margin-top:3em;">{{$site->name}}</span>
-            </div>
-          @endforeach
-          @endif
-        </div>
-      @endif
-    @endif
-
-    @can('dashboard_admin')
-
-    @endcan
-
     <!-- Modal liste -->
     <div style="font-family: Century Gothic;" class="modal" id="modal_liste_incident" tabindex="-1" role="dialog" aria-labelledby="verticalModalTitle" aria-hidden="true">
                         <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -1804,6 +2205,292 @@
     </div> <!-- small modal -->
 
 
-    <script src="{{ url('dashboard.js') }}"></script>
+  <script>
+
+    var janv = 0;
+    var fev = 0;
+    var mars = 0;
+    let avril = 0;
+    var mai = 0;
+    var juin = 0;
+    var juill = 0;
+    var aout = 0;
+    var sept = 0;
+    var oct = 0;
+    var nov = 0;
+    var decc = 0;
+    
+    var incidents = {!! json_encode($incidents); !!}
+    var numbers = {!! json_encode($tab_ids) !!}
+    var mon_tab_date = {!! json_encode($tab_created) !!}
+    var incidentAprendrEnCompte = [];
+
+    $(document).ready(function(){
+
+        for (let me = 0; me < incidents.length; me++) {
+          const tins = incidents[me];
+          
+          if ((tins.observation_rex) && (!tins.deja_pris_en_compte)) {
+            let annee_incid = parseInt(mon_tab_date[me].substring(0, 4));
+
+            if(annee_incid == parseInt(new Date().getFullYear())){
+              incidentAprendrEnCompte.push(tins);
+            }
+          }
+        }
+
+        for (let mr = 0; mr < incidentAprendrEnCompte.length; mr++) {
+          const icidant = incidentAprendrEnCompte[mr];
+          
+          let indes = -1;
+          for (let fs = 0; fs < numbers.length; fs++) {
+            const numeru = numbers[fs];
+            if(numeru == icidant.number){
+              indes = fs;
+              break;
+            }
+          }
+
+          let mois = parseInt(mon_tab_date[indes].substring(5, 7));
+          
+          switch (mois) {
+            case 1:
+              janv +=1;
+              break;
+            case 2:
+              fev +=1;
+              break;
+            case 3:
+              mars +=1;
+              break;
+            case 4:
+              avril +=1;
+              break;
+            case 5:
+              mai +=1;
+              break;
+            case 6:
+              juin +=1;
+              break;
+            case 7:
+              juill +=1;
+              break;
+            case 8:
+              aout +=1;
+              break;
+            case 9:
+              sept +=1;
+              break;
+            case 10:
+              oct +=1;
+              break;
+            case 11:
+              nov +=1;
+              break;
+            case 12:
+              decc +=1;
+              break;
+            default:
+              break;
+          }
+        }
+    });
+
+    $(document).on('change', '#DateFin', function(){
+
+        let debut = parseInt($('#DateDebut').val().replaceAll("-", ""));
+        let fin = parseInt($('#DateFin').val().replaceAll("-", ""));
+
+        for (let vt = 0; vt < incidents.length; vt++) {
+                const iir = incidents[vt];
+
+                let date_declaration = parseInt(mon_tab_date[vt].replaceAll("-", ""));
+
+                if(
+                    ((date_declaration == debut) && (date_declaration < fin)) ||
+                    ((date_declaration > debut) && (date_declaration < fin)) ||
+                    ((date_declaration > debut) && (date_declaration == fin)) ||
+                    ((date_declaration == debut) && (date_declaration == fin))
+                 ) 
+                {
+                        if ((iir.observation_rex) && (!iir.deja_pris_en_compte)) {
+                            incidentAprendrEnCompte.push(iir);
+                        }
+                }
+
+        }
+
+        for (let mr = 0; mr < incidentAprendrEnCompte.length; mr++) {
+          const icidant = incidentAprendrEnCompte[mr];
+          
+          let indes = -1;
+          for (let fs = 0; fs < numbers.length; fs++) {
+            const numeru = numbers[fs];
+            if(numeru == icidant.number){
+              indes = fs;
+              break;
+            }
+          }
+
+          let mois = parseInt(mon_tab_date[indes].substring(5, 7));
+          
+          switch (mois) {
+            case 1:
+              janv +=1;
+              break;
+            case 2:
+              fev +=1;
+              break;
+            case 3:
+              mars +=1;
+              break;
+            case 4:
+              avril +=1;
+              break;
+            case 5:
+              mai +=1;
+              break;
+            case 6:
+              juin +=1;
+              break;
+            case 7:
+              juill +=1;
+              break;
+            case 8:
+              aout +=1;
+              break;
+            case 9:
+              sept +=1;
+              break;
+            case 10:
+              oct +=1;
+              break;
+            case 11:
+              nov +=1;
+              break;
+            case 12:
+              decc +=1;
+              break;
+            default:
+              break;
+          }
+        }
+
+    });
+    
+		var pieChart = document.getElementById('pieChart').getContext('2d');
+		var multipleLineChart = document.getElementById('multipleLineChart').getContext('2d');
+
+		var myPieChart = new Chart(pieChart, {
+			type: 'pie',
+			data: {
+				datasets: [{
+					data: [{{$encour}}, {{$cloture}}, {{$annul}}],
+					backgroundColor :["#1d7af3","#2A792E","#fdaf4b"],
+					borderWidth: 0
+				}],
+				labels: ['ENCOURS', 'CLÔTURÉ', 'ANNULÉ'] 
+			},
+			options : {
+				responsive: true, 
+				maintainAspectRatio: false,
+				legend: {
+					position : 'bottom',
+					labels : {
+						fontColor: 'rgb(154, 154, 154)',
+						fontSize: 11,
+						usePointStyle : true,
+						padding: 20
+					}
+				},
+				pieceLabel: {
+					render: 'percentage',
+					fontColor: 'white',
+					fontSize: 14,
+				},
+				tooltips: false,
+				layout: {
+					padding: {
+						left: 20,
+						right: 20,
+						top: 20,
+						bottom: 20
+					}
+				}
+			}
+		});
+
+
+		var myMultipleLineChart = new Chart(multipleLineChart, {
+			type: 'line',
+			data: {
+				labels: ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"],
+				datasets: [{
+					label: "ENCOURS",
+					borderColor: "#1d7af3",
+					pointBorderColor: "#FFF",
+					pointBackgroundColor: "#1d7af3",
+					pointBorderWidth: 2,
+					pointHoverRadius: 4,
+					pointHoverBorderWidth: 1,
+					pointRadius: 4,
+					backgroundColor: 'transparent',
+					fill: true,
+					borderWidth: 2,
+					data: [{{$janv_encours}}, {{$fev_encours}}, {{$mars_encours}}, {{$avril_encours}}, {{$mai_encours}}, {{$juin_encours}}, {{$juill_encours}}, {{$aout_encours}}, {{$sept_encours}}, {{$oct_encours}}, {{$nov_encours}}, {{$decc_encours}}]
+				},{
+					label: "CLÔTURÉ",
+					borderColor: "#59d05d",
+					pointBorderColor: "#FFF",
+					pointBackgroundColor: "#59d05d",
+					pointBorderWidth: 2,
+					pointHoverRadius: 4,
+					pointHoverBorderWidth: 1,
+					pointRadius: 4,
+					backgroundColor: 'transparent',
+					fill: true,
+					borderWidth: 2,
+					data: [{{$janv_cloturer}}, {{$fev_cloturer}}, {{$mars_cloturer}}, {{$avril_cloturer}}, {{$mai_cloturer}}, {{$juin_cloturer}}, {{$juill_cloturer}}, {{$aout_cloturer}}, {{$sept_cloturer}}, {{$oct_cloturer}}, {{$nov_cloturer}}, {{$decc_cloturer}}]
+				}, {
+					label: "ANNULÉ",
+					borderColor: "#FFA229",
+					pointBorderColor: "#FFF",
+					pointBackgroundColor: "#FFA229",
+					pointBorderWidth: 2,
+					pointHoverRadius: 4,
+					pointHoverBorderWidth: 1,
+					pointRadius: 4,
+					backgroundColor: 'transparent',
+					fill: true,
+					borderWidth: 2,
+					data: [{{$janv_annuler}}, {{$fev_annuler}}, {{$mars_annuler}}, {{$avril_annuler}}, {{$mai_annuler}}, {{$juin_annuler}}, {{$juill_annuler}}, {{$aout_annuler}}, {{$sept_annuler}}, {{$oct_annuler}}, {{$nov_annuler}}, {{$decc_annuler}}]
+				}]
+			},
+			options : {
+				responsive: true, 
+				maintainAspectRatio: false,
+				legend: {
+					position: 'top',
+				},
+				tooltips: {
+					bodySpacing: 4,
+					mode:"nearest",
+					intersect: 0,
+					position:"nearest",
+					xPadding:10,
+					yPadding:10,
+					caretPadding:10
+				},
+				layout:{
+					padding:{left:15,right:15,top:15,bottom:15}
+				}
+			}
+		});
+
+
+
+	</script>
+
+  <script src="{{ url('dashboard.js') }}"></script>
 
 @endsection

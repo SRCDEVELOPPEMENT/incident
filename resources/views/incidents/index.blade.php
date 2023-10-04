@@ -2,20 +2,8 @@
 
 <?php
 
-    $le_role_du_user_connecte = Auth::user()->roles[0]->name;
-    $tab_created = array();
-    $tab_ids = array();
-
-    if(Session::has('incidents')){
-        if(is_iterable(Session::get('incidents'))){
-            for ($j=0; $j < count(Session::get('incidents')); $j++) {
-                $ines = Session::get('incidents')[$j];
-                array_push($tab_ids, $ines->number);
-                array_push($tab_created, substr(strval($ines->created_at), 0, 10));
-            }
-        }
-    }
-
+    $times = Session::get('times');
+        
 ?>
 
 @section('content')
@@ -25,12 +13,12 @@
                 <div class="col-12">
                         <div class="card-header py-3">
                             <div class="row">
-                                <div class="col-md-6 text-left text-xl text-uppercase">
-                                    <h1 class="mb-2">
+                                <div class="col-md-9 text-left text-xl text-uppercase" style="font-weight:bold;">
+                                    <h1 class="mb-2 text-danger">
                                     <span class="fe fe-info mr-2"></span>  
-                                    Liste Incidents</h1>
+                                    NB : Bien Vouloir Contacter Par Téléphone Le Responsable Du Site Auquel L'incident Est Assigné (Recepteur de l'incident)</h1>
                                 </div>
-                                <div class="col-md-6 text-right">
+                                <div class="col-md-3 text-right">
                                     @can('creer-incident')
                                     <button 
                                             style="font-family: Century Gothic;"
@@ -58,7 +46,7 @@
                                 <div class="card shadow">
                                     <div class="card-body">  
                                         <div style="font-family: Century Gothic;" class="row ml-1 mt-4 my-4">
-                                            <div class="col-xs-2 mr-3">
+                                            <div class="col-xs-2 mr-4">
                                                 <select class="custom-select border-primary" id="emis_recus">
                                                         <option value="">Incident</option>
                                                         <option value="Emis">Emis</option>
@@ -66,24 +54,13 @@
                                                 </select>
                                             </div>
 
-                                            @if($le_role_du_user_connecte == "COORDONATEUR")
-                                            <div class="col-xs-2">
-                                                <select class="custom-select border-primary" id="assigner_as">
-                                                        <option value="">Assignation...</option>
-                                                        <option value="Déja Pris En Compte">Déja Pris En Compte</option>
-                                                </select>
-                                            </div>
-                                            @endif
-
                                             <div class="col-sm-2">
-                                                <select data-categories="{{ json_encode(Session::get('categories')) }}" class="form-control select2" id="validationCustom04">
-                                                    <option selected value="">Catégorie...</option>
-                                                    @if(Session::has('categories'))
-                                                    @if(is_iterable(Session::get('categories')))
-                                                    @foreach(Session::get('categories') as $categorie)
-                                                    <option value="{{ $categorie->name }}">{{ $categorie->name }}</option>
+                                                <select data-sites="{{ json_encode($sites) }}" class="form-control select2" id="validationCustom04">
+                                                    <option selected value="">Site...</option>
+                                                    @if(is_iterable($sites))
+                                                    @foreach($sites as $site)
+                                                    <option value="{{ $site->name }}">{{ $site->name }}</option>
                                                     @endforeach
-                                                    @endif
                                                     @endif
                                                 </select>
                                             </div>
@@ -103,10 +80,7 @@
                                                     <input type="date" class="form-control border-primary" id="searchDate">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                <input class="form-control border-primary" id="searchMonth" type="month">
-                                            </div>
-                                            <div class="text-right col-md-2">
+                                            <div class="text-right col-md-2 mr-1">
                                                 <input type="text" name="" id="search_text_simple" class="form-control border-primary" placeholder="Search...">
                                             </div>
                                         </div>
@@ -117,13 +91,10 @@
                                                     <th class="text-sm">Numéro</th>
                                                     <th></th>
                                                     <th>Description Incident</th>
-                                                    <th>Déclaration</th>
-                                                    <th>Echéance</th>
-                                                    <th>Clôture</th>
-                                                    <th>Catégorie</th>
-                                                    <th>Priorité</th>
-                                                    
-                                                    <th class="text-sm">Assignation</th>
+                                                    <th>Date Déclaration</th>
+                                                    <th>Date Echéance</th>
+                                                    <th>Emetteur</th>
+                                                    <th class="text-sm">Recepteur</th>
                                                     
                                                     <th>Tâches</th>
                                                     <th></th>
@@ -134,77 +105,27 @@
                                             <tbody class="agencies">
                                                 @if(is_iterable($incidents))
                                                 @foreach($incidents as $key => $incident)
-                                                    <?php 
-                                                       
-                                                        $nombre_taches = 0;
-                                                        if(Session::has('tasks')){
-                                                            if(is_iterable(Session::get('tasks'))){
-                                                                for ($i=0; $i < count(Session::get('tasks')); $i++) {
-                                                                    $task = Session::get('tasks')[$i];
-                                                                    
-                                                                    if($incident != NULL){
-                                                                        if($task->incident_number == $incident->number){
-                                                                            $nombre_taches +=1;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-
-                                                        $counte = 0;
-                                                        $user_incident = NULL;
-                                                        if(Session::has('users_incidents')){
-                                                            if(is_iterable(Session::get('users_incidents'))){
-                                                                for ($j=0; $j < count(Session::get('users_incidents')); $j++) {
-                                                                    $ui = Session::get('users_incidents')[$j];
-
-                                                                    if(($ui->incident_number == $incident->number)){
-
-                                                                        $counte +=1;
-
-                                                                        if(intval($ui->user_id) == intval(Auth::user()->id)){
-                                                                            $user_incident  = $ui;
-                                                                        }
-                                                                        
-                                                                    }
-
-                                                                }
-                                                            }
-                                                        }
-
-                                                    ?>
 
                                                     <tr id="myInc" data-incident="{{ json_encode($incident) }}">
                                                         <td class="font-weight-bold" style="font-size:0.9em;">
                                                             {{ $incident->number }}
                                                         </td>
                                                         <td>
-                                                        @if($user_incident)
-                                                            @if($user_incident->isDeclar)
+                                                            @if($incident->site_declarateur == Auth::user()->site_id)
                                                                 <span class="badge badge-light">Emis</span>
                                                             @else
                                                                 <span class="badge badge-light">Reçus</span>
                                                             @endif
-                                                        @else
-                                                                <span class="badge badge-light">Reçus</span>
-                                                        @endif
+
                                                         </td>
                                                         <td style="font-size:0.7em;">{{ $incident->description }}
                                                         </td>
-                                                        <td style="font-size:0.7em;" id="createcolumn">{{ substr($incident->created_at, 0, 10) }}</td>
+                                                        <td style="font-size:0.7em;" id="createcolumn">{{ $incident->declaration_date }}</td>
                                                         <td style="font-size:0.7em;">
                                                             <a  
                                                                 data-incident="{{ json_encode($incident) }}"
                                                                 href="#!"
-                                                                @if($incident->due_date)
-                                                                        title="Ajuster La Date D'échéance"
-                                                                @else
-                                                                        title="DEFINISSEZ UNE ECHEANCE" 
-                                                                @endif
-
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
+                                                                @if(($incident->site_declarateur == Auth::user()->site_id) || ($incident->site_id != Auth::user()->site_id))
                                                                             @if(($incident->status != "CLÔTURÉ"))
                                                                                 id="due_date_set"
                                                                                 data-backdrop="static"
@@ -212,181 +133,87 @@
                                                                                 data-toggle="modal"
                                                                                 data-target="#define_dat_echean"
                                                                             @endif
-                                                                        @endif
-                                                                    @endif
                                                                 @endif
                                                                 style="text-decoration:none;"
-
-                                                                @if($incident->status != "CLÔTURÉ")
-                                                                    @if(intval(str_replace("-", "", $incident->due_date)) < intval(str_replace("-", "", date('Y-m-d'))))
-                                                                            style="color:danger;"
-                                                                            class="text-danger"
-                                                                    @elseif(intval(str_replace("-", "", $incident->due_date)) == intval(str_replace("-", "", date('Y-m-d'))))
-                                                                            style="color:yellow;"
-                                                                            class="text-warning"
-                                                                    @else
-
-                                                                    @endif
-                                                                @endif
-                                                                    >
-                                                                {{ $incident->due_date ? $incident->due_date : "DEFINISSEZ UNE ECHEANCE" }}
+                                                            >
+                                                            {{ $incident->due_date ? $incident->due_date : 'DEFINISSEZ UNE DATE D\'ECHEANCE' }}
                                                             </a>
                                                         </td>
-                                                        <td style="font-size:0.7em;">{{ $incident->closure_date ? $incident->closure_date : '' }}</td>
-                                                        <td style="font-size:0.7em;">
-                                                            <a 
-                                                                href="#!"
-                                                                style="text-decoration: none;"
-                                                                title="Catégorie De L'incident"
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
-                                                                            @if($incident->status != "CLÔTURÉ")
-                                                                                id="set_categ"
-                                                                                data-incident="{{ json_encode($incident) }}"
-                                                                                data-backdrop="static"
-                                                                                data-keyboard="false"
-                                                                                data-toggle="modal"
-                                                                                data-target="#assignat"
-                                                                            @endif
-                                                                        @endif
-                                                                    @endif
-                                                                @endif
-                                                                >
-                                                                {{ $incident->categories ? $incident->categories->name : "DEFINISSEZ UNE CATEGORIE" }}
-                                                            </a>
+                                                        <?php
+                                                            $Ncate = NULL;
+                                                            if(is_iterable($categories)){
+                                                                for ($gr=0; $gr < count($categories); $gr++) {
+                                                                    $categ = $categories[$gr];
+                                                                    if($categ->id == $incident->categorie_id){
+                                                                        $Ncate = $categ;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+                                                        ?>
+                                                        <td>
+                                                            <?php 
+                                                                $site_emetteur = NULL;
+                                                                for ($v=0; $v < count($sites); $v++) {
+                                                                    $s = $sites[$v];
+                                                                    if($s->id == $incident->site_declarateur){
+                                                                        $site_emetteur = $s;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            ?>
+                                                            <span class="badge badge-light">{{ $site_emetteur ? $site_emetteur->name : "" }}</span>
                                                         </td>
-                                                        <td style="font-size:0.7em;">
-                                                                        <a 
-                                                                            @if($incident->priority == 'URGENT')
-                                                                                style="color:red; text-decoration:none;"
-                                                                            @elseif($incident->priority == 'ÉLEVÉE')
-                                                                                style="color:yellow; text-decoration:none;"
-                                                                            @else
-                                                                                style="color:green; text-decoration:none;"
-                                                                            @endif
-                                                                            href="#!"
-                                                                            title="Modifier La Priorité"
-                                                                            @if($user_incident)
-                                                                                @if($user_incident->isCoordo)
-                                                                                    @if($user_incident->isTrigger)
-                                                                                        @if(($incident->status != "CLÔTURÉ") && ($incident->status != "ANNULÉ"))
-                                                                                            id="define_prioriti"
-                                                                                            data-incident="{{ json_encode($incident) }}"
-                                                                                            data-backdrop="static"
-                                                                                            data-keyboard="false"
-                                                                                            data-toggle="modal"
-                                                                                            data-target="#edit_priority_incident"
-                                                                                        @endif
-                                                                                    @endif
-                                                                                @endif
-                                                                            @endif
-                                                                            >
-                                                                            {{ $incident->priority }}
-                                                                        </a>
-                                                        </td>
-
                                                         
                                                         <td>
+                                                            <?php 
+                                                            $site_recepteur = NULL;
+                                                                for ($v=0; $v < count($sites); $v++) {
+                                                                    $s = $sites[$v];
+                                                                    if($s->id == $incident->site_id){
+                                                                        $site_recepteur = $s;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            ?>
                                                             @if($incident->deja_pris_en_compte == TRUE)
-                                                                <span title="Incident Déja Déclaré Par Un Autre Site" style="font-size: 0.8em;" class="badge badge-light">Déja Pris En Compte</span>
+                                                            <span class="badge badge-light">DÉJA PRIS EN COMPTE</span>
                                                             @else
-                                                                @if($incident->observation_rex)
-                                                                    @if(Session::has('users_incidents'))
-                                                                    @if(is_iterable(Session::get('users_incidents')))
-                                                                    @for($g=0; $g < count(Session::get('users_incidents')); $g ++)
-                                                                        @if(Session::get('users_incidents')[$g]->incident_number == $incident->number)
-                                                                            @if(Session::get('users_incidents')[$g]->isTrigger == TRUE)
-                                                                                @if(Session::get('users_incidents')[$g]->isCoordo == TRUE)
-                                                                                    @if(Session::get('users_incidents')[$g]->isTriggerPlus == TRUE)
-                                                                                            
-                                                                                        @if(Session::has('users'))
-                                                                                            @if(is_iterable(Session::get('users')))
-                                                                                            @for($h=0; $h < count(Session::get('users')); $h ++)
-                                                                                                @if(intval(Session::get('users')[$h]->id) == intval(Session::get('users_incidents')[$g]->user_id))
-                                                                                                    
-                                                                                                    @if(Session::get('users')[$h]->site_id)
-                                                                                                    
-                                                                                                        @if(Session::has('sites'))
-                                                                                                        @if(is_iterable(Session::get('sites')))
-                                                                                                        @for($o=0; $o < count(Session::get('sites')); $o ++)
-                                                                                                            @if(intval(Session::get('sites')[$o]->id) == intval(Session::get('users')[$h]->site_id))
-                                                                                                                <span class="badge badge-light">{{ Session::get('sites')[$o]->name }}</span>
-                                                                                                                @break
-                                                                                                            @endif
-                                                                                                        @endfor
-                                                                                                        @endif
-                                                                                                        @endif
-
-                                                                                                    @elseif(Session::get('users')[$h]->departement_id)
-
-                                                                                                        @if(Session::has('departements'))
-                                                                                                        @if(is_iterable(Session::get('departements')))
-                                                                                                        @for($o=0; $o < count(Session::get('departements')); $o ++)
-                                                                                                            @if(intval(Session::get('departements')[$o]->id) == intval(Session::get('users')[$h]->departement_id))
-                                                                                                                <span class="badge badge-light">{{ Session::get('departements')[$o]->name }}</span>
-                                                                                                                @break
-                                                                                                            @endif
-                                                                                                        @endfor
-                                                                                                        @endif
-                                                                                                        @endif
-
-                                                                                                    @endif
-                                                                                                    @break
-                                                                                                @endif
-                                                                                            @endfor
-                                                                                            @endif
-                                                                                        @endif
-                                                                                    @endif
-                                                                                @endif
-                                                                            @endif
-                                                                        @endif
-                                                                    @endfor
-                                                                    @endif
-                                                                    @endif
-                                                                @else
-                                                                    <span class="badge badge-light"></span>
-                                                                @endif
+                                                            <span class="badge badge-light">{{ $site_recepteur ? $site_recepteur->name : "" }}</span>
                                                             @endif
                                                         </td>
                                                         
                                                         <td>
                                                             <a 
                                                                 style="text-decoration:none;"
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
-                                                                            href="{{ route('listedTask', ['number' => $incident->number]) }}"
-                                                                        @endif
-                                                                    @endif
+                                                                @if($incident->site_id == Auth::user()->site_id)
+                                                                    href="{{ route('listedTask', ['number' => $incident->number, 'in' => $in]) }}"
                                                                 @endif
                                                                 title="Liste Des Tâches De L'incident">
-                                                                <small class="text-lg">{{ $nombre_taches < 10 ? 0 .''. $nombre_taches : $nombre_taches}}</small>
+                                                                @if(is_iterable($tasks) > 0)
+                                                                <small class="text-lg">{{ count($tasks[$key]) < 10 ? 0 .''. count($tasks[$key]) : count($tasks[$key]) }}</small>
+                                                                @else
+                                                                <small class="text-lg">00</small>
+                                                                @endif
                                                                 <span class="fe fe-list"></span>
                                                                 <span class="fe fe-check"></span>
                                                             </a>
                                                         </td>
                                                         
                                                         <td>
-                                                            @if($user_incident)
-                                                                @if($user_incident->isTrigger)
                                                                 <a 
                                                                     style="text-decoration:none;" 
                                                                     type="button" 
-                                                                    href="{{ route('printIncident', ['number' => $incident->number]) }}" 
+                                                                    href="{{ route('printIncident', ['number' => $incident->number]) }}"
                                                                     title="Imprimer Cet Incident"
                                                                     class="fe fe-printer fe-32">
                                                                 </a>
-                                                                @endif
-                                                            @endif
                                                         </td>
 
-                                                        <td>                                                                        
+                                                        <td>
                                                                 <a 
                                                                         type="button"
-                                                                        @if($user_incident)
-                                                                            @if($user_incident->isCoordo)
-                                                                                @if($user_incident->isTrigger)
+                                                                        @if(($incident->site_declarateur == Auth::user()->site_id) || ($incident->site_id != Auth::user()->site_id))
                                                                                     id="toggle"
                                                                                     data-incident="{{ json_encode($incident) }}"
                                                                                     @if($incident->closure_date)
@@ -398,11 +225,8 @@
                                                                                         title="Clôturer Cet Incident"
                                                                                         class="fe fe-toggle-left fe-32 saiyan"
                                                                                     @endif
-                                                                                @endif
-                                                                            @endif
                                                                         @endif
                                                                     >
-
                                                                 </a>
                                                         </td>
                                                         <td>
@@ -410,16 +234,13 @@
                                                                 <span class="text-muted sr-only">Action</span>
                                                             </button>
                                                             <div class="dropdown-menu dropdown-menu-right">
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
+                                                                @if(($incident->site_declarateur == Auth::user()->site_id) || ($incident->site_id != Auth::user()->site_id))
                                                                             @if($incident->status != "CLÔTURÉ" && $incident->status != "ANNULÉ")
                                                                                 <a
                                                                                     href="#!"
-                                                                                    data-departements="{{ json_encode(Session::get('departements')) }}"
-                                                                                    data-categories="{{ json_encode(Session::get('categories')) }}"
-                                                                                    data-incident="{{ json_encode($incident) }}"
                                                                                     id="btn_edit_in"
+                                                                                    data-incident="{{ json_encode($incident) }}"
+                                                                                    data-categories="{{ json_encode(Session::get('categories')) }}"
                                                                                     class="dropdown-item mb-1"
                                                                                     data-backdrop="static"
                                                                                     data-keyboard="false"
@@ -427,13 +248,9 @@
                                                                                     data-target="#modaledit_incident"><span class="fe fe-edit-2 mr-4"></span> Editer
                                                                                 </a>
                                                                             @endif
-                                                                        @endif
-                                                                    @endif
                                                                 @endif
 
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
+                                                                @if(($incident->site_declarateur == Auth::user()->site_id) || ($incident->site_id != Auth::user()->site_id))
                                                                                 <a 
                                                                                     class="dropdown-item mb-1" 
                                                                                     href="#!"
@@ -444,7 +261,7 @@
                                                                                         data-keyboard="false"
                                                                                         data-toggle="modal"
                                                                                         data-target="#motif_danul"
-                                                                                    @elseif($incident->status == "ANNULÉ")
+                                                                                    @elseif($incident['status'] == "ANNULÉ")
                                                                                         id="motiannulitions"
                                                                                         data-backdrop="static"
                                                                                         data-keyboard="false"
@@ -465,63 +282,54 @@
                                                                                     <span class="fe fe-pocket mr-4"></span>Commentaire Fait Lors De La Cloture
                                                                                 @endif
                                                                                 </a>
-                                                                        @endif
-                                                                    @endif
                                                                 @endif
 
                                                                 <a
                                                                     id="infos_incident"
-                                                                    data-sites="{{ json_encode(Session::get('sites')) }}"
-                                                                    data-ids="{{ json_encode($tab_ids) }}"
-                                                                    data-created="{{ json_encode($tab_created) }}"
-                                                                    data-departements="{{ json_encode(Session::get('departements')) }}"
-                                                                    data-users="{{ json_encode(Session::get('users')) }}"
-                                                                    data-users_incidents="{{ json_encode(Session::get('users_incidents')) }}"
-                                                                    data-number="{{ json_encode($incident) }}"
-                                                                    data-task="{{ json_encode(Session::get('tasks')) }}"
                                                                     class="dropdown-item mb-1"
                                                                     href="#!"
                                                                     data-backdrop="static"
                                                                     data-keyboard="false"
                                                                     data-toggle="modal"
+                                                                    data-incident="{{ json_encode($incident) }}"
+                                                                    data-number="{{ $incident->number }}"
+                                                                    data-description="{{ $incident->description }}"
+                                                                    data-status="{{ $incident->status }}"
+                                                                    data-cause="{{ $incident->cause }}"
+                                                                    data-motif_annulation="{{ $incident->motif_annulation }}"
+                                                                    data-proces_id="{{ $incident->proces_id }}"
+                                                                    data-perimeter="{{ $incident->perimeter }}"
+                                                                    data-priority="{{ $incident->priority }}"
+                                                                    data-declaration_date="{{ $incident->declaration_date }}"
+                                                                    data-battles="{{ $incident->battles }}"
+                                                                    data-comment="{{ $incident->comment }}"
+                                                                    data-site_id="{{ $incident->site_id }}"
+                                                                    data-observation_rex="{{ $incident->observation_rex }}"
+                                                                    data-archiver="{{ $incident->archiver }}"
+                                                                    data-deja_pris_en_compte="{{ $incident->deja_pris_en_compte }}"
+                                                                    data-categorie_id="{{ $incident->categorie_id }}"
+                                                                    data-site_declarateur="{{ $incident->site_declarateur }}"
+                                                                    data-observation="{{ $incident->observation }}"
+                                                                    data-fullname_declarateur="{{ $incident->fullname_declarateur }}"
+                                                                    data-closure_date="{{ $incident->closure_date }}"
+                                                                    data-due_date="{{ $incident->due_date }}"
+                                                                    data-valeur="{{ $incident->valeur }}"
+                                                                    data-categories="{{ json_encode($categories) }}"
+                                                                    data-processus="{{ json_encode(Session::get('processus')) }}"
+                                                                    data-tasks="{{ json_encode($tasks[$key]) }}"
+                                                                    data-sites="{{ json_encode($sites) }}"
                                                                     data-target="#modal_infos_incidant">
                                                                     <span class="fe fe-eye mr-4"></span> Voir Infos Incident
                                                                 </a>
 
                                                                 @if(auth::user()->roles[0]->name == "COORDONATEUR")
-                                                                    <?php
-                                                                        $usere = NULL;
-                                                                        if(Session::has('users_incidents')){
-                                                                        if(is_iterable(Session::get('users_incidents'))){
-                                                                        for ($j=0; $j < count(Session::get('users_incidents')); $j++) {
-                                                                            $xi = Session::get('users_incidents')[$j];
-                                                                            if(($xi->incident_number == $incident->number) &&
-                                                                              ($xi->isDeclar == TRUE)){
-
-                                                                                if(Session::has('users_incidents')){
-                                                                                if(is_iterable(Session::get('users_incidents'))){
-                                                                                for ($gs=0; $gs < count(Session::get('users')); $gs++) {
-                                                                                    $ur = Session::get('users')[$gs];
-                                                                                    if(intval($ur->id) == intval($xi->user_id)){
-                                                                                        $usere = $ur;
-                                                                                        break;
-                                                                                    }
-                                                                                }}}
-                                                                            }
-                                                                        }}}
-                                                                    ?>
-                                                                    @if($usere)
-                                                                    @if($usere->responsable)
-                                                                        @if($usere->responsable == Auth::user()->id)
                                                                         <a
                                                                                     class="dropdown-item mb-1"
                                                                                     href="#!"
                                                                                     id="assign_elt_gohan"
                                                                                     data-incident="{{ json_encode($incident) }}"
-                                                                                    data-utilisateurs="{{ json_encode(Session::get('users')) }}"
-                                                                                    data-users_incidents="{{ json_encode(Session::get('users_incidents')) }}"
-                                                                                    data-departements="{{ json_encode(Session::get('departements')) }}"
-                                                                                    data-sites="{{ json_encode(Session::get('sites')) }}"
+                                                                                    data-utilisateurs="{{ json_encode($users) }}"
+                                                                                    data-sites="{{ json_encode($sites) }}"
                                                                                     data-backdrop="static"
                                                                                     data-keyboard="false"
                                                                                     data-toggle="modal"
@@ -530,92 +338,27 @@
                                                                                     <span class="fe fe-home mr-2"></span>
                                                                                     Assigner Une Entité A Cet Incident
                                                                         </a>
-                                                                        @endif
-                                                                    @else
-                                                                        @if($usere->id == Auth::user()->id)
                                                                         <a
                                                                                     class="dropdown-item mb-1"
                                                                                     href="#!"
-                                                                                    id="assign_elt_gohan"
+                                                                                    id="cloture_rex"
+                                                                                    data-number="{{ $incident->number }}"
                                                                                     data-incident="{{ json_encode($incident) }}"
-                                                                                    data-utilisateurs="{{ json_encode(Session::get('users')) }}"
-                                                                                    data-users_incidents="{{ json_encode(Session::get('users_incidents')) }}"
-                                                                                    data-departements="{{ json_encode(Session::get('departements')) }}"
-                                                                                    data-sites="{{ json_encode(Session::get('sites')) }}"
-                                                                                    data-backdrop="static"
-                                                                                    data-keyboard="false"
-                                                                                    data-toggle="modal"
-                                                                                    data-target="#Grimjow_jagerjack">
-                                                                                    <span class="fe fe-corner-down-right"></span>
-                                                                                    <span class="fe fe-home mr-2"></span>
-                                                                                    Assigner Une Entité A Cet Incident
+                                                                                    data-utilisateurs="{{ json_encode($users) }}"
+                                                                                    data-sites="{{ json_encode($sites) }}">
+                                                                                    <span class="fe fe-toggle-left mr-2"></span>
+                                                                                    Cloturer Cet Incident
                                                                         </a>
-                                                                        @endif
-                                                                    @endif
-                                                                    @endif
                                                                 @endif
 
-
-                                                                @if(auth::user()->roles[0]->name == "COORDONATEUR")
-                                                                    <?php
-                                                                        $usere = NULL;
-                                                                        if(Session::has('users_incidents')){
-                                                                        if(is_iterable(Session::get('users_incidents'))){
-                                                                        for ($j=0; $j < count(Session::get('users_incidents')); $j++) {
-                                                                            $xi = Session::get('users_incidents')[$j];
-                                                                            if(($xi->incident_number == $incident->number) &&
-                                                                              ($xi->isDeclar == TRUE)){
-
-                                                                                if(Session::has('users_incidents')){
-                                                                                if(is_iterable(Session::get('users_incidents'))){
-                                                                                for ($gs=0; $gs < count(Session::get('users')); $gs++) {
-                                                                                    $ur = Session::get('users')[$gs];
-                                                                                    if(intval($ur->id) == intval($xi->user_id)){
-                                                                                        $usere = $ur;
-                                                                                        break;
-                                                                                    }
-                                                                                }}}
-                                                                            }
-                                                                        }}}
-                                                                    ?>
-                                                                    @if($usere)
-                                                                    @if($usere->responsable)
-                                                                        @if($usere->responsable == Auth::user()->id)
-                                                                        <a
-                                                                            class="dropdown-item mb-1"
-                                                                            href="{{ route('viewUser', ['number' => $incident->number]) }}">
-                                                                            <span class="fe fe-eye"></span>
-                                                                            <span class="fe fe-eye mr-2"></span>
-                                                                            Voir Entités Assigneés A Cet Incident
+                                                                @if($incident->site_id != Auth::user()->site_id)
+                                                                    @if($incident->status != "CLÔTURÉ")
+                                                                        <a 
+                                                                            id="delete_incids"
+                                                                            data-incident="{{ json_encode($incident) }}"
+                                                                            class="dropdown-item mb-1" 
+                                                                            href="#!"><span class="fe fe-x mr-4"></span> Supprimer
                                                                         </a>
-                                                                        @endif
-                                                                    @else
-                                                                        @if($usere->id == Auth::user()->id)
-                                                                        <a
-                                                                            class="dropdown-item mb-1"
-                                                                            href="{{ route('viewUser', ['number' => $incident->number]) }}">
-                                                                            <span class="fe fe-eye"></span>
-                                                                            <span class="fe fe-eye mr-2"></span>
-                                                                            Voir Entités Assigneés A Cet Incident
-                                                                        </a>
-                                                                        @endif
-                                                                    @endif
-
-                                                                    @endif
-                                                                @endif
-
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
-                                                                            @if($incident->status != "CLÔTURÉ")
-                                                                                <a 
-                                                                                    id="delete_incids" 
-                                                                                    data-incident="{{ json_encode($incident) }}"
-                                                                                    class="dropdown-item mb-1" 
-                                                                                    href="#!"><span class="fe fe-x mr-4"></span> Supprimer
-                                                                                </a>
-                                                                            @endif
-                                                                        @endif
                                                                     @endif
                                                                 @endif
 
@@ -631,33 +374,13 @@
                                                                     href="#!"><span class="fe fe-message-square mr-4"></span> Commentaire De Clôture
                                                                 </a>
                                                                 @endif
-
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
-                                                                            @if($incident->status == "CLÔTURÉ")
-                                                                                <a 
-                                                                                    href="#!"
-                                                                                    id="archive_incident"
-                                                                                    data-incident="{{ json_encode($incident) }}" 
-                                                                                    class="dropdown-item mb-1" 
-                                                                                    ><span class="fe fe-archive mr-4"></span> Archiver
-                                                                                </a>
-                                                                            @endif
-                                                                        @endif
-                                                                    @endif
-                                                                @endif
-
-                                                                @if($user_incident)
-                                                                    @if($user_incident->isCoordo)
-                                                                        @if($user_incident->isTrigger)
-                                                                        <a 
-                                                                            class="dropdown-item" 
-                                                                            href="{{ route('listedTask', ['number' => $incident->number]) }}">
-                                                                            <span class="fe fe-list mr-4"></span> Liste Des Tâches
-                                                                        </a>
-                                                                        @endif
-                                                                    @endif
+                                                                
+                                                                @if($incident->site_id == Auth::user()->site_id)
+                                                                    <a
+                                                                        class="dropdown-item"
+                                                                        href="{{ route('listedTask', ['number' => $incident->number, 'in' => $in]) }}">
+                                                                        <span class="fe fe-list mr-4"></span> Liste Des Tâches
+                                                                    </a>
                                                                 @endif
 
                                                             </div>
@@ -700,27 +423,14 @@
                                                     </div>
                                                 </div>
                                                 <div class="form-group col-md-12 my-4">
-                                                    <label for="deepa"><span class="fe fe-home mr-4"></span>Département | Site <span style="color:red;"> *</span></label>
+                                                    <label for="deepa"><span class="fe fe-home mr-4"></span>Site <span style="color:red;"> *</span></label>
                                                     <select style="font-size:1.2em;" class="custom-select border-success" data-types="{{ json_encode(Session::get('types')) }}" data-categories="{{ json_encode(Session::get('categories')) }}" name="assignatdeepartes" id="deepartes">
-                                                        <optgroup label="Liste Département">
                                                             <option selected value="">Choisissez...</option>
-                                                            @if(Session::has('departements'))
-                                                            @if(is_iterable(Session::get('departements')))
-                                                            @foreach(Session::get('departements') as $departement)
-                                                            <option value="{{ $departement->id }}">{{ $departement->name }}</option>
+                                                            @if(is_iterable($sites))
+                                                            @foreach($sites as $site)
+                                                            <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                             @endforeach
                                                             @endif
-                                                            @endif
-                                                        </optgroup>
-                                                        <optgroup label="Liste Type">
-                                                            @if(Session::has('types'))
-                                                            @if(is_iterable(Session::get('types')))
-                                                            @foreach(Session::get('types') as $type)
-                                                            <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                            @endforeach
-                                                            @endif
-                                                            @endif
-                                                        </optgroup>
                                                     </select>
                                                 </div>
 
@@ -793,44 +503,6 @@
                         </div>
     </div> <!-- small modal -->
 
-
-    <!-- Modal Archivage D'un Incident -->
-    <div id="archivag" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="text-white" id="verticalModalTitle">
-                                            <i class="fe fe-archive mr-3" style="font-size:20px;"></i>
-                                            ARCHIVAGE
-                                    </h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="card shadow">
-                                                <div class="row my-4 text-xl">
-                                                    <div class="col-md-5 text-left ml-5">
-                                                        Incident Numéro
-                                                    </div>
-                                                    <div class="col-md-5 text-right">
-                                                        <strong id="taboo"></strong>
-                                                    </div>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <div class="form-group" style="text-align:center; font-size:20px;">
-                                                        Voulez-vous Vraiment Archiver Cet Incident ?
-                                                    </div>
-                                                </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                        <button type="button" id="btn_save_arching" class="btn btn-primary">OUI</button>
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">NON</button>
-                                </div>
-                            </div>
-                        </div>
-    </div> <!-- small modal -->
 
     <!-- Modal SET Date D'échéance D'un Incident -->
     <div style="font-family: Century Gothic;" id="define_dat_echean" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -978,7 +650,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validation" disabled style="width:100%; height:15em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
+                                          <textarea rows="17" id="validation" disabled style="width:100%; border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -1022,7 +694,7 @@
                                       </div>
                                       <div class="modal-body">
                                           <div class="form-group">
-                                          <textarea id="validtion_edii" disabled style="width:100%; height:16em;border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
+                                          <textarea rows="17" id="validtion_edii" disabled style="width:100%; border-style:none; resize: none; font-size:19px;" class="form-control bg-light"></textarea>
                                           </div>
                                       </div>
                                       <div class="modal-footer">
@@ -1104,6 +776,24 @@
                                                 @csrf
                                                 @method('POST')
                                             <div class="form-group mb-3">
+                                                <label for="description"> <span class="fe fe-edit-2 mr-1"></span> Votre Nom Complèt <span style="color:red;"> *</span></label>
+                                                <input style="font-size:1.1em;" class="form-control border-primary" id="fullname" name="fullname" placeholder="EX : Audrey Tekeu"/>
+                                                <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="site_incident"><span class="fe fe-home mr-2"></span>Site Où Est Survenu L'Incident<span style="color:red;"> *</span></label>
+                                                <select style="font-size:1.2em;" class="custom-select border-primary" name="site_incident" id="site_incident">
+                                                        <option selected value="">Choisissez...</option>
+                                                        @if(is_iterable($sites))
+                                                        @foreach($sites as $site)
+                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group mb-3">
                                                 <label for="description"> <span class="fe fe-edit-2 mr-1"></span> A Propos Incident (Décrivez Votre Problème !) <span style="color:red;"> *</span></label>
                                                 <textarea style="resize:none; font-size:1.1em;" rows="4" class="form-control border-primary" id="description" name="description" placeholder="Veuillez Entrer Une Description Précise."></textarea>
                                                 <div class="invalid-feedback"> Please enter a message in the textarea. </div>
@@ -1118,36 +808,23 @@
                                                 <textarea style="resize:none; font-size:1.1em;" class="form-control border-primary" id="perimeter" name="perimeter" placeholder="Veuillez Entrer La Portée De L'incident." rows="3"></textarea>
                                                 <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                             </div>
-                                            <!-- <div class="form-group mb-3">
-                                                <label for="deepa"><span class="fe fe-home mr-1"></span>Domaine De L'incident  <span style="color:red;"> *</span></label>
-                                                <select style="font-size:1.2em;" class="custom-select border-primary" data-types="{{ json_encode(Session::get('types')) }}" data-categories="{{ json_encode(Session::get('categories')) }}" name="esperance" id="deepa">
-                                                    <optgroup label="Liste Département">
+                                            <div class="form-group mb-3">
+                                                <label for="deepa"><span class="fe fe-home mr-1"></span>Affecté L'incident A Site/Service<span style="color:red;"> *</span></label>
+                                                <select style="font-size:1.2em;" class="custom-select border-primary" data-sites="{{ json_encode($sites) }}" data-types="{{ json_encode($types) }}" data-categories="{{ json_encode($categories) }}" name="esperance" id="deepa">
                                                         <option selected value="">Choisissez...</option>
-                                                        @if(Session::has('departements'))
-                                                        @if(is_iterable(Session::get('departements')))
-                                                        @foreach(Session::get('departements') as $departement)
-                                                        <option value="{{ $departement->id }}">{{ $departement->name }}</option>
+                                                        @if(is_iterable($sites))
+                                                        @foreach($sites as $site)
+                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                         @endforeach
                                                         @endif
-                                                        @endif
-                                                    </optgroup>
-                                                    <optgroup label="Liste Type">
-                                                        @if(Session::has('types'))
-                                                        @if(is_iterable(Session::get('types')))
-                                                        @foreach(Session::get('types') as $type)
-                                                        <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                        @endforeach
-                                                        @endif
-                                                        @endif
-                                                    </optgroup>
                                                 </select>
                                             </div>
                                             <div class="form-group mb-3">
                                                 <label for="categorie"><span class="fe fe-box mr-1"></span>Catégorie De L'incident <span style="color:red;"> *</span></label>
                                                 <select class="form-control select2" id="categorie" name="categorie_id">
-                                                    
+                                                        <option selected value="">Choisissez...</option>
                                                 </select>
-                                            </div> -->
+                                            </div>
                                             <div class="form-group mb-3">
                                                 <label for="battles"><span class="fe fe-box mr-1"></span>Quelles Actions Avez-vous Méneés ?</label>
                                                 <textarea style="resize:none; font-size:1.1em;" class="form-control border-primary" id="battles" name="battles" placeholder="Veuillez Spécifiez Les Actions Méneés." rows="4"></textarea>
@@ -1157,12 +834,10 @@
                                                 <select style="height:10em;" class="form-control select2-multi border-primary" id="process_incdent" name="processus_id">
                                                     <optgroup label="Liste Procéssus">
                                                         <option value=""></option>
-                                                        @if(Session::has('processus'))
-                                                        @if(is_iterable(Session::get('processus')))
-                                                        @foreach(Session::get('processus') as $process)
+                                                        @if(is_iterable($processus))
+                                                        @foreach($processus as $process)
                                                         <option value="{{ $process->id }}">{{ $process->name }}</option>
                                                         @endforeach
-                                                        @endif
                                                         @endif
                                                     </optgroup>
                                                 </select>
@@ -1177,13 +852,32 @@
                                                     <option value="URGENT">URGENT</option>
                                                 </select>
                                             </div>
+                                            <div class="form-group mb-3">
+                                                <label for="obs"><span class="fe fe-edit-2 mr-1"></span> Observation (Vos Suggestion Pour Résoudre L'incident !) <span style="color:red;"> *</span></label>
+                                                <textarea style="resize:none; font-size:1.1em;" class="form-control border-primary" id="obs" name="observation" placeholder="Veuillez Entrer Une Cause Assez Exacte." rows="4"></textarea>
+                                                <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                            </div>
+                                            <div class="form-group my-4">
+                                                <label for="date_echeance">
+                                                    <span class="fe fe-calendar fe-16 mr-1"></span>
+                                                    Date D'échéance <span style="color:red;"> *</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="date" class="form-control border-info" name="due_date" id="date_due_insert" aria-describedby="button-addon2">
+                                                    <div class="input-group-append">
+                                                        <div class="input-group-text" id="button-addon-date"><span class="fe fe-calendar fe-16 mx-2"></span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="row">
                                                 <div class="form-group col-md-12">
                                                         <button 
-                                                                data-processus="{{ json_encode(Session::get('processus')) }}" 
+                                                                data-processus="{{ json_encode(Session::get('processus')) }}"
+                                                                data-incidents="{{ json_encode($incidents) }}"
                                                                 name="buttonAddingIncidants" 
                                                                 type="button" 
-                                                                class="btn btn-block btn-outline-primary">
+                                                                class="btn btn-block btn-primary">
 
                                                             <span class="fe fe-save fe-16 mr-2"></span>
                                                             <span class="text">Enregister Incident</span>
@@ -1197,10 +891,10 @@
                             <div class="modal-footer">
                                 <div class="row col-md-12 my-4">
                                     <div class="col-md-6 text-left">
-                                        <button type="button" id="btn_clear_fields_incident" class="btn btn-outline-danger"><span class="fe fe-trash fe-16 mr-1"></span> Effacer Le Texte Saisi</button>
+                                        <button type="button" id="btn_clear_fields_incident" class="btn btn-danger"><span class="fe fe-trash fe-16 mr-1"></span> Effacer Le Texte Saisi</button>
                                     </div>
                                     <div class="col-md-6 text-right">
-                                        <button data-dismiss="modal" id="serial_kill" class="btn btn-outline-info"> <i class="fe fe-slash mr-2"></i> Fermer La Page</button>
+                                        <button data-dismiss="modal" id="serial_kill" class="btn btn-info"> <i class="fe fe-slash mr-2"></i> Fermer La Page</button>
                                     </div>
                                 </div>
                             </div>
@@ -1239,6 +933,24 @@
                                                 @method('POST')
                                             <input type="hidden" id="number_incident" name="number">
                                             <div class="form-group mb-3">
+                                                <label for="description"> <span class="fe fe-edit-2 mr-1"></span> Votre Nom Complèt <span style="color:red;"> *</span></label>
+                                                <input style="font-size:1.1em;" class="form-control border-primary" id="fullname_edit" name="fullname" placeholder="EX : Audrey Tekeu"/>
+                                                <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="site_incident"><span class="fe fe-home mr-2"></span>Site Où Est Survenu L'Incident<span style="color:red;"> *</span></label>
+                                                <select style="font-size:1.2em;" class="custom-select border-primary" name="site_incident" id="site_incident_edit">
+                                                        <option selected value="">Choisissez...</option>
+                                                        @if(is_iterable($sites))
+                                                        @foreach($sites as $site)
+                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group mb-3">
                                                 <label for="description"> <span class="fe fe-edit-2 mr-1"></span> A Propos De L'incident (Décrivez Votre Problème !) <span style="color:red;"> *</span></label>
                                                 <textarea style="resize:none; font-size:1.2em;" rows="4" class="form-control border-primary" id="description_edit" name="description" placeholder="Veuillez Entrer Une Description Précise."></textarea>
                                                 <div class="invalid-feedback"> Please enter a message in the textarea. </div>
@@ -1254,27 +966,14 @@
                                                 <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                             </div>
                                             <div class="form-group mb-3">
-                                                <label for="deepa">Domaine De L'incident <span style="color:red;"> *</span></label>
+                                                <label for="deepa">Affecté L'incident A Site/Service <span style="color:red;"> *</span></label>
                                                 <select style="font-size:1.2em;" class="custom-select border-primary" data-types="{{ json_encode(Session::get('types')) }}" data-categories="{{ json_encode(Session::get('categories')) }}" name="esperanceEdit" id="deepaEdit">
-                                                    <optgroup label="Liste Département">
                                                         <option selected value="">Choisissez...</option>
-                                                        @if(Session::has('departements'))
-                                                        @if(is_iterable(Session::get('departements')))
-                                                        @foreach(Session::get('departements') as $departement)
-                                                        <option value="{{ $departement->id }}">{{ $departement->name }}</option>
+                                                        @if(is_iterable($sites))
+                                                        @foreach($sites as $site)
+                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                         @endforeach
                                                         @endif
-                                                        @endif
-                                                    </optgroup>
-                                                    <optgroup label="Liste Type">
-                                                        @if(Session::has('types'))
-                                                        @if(is_iterable(Session::get('types')))
-                                                        @foreach(Session::get('types') as $type)
-                                                        <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                        @endforeach
-                                                        @endif
-                                                        @endif
-                                                    </optgroup>
                                                 </select>
                                             </div>
                                             <div class="form-group mb-3">
@@ -1291,14 +990,11 @@
                                                 <label for="process_edit"><span class="fe fe-activity mr-1"></span>Procéssus Impacté <span style="color:red;"> *</span></label>
                                                 <select style="font-size:1.2em;" data-processus="{{ json_encode(Session::get('processus')) }}" class="custom-select border-primary" id="process_editss" name="processus_id">
                                                     <option value="">Sélectionner Un Procéssus</option>
-                                                    @if(Session::has('processus'))
-                                                    @if(is_iterable(Session::get('processus')))
-                                                    @foreach(Session::get('processus') as $process)
+                                                    @if(is_iterable($processus))
+                                                    @foreach($processus as $process)
                                                     <option value="{{ $process->id }}">{{ $process->name }}</option>
                                                     @endforeach
                                                     @endif
-                                                    @endif
-                                                    </optgroup>
                                                 </select>
                                             </div>
                                             <div class="form-group">
@@ -1311,6 +1007,11 @@
                                                     <option value="URGENT">URGENT</option>
                                                 </select>
                                             </div>
+                                            <div class="form-group mb-3">
+                                                <label for="obs"><span class="fe fe-edit-2 mr-1"></span> Observation (Vos Suggestion Pour Résoudre L'incident !) <span style="color:red;"> *</span></label>
+                                                <textarea style="resize:none; font-size:1.1em;" class="form-control border-primary" id="obs_edit" name="observation" placeholder="Veuillez Entrer Une Cause Assez Exacte." rows="4"></textarea>
+                                                <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                            </div>
                                             <div>
                                                     <label for="date_echeance_edit">
                                                         <span class="fe fe-calendar fe-16 mr-1"></span>    
@@ -1322,13 +1023,13 @@
                                             </div>
                                             <div class="row">
                                                         <div class="text-left col-md-6">
-                                                            <button type="button" id="btn_clear_fields_edit_incident" class="btn btn-outline-danger">
+                                                            <button type="button" id="btn_clear_fields_edit_incident" class="btn btn-danger">
                                                                 <span class="fe fe-trash fe-16 mr-1"></span>
                                                                  Effacer Le Texte Saisi
                                                             </button>
                                                         </div>
                                                         <div class="text-right col-md-6">
-                                                            <button id="btn_edit_incident" type="button" class="btn btn-outline-primary"><span class="fe fe-edit-3 fe-16 mr-2"></span>Modifier Incident</button>
+                                                            <button id="btn_edit_incident" type="button" class="btn btn-primary"><span class="fe fe-edit-3 fe-16 mr-2"></span>Modifier Incident</button>
                                                         </div>    
                                             </div>
                                           </form>
@@ -1349,7 +1050,7 @@
                                 <h5 class="modal-title text-lg text-center" id="verticalModalTitle">
                                     <i class="fe fe-corner-down-right" style="font-size:15px;"></i>
                                     <i class="fe fe-home mr-3" style="font-size:20px;"></i>
-                                    Assignation De L'incident A Un Site Ou Un Département
+                                    Assignation De L'incident A Un Site
                                 </h5>
                               <button type="button" id="btncloseeditform" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
@@ -1430,25 +1131,12 @@
                                                         data-categories="{{ json_encode(Session::get('categories')) }}"
                                                         name="esperanceEditshow" 
                                                         id="regina">
-                                                    <optgroup label="Liste Département">
                                                         <option selected value="">Choisissez...</option>
-                                                        @if(Session::has('departements'))
-                                                        @if(is_iterable(Session::get('departements')))
-                                                        @foreach(Session::get('departements') as $departement)
-                                                        <option value="{{ $departement->id }}">{{ $departement->name }}</option>
+                                                        @if(is_iterable($sites))
+                                                        @foreach($sites as $site)
+                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
                                                         @endforeach
                                                         @endif
-                                                        @endif
-                                                    </optgroup>
-                                                    <optgroup label="Liste Type">
-                                                        @if(Session::has('types'))
-                                                        @if(is_iterable(Session::get('types')))
-                                                        @foreach(Session::get('types') as $type)
-                                                        <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                        @endforeach
-                                                        @endif
-                                                        @endif
-                                                    </optgroup>
                                                 </select>
                                             </div>
                                             
@@ -1561,6 +1249,26 @@
                                                         <tr>
                                                             <td>
                                                                 <span class="text">
+                                                                Nom & Prénom</span>
+                                                            </td>
+                                                            <td>
+                                                                <input style="color:white;" disabled name="" id="fullname_conf"/>
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>
+                                                                <span class="text">
+                                                                Site Où Est Survenu L'incident</span>
+                                                            </td>
+                                                            <td>
+                                                                <textarea style="color:white;" disabled name="" id="site_survenue_conf" cols="30" rows="3"></textarea>
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>
+                                                                <span class="text">
                                                                 Description</span>
                                                             </td>
                                                             <td>
@@ -1604,6 +1312,43 @@
                                                                 <textarea style="color:white;" disabled name="" id="process_conf" cols="30" rows="5"></textarea>
                                                             </td>
                                                         </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="text">
+                                                                Incident Assigné A </span>
+                                                                </td>
+                                                                <td>
+                                                                <textarea style="color:white;" disabled name="" id="personne_assigne" cols="30" rows="5"></textarea>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="text">
+                                                                Catégorie</span>
+                                                                </td>
+                                                                <td>
+                                                                <textarea style="color:white;" disabled name="" id="Kate_conf" cols="30" rows="5"></textarea>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="text">
+                                                                Priorité</span>
+                                                                </td>
+                                                                <td>
+                                                                <textarea style="color:white;" disabled name="" id="priori_conf" cols="30" rows="5"></textarea>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="text">
+                                                                Observation</span>
+                                                                </td>
+                                                                <td>
+                                                                <textarea style="color:white;" disabled name="" id="observe_conf" cols="30" rows="7"></textarea>
+                                                            </td>
+                                                        </tr>
+
                                                     <tbody>
                                                 </table>
                                         </div>
@@ -1671,124 +1416,6 @@
                         </div>
     </div>
 
-    <!-- Modal Task -->
-    <div style="font-family: Century Gothic; font-size:15px;" class="modal" id="modal_task" tabindex="-1" role="dialog" aria-labelledby="verticalModalTitle" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="verticalModalTitle">
-                                    <i class="fe fe-plus" style="font-size:15px;"></i>
-                                    <i class="fe fe-anchor mr-3" style="font-size:20px;"></i>
-                                Attribution D'une Tâche A Un Incident</h5>
-                              <button id="btnExitModalTask" type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
-                            </div>
-                            <div class="modal-body">
-                                    <div class="card">
-                                            <div class="card-header" style="margin-bottom: 1em;">
-                                                <div class="row">
-                                                    <strong style="font-size:20px;" class="card-title">
-                                                        <div class="col-md-12">
-                                                            <span class="text">Incident</span>
-                                                            <span id="txt_num_i" style="margin-left: 13em;" class="text"> </span>
-                                                        </div>
-                                                    </strong>
-                                                </div>
-                                            </div>
-                                            <div class="card-body">
-                                                <form id="frmtach">
-                                                        @csrf
-                                                        @method('POST')
-                                                    <input type="hidden" id="inco" value="" name="number">
-                                                    <div class="form-group mb-4">
-                                                        <label for="desc_unique"><span class="fe fe-edit mr-1"></span> Description (Décrivez De Facon Brève L'objectif De Votre Tâche !) <span style="color:red;"> *</span></label>
-                                                        <textarea style="resize:none; font-size:1.2em;" class="form-control border-primary" id="desc_unique" name="description" placeholder="Veuillez Décrire En Quoi Consiste La Tâche..." rows="7"></textarea>
-                                                        <div class="invalid-feedback"> Please enter a message in the textarea. </div>
-                                                    </div>
-                                                    <div class="form-group mb-4">
-                                                        <label for="obs_task"><span class="fe fe-edit-2 mr-1"></span> Observation <span style="color:red;"> *</span></label>
-                                                        <textarea style="resize:none; font-size:1.2em;" class="form-control border-primary" id="obs_task" name="observation_task" placeholder="Veuillez Renseigner Une Observation..." rows="5"></textarea>
-                                                        <div class="invalid-feedback"> Please enter a message in the textarea. </div>
-                                                    </div>
-                                                    <div class="mb-4">
-                                                        <label for="date_echeance_unique">
-                                                        <span class="fe fe-calendar fe-16 mr-1"></span>    
-                                                        Date D'échéance De La Tâche <span style="color:red;"> *</span></label>
-                                                        <div class="input-group">
-                                                        <input type="date" class="form-control border-primary" id="date_echeance_unique" name="maturity_date" aria-describedby="button-addon2">
-                                                        <div class="input-group-append">
-                                                            <div class="input-group-text" id="button-addon-date"><span class="fe fe-calendar fe-16 mx-2"></span></div>
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group my-4">
-                                                        <label for="number_ds_task">Numéro De Demande De Service</label>
-                                                        <input style="font-size:1.2em;" type="text" class="form-control border-primary" id="number_ds_task" name="ds_number">
-                                                    </div>
-                                                    <div class="form-group my-4">
-                                                        <label for="deepartes">
-                                                            <span class="fe fe-home fe-16 mr-2"></span>
-                                                            (Département | Site) Chargé De Resoudre L'incident <span style="color:red;"> *</span>
-                                                        </label>
-                                                        <select 
-                                                                style="font-size: 1.2em;" 
-                                                                data-departements="{{ json_encode(Session::get('departements')) }}" 
-                                                                data-types="{{ json_encode(Session::get('types')) }}" 
-                                                                data-sites="{{ json_encode(Session::get('sites')) }}" 
-                                                                class="custom-select border-primary" 
-                                                                name="deepartes" 
-                                                                id="set_departement_or_site" 
-                                                                >
-
-                                                            <optgroup label="Liste Département">
-                                                                        <option selected value="">Choisissez...</option>
-                                                                        @if(Session::has('departements'))
-                                                                        @if(is_iterable(Session::get('departements')))
-                                                                        @foreach(Session::get('departements') as $departement)
-                                                                        <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                                                                        @endforeach
-                                                                        @endif
-                                                                        @endif
-                                                            </optgroup>
-                                                            <optgroup label="Liste Type Site">
-                                                                        @if(Session::has('types'))
-                                                                        @if(is_iterable(Session::get('types')))
-                                                                        @foreach(Session::get('types') as $type)
-                                                                        <option value="{{ $type->name }}">{{ $type->name }}</option>
-                                                                        @endforeach
-                                                                        @endif
-                                                                        @endif
-                                                            </optgroup>
-                                                        </select>
-                                                    </div>
-                                                    <div id="devdocs"></div>
-                                                </form>
-                                            </div>
-                                    </div>
-                            </div>
-                            <div class="modal-footer">
-                                    <div class="row my-4">
-                                                        <div class="text-left col-xs-6">
-                                                            <button type="button" id="btn_clear_fields_unique" class="btn btn-danger">
-                                                                <span class="fe fe-trash fe-16 mr-1"></span>
-                                                                <span class="text-lg">Effacer Le Texte</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="text-right col-xs-6 ml-4">
-                                                            <button type="button" id="btn_add_unique_task" class="btn btn-primary">
-                                                                <span class="fe fe-anchor fe-16"></span>
-                                                                <span class="fe fe-save mr-2"></span> 
-                                                                <span class="text-lg">Attribuer La Tâche</span>
-                                                            </button>
-                                                        </div>
-                                    </div>
-                            </div>
-                          </div>
-                        </div>
-    </div>
-
-
     <!-- Modal Cloture Incident -->
     <div style="font-family: Century Gothic;" id="clos" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
@@ -1817,12 +1444,12 @@
                                             <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                         </div>
                                         <div class="form-group my-4">
-                                                <label for="cloture_comment"> <span class="fe fe-edit mr-2"></span>Commentaire</label>
+                                                <label for="cloture_comment"> <span class="fe fe-edit mr-2"></span>Commentaire <span style="color:red;"> *</span></label>
                                                 <textarea style="resize:none; font-size:1.2em;" rows="4" class="form-control border-success" id="cloture_comment" name="comment" placeholder="Veuillez Entrer Un Commentaire De Clôture."></textarea>
                                                 <div class="invalid-feedback"> Please enter a message in the textarea. </div>
                                         </div>
                                         <div class="form-group">
-                                            <button data-incident="" data-tasks="{{ json_encode(Session::get('tasks')) }}" id="Kloture" class="btn btn-outline-success btn-block">
+                                            <button data-incident="" data-tasks="{{ json_encode($taches) }}" id="Kloture" class="btn btn-outline-success btn-block">
                                                 <span class="fe fe-lock fe-16 mr-3"></span>
                                                 Clôturé
                                             </button>
@@ -1833,6 +1460,49 @@
                         </div>
     </div> <!-- small modal -->
 
+    <!-- Modal Cloture Incident -->
+    <div style="font-family: Century Gothic;" id="clos_rex" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-xl" id="verticalModalTitle">
+                                        <i class="fe fe-lock mr-3" style="font-size:20px;"></i>
+                                        Clôture D'un Incident</h5>
+                                <button id="btnExitModalCloture" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card shadow" style="padding:2em;">
+                                        <div class="row text-lg my-4">
+                                            <div class="col-md-6 text-left">
+                                                Numéro Incident
+                                            </div>
+                                            <div class="col-md-6 text-right">
+                                                <strong id="nibiru_number_rex"></strong>
+                                            </div>
+                                        </div>
+                                        <div class="form-group my-3">
+                                            <label for="valeure"> <span class="fe fe-dollar-sign mr-2"></span>Montant (en FCFA)</label>
+                                            <input type="number" placeholder="FCFA" min="0" class="form-control border-success" id="valeure_rex" name="valeure">
+                                            <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                        </div>
+                                        <div class="form-group my-4">
+                                                <label for="cloture_comment"> <span class="fe fe-edit mr-2"></span>Commentaire <span style="color:red;"> *</span></label>
+                                                <textarea style="resize:none; font-size:1.2em;" rows="4" class="form-control border-success" id="cloture_comment_rex" name="comment" placeholder="Veuillez Entrer Un Commentaire De Clôture."></textarea>
+                                                <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <button data-incident="" data-tasks="{{ json_encode($taches) }}" id="Kloture_rex" class="btn btn-outline-success btn-block">
+                                                <span class="fe fe-lock fe-16 mr-3"></span>
+                                                Clôturé
+                                            </button>
+                                        </div>
+                                    </div>
+                            </div>
+                          </div>
+                        </div>
+    </div> <!-- small modal -->
 
     <!-- Modal Battles Incident -->
     <div id="battles" style="font-family: Century Gothic;" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -2112,12 +1782,10 @@
                                         <div class="form-group">
                                             <select class="custom-select" id="users_s" required>
                                                 <option selected value="">Choisissez...</option>
-                                                @if(Session::has('users'))
-                                                @if(is_iterable(Session::get('users')))
-                                                @foreach(Session::get('users') as $user)
+                                                @if(is_iterable($users))
+                                                @foreach($users as $user)
                                                 <option value="{{ $user->id }}">{{ $user->fullname }}</option>
                                                 @endforeach
-                                                @endif
                                                 @endif
                                             </select>
                                         </div>
@@ -2133,7 +1801,7 @@
                           </div>
                         </div>
     </div> <!-- small modal -->
-
+    </div>
 
     <!-- MODAL INFO INCIDENT -->
     <div style="font-family: Century Gothic;" id="modal_infos_incidant" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -2160,6 +1828,30 @@
                                             </div>
                                             <div class="card-body">
                                             <div class="list-group list-group-flush my-n3">
+
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <small><strong></strong></small>
+                                                            <div class="my-0 big"><span class="declarateur"></span></div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <small class="badge badge-pill badge-light text-uppercase">Déclarateur De L'incident</small>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- / .row -->
+
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <small><strong></strong></small>
+                                                            <div class="my-0 big"><span class="site_de_lincident"></span></div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <small class="badge badge-pill badge-light text-uppercase">Site De L'incident</small>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- / .row -->
 
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
@@ -2299,24 +1991,24 @@
                                                     <div class="row align-items-center">
                                                         <div class="col">
                                                             <small><strong></strong></small>
-                                                            <div class="my-0 big"><span class="site_emeter"></span></div>
+                                                            <div class="my-0 big"><span class="statut_taches"></span></div>
                                                         </div>
                                                         <div class="col-auto">
-                                                            <small class="badge badge-pill badge-light text-uppercase">Entité Emétteur</small>
+                                                            <small class="badge badge-pill badge-light text-uppercase">Statut Tâches</small>
                                                         </div>
                                                     </div>
-                                                </div> <!-- / .row -->
+                                                </div>
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
                                                         <div class="col">
                                                             <small><strong></strong></small>
-                                                            <div class="my-0 big"><span class="syte_receppt"></span></div>
+                                                            <div class="my-0 big"><span class="les_taches"></span></div>
                                                         </div>
                                                         <div class="col-auto">
-                                                          <small class="badge badge-pill badge-light text-uppercase">Entité Récèpteur</small>
+                                                            <small class="badge badge-pill badge-light text-uppercase">Tâches</small>
                                                         </div>
                                                     </div>
-                                                </div> <!-- / .row -->
+                                                </div>
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
                                                         <div class="col">

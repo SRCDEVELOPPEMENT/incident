@@ -9,7 +9,9 @@ use App\Models\Logtache;
 use App\Models\Incident;
 use App\Models\Service_request;
 use App\Models\User;
+use App\Models\Categorie;
 use App\Models\Users_incident;
+use App\Models\Connection;
 use App\Models\Site;
 use Carbon\Carbon;
 use DB;
@@ -30,9 +32,13 @@ class TaskController extends Controller
         $this->middleware('permission:supprimer-tache', ['only' => ['destroy']]);
     }
 
-    public function getTaches()
-    {
-        return Session::get('tasks');
+    public function connect(){
+
+        $Connection = new Connection();
+
+        $conn = $Connection->connect();
+
+        return $conn;
     }
 
     /**
@@ -43,35 +49,38 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         notify()->info('Liste Des Tâches ! ⚡️');
+
         $number_incident = $request->number;
         $incident = NULL;
         $taches = array();
+        $in = $request->in;
+        $ta = 1;
 
-        if(Session::has('incidents')){
-            if(is_iterable(Session::get('incidents'))){
-                for ($n=0; $n < count(Session::get('incidents')); $n++) {
-                    $ici = Session::get('incidents')[$n];
-                    if($ici->number == $number_incident){
-                        $incident = $ici;
-                    }
-                }
-            }
-        }
+        $sites = Site::with('types')->get();
+        $types = DB::table('types')->get();
+        $users = User::with('sites')->get();
+        $categories = Categorie::with('sites')->get();
+        $logs = Logtache::with('users', 'tasks')->get();
+        $processus = DB::table('pros')->get();
 
-        if(Session::has('tasks')){
-        if(is_iterable(Session::get('tasks'))){
-        for ($e=0; $e < count(Session::get('tasks')); $e++) {
-            $t = Session::get('tasks')[$e];
-            if($t->incident_number == $request->number){
-                array_push($taches, $t);
-            }
-        }}}
+        $conn = $this->connect();
 
-        return view('taches.index', compact('taches', 'number_incident', 'incident'));
+
+        $incident = Incident::with('categories', 'processus', 'sites')
+        ->where('number', '=', $number_incident)
+        ->get()->first();
+
+        $taches = Tache::with('sites')
+        ->where('incident_number', '=', $number_incident)->get();
+
+        return view('taches.index', 
+        compact('taches', 'number_incident', 'logs', 
+                'sites', 'types', 'incident', 'in', 'ta', 'processus', 'categories',
+                'users'));
     }
 
 
-        /**
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -79,113 +88,162 @@ class TaskController extends Controller
     public function listeTaches(Request $request)
     { 
         notify()->info('Liste Des Tâches ! ⚡️');
-
+        
+        $taches = [];
         $number_incident = FALSE;
+        $ta = $request->ta;
+        $incidents = array();
+        $users = User::with('sites')->get();
+        $sites = Site::with('types')->get();
+        $types = DB::table('types')->get();
+        $categories = Categorie::with('sites')->get();
+        $logs = Logtache::with('users', 'tasks')->get();
+        $processus = DB::table('pros')->get();
 
-        if(
-           (Auth::user()->roles[0]->name == "COORDONATEUR") ||
-           (Auth::user()->roles[0]->name == "CONTROLLEUR")
-          ){
+        $conn = $this->connect();
 
-            $taches = Session::get('tasks');
+        if(Auth::user()->roles[0]->name == "CONTROLLEUR"){
+
+            $taches = Tache::with('sites')->get();
+
+        }
+        elseif(
+           (Auth::user()->roles[0]->name == "COORDONATEUR")
+        ){
+
+            // $Query = "SELECT * FROM incidents i INNER JOIN users_incidents u ON i.number = u.incident_number
+            //             WHERE status = 'ENCOURS' AND user_id = '". Auth::user()->id ."'";
+            // $stmt = sqlsrv_query( $conn, $Query);
+            // if ($stmt)
+            // {
+            //     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_SCROLL_FIRST)) {
+            //         $url = $row;
+            //         if($url){
+            //         array_push($incidents, $url);
+            //         }
+            //     }
+            // }
+
+            // for ($ci=0; $ci < count($incidents); $ci++) {
+            //         $iic = $incidents[$ci];
+                
+            //     $taches = Tache::with('sites')
+            //     ->where('incident_number', '=', $iic['number'])
+            //     ->get();
+
+            // }
+            $taches = Tache::with('sites')
+            ->where('status', '=', 'ENCOURS')
+            ->get();
 
         }else {
-            
-            //$t = array();
-            //$tab = array();
-            $taches = [];
-            $usersincidents = array();
 
-            if(Session::has('users_incidents_logIn')){
-            if(is_iterable(Session::get('users_incidents_logIn'))){
-            for ($rv=0; $rv < count(Session::get('users_incidents_logIn')); $rv++) {
-                $ui = Session::get('users_incidents_logIn')[$rv];
-                if($ui->user_id == Auth::user()->id){
-                    array_push($usersincidents, $ui);
-                }
-            }}}
-
-            // for ($v=0; $v < count($usersincidents); $v++){
-            //     $ui = $usersincidents[$v];
-
-                // if(Session::has('tasks')){
-                // if(is_iterable(Session::get('tasks'))){
-                // for ($fm=0; $fm < count(Session::get('tasks')); $fm++) {
-                //     $tach = Session::get('tasks')[$fm];
-                //     if($tach->incident_number == $ui->incident_number){
-                //         array_push($t, $tach);
-                //     }
-                // }}}
-                //dd(Session::get('tasks'));
-                if(Session::has('tasks')){
-                if(is_iterable(Session::get('tasks'))){
-                for ($pt=0; $pt < count(Session::get('tasks')); $pt++) {
-                    $pd = Session::get('tasks')[$pt];
-
-                    if($pd->site_id){
-                        if(Auth::user()->site_id){
-                            if(Auth::user()->site_id == $pd->site_id){
-                                array_push($taches, $pd);
-                            }else {
-                                // for ($d=0; $d < count($usersincidents); $d++){
-                                //     $us = $usersincidents[$d];
-                                //     if($us->incident_number == $pd->incident_number){
-                                //         if($us->isCoordo == TRUE){
-                                //             array_push($taches, $pd);
-                                //         }
-                                //     }
-                                // }
-                            }
-                        }
-                        elseif (Auth::user()->departement_id) {
-
-                            for ($d=0; $d < count($usersincidents); $d++){
-                                $us = $usersincidents[$d];
-                                if($us->incident_number == $pd->incident_number){
-                                    if($us->isCoordo == TRUE){
-                                        array_push($taches, $pd);
-                                    }
-                                }
-                            }
-                        }
-                    }elseif ($pd->departement_id) {
-                        if(Auth::user()->departement_id){
-                            
-                            if(Auth::user()->departement_id == $pd->departement_id){
-                                array_push($taches, $pd);
-                            }else{
-                                // for ($d=0; $d < count($usersincidents); $d++){
-                                //     $us = $usersincidents[$d];
-                                //     if($us->incident_number == $pd->incident_number){
-                                //         if($us->isCoordo == TRUE){
-                                //             array_push($taches, $pd);
-                                //         }
-                                //     }
-                                // }
-                            }
-                        }
-                        elseif (Auth::user()->site_id) {
-                            for ($d=0; $d < count($usersincidents); $d++){
-                                $us = $usersincidents[$d];
-                                if($us->incident_number == $pd->incident_number){
-                                    if($us->isCoordo == TRUE){
-                                        array_push($taches, $pd);
-                                    }
-                                }
-                            }
+                $Query = "SELECT * FROM incidents i INNER JOIN users_incidents u ON i.number = u.incident_number
+                            WHERE status = 'ENCOURS' AND user_id = '". Auth::user()->id ."'";
+                $stmt = sqlsrv_query( $conn, $Query);
+                if ($stmt)
+                {
+                    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_SCROLL_FIRST)) {
+                        $url = $row;
+                        if($url){
+                        array_push($incidents, $url);
                         }
                     }
-                }}}
+                }
 
-            //}
+                for ($jy=0; $jy < count($incidents); $jy++) {
+                    $iic = $incidents[$jy];
+
+                    $tas = Tache::with('sites')
+                    ->where('incident_number', '=', $iic['number'])
+                    ->get();
+                    
+                    for ($pt=0; $pt < count($tas); $pt++) {
+                        $pd = $tas[$pt];
+
+                        if($pd->site_id == Auth::user()->site_id){
+                            array_push($taches, $pd);
+                        }
+                    }
+                }
         }
 
         $incident = NULL;
         
-        return view('taches.index', compact('taches', 'number_incident', 'incident'));
+        return view('taches.index', 
+        compact('taches', 'users', 'logs', 
+                'types', 'sites', 'number_incident', 'processus', 'categories',
+                'incident', 'ta'));
     }
 
-    
+
+    public function listeTachesEncours(Request $request)
+    { 
+        notify()->info('Liste Des Tâches ! ⚡️');
+
+        $taches = [];
+        $u_incidents = [];
+        $number_incident = FALSE;
+        $ta = $request->ta;
+        $incidents = array();
+        $users = User::with('sites')->get();
+        $sites = Site::with('types')->get();
+        $types = DB::table('types')->get();
+        $categories = Categorie::with('sites')->get();
+        $logs = Logtache::with('users', 'tasks')->get();
+        $processus = DB::table('pros')->get();
+
+        $conn = $this->connect();
+
+        if((Auth::user()->roles[0]->name == "CONTROLLEUR") ||
+           (Auth::user()->roles[0]->name == "COORDONATEUR")){
+
+            $taches = Tache::with('sites')
+            ->where('status', '=', 'ENCOURS')
+            ->get();
+
+        }
+        else{
+                $Query = "SELECT * FROM incidents i INNER JOIN users_incidents u ON i.number = u.incident_number
+                            WHERE status = 'ENCOURS' AND user_id = '". Auth::user()->id ."'";
+                $stmt = sqlsrv_query( $conn, $Query);
+                if ($stmt)
+                {
+                    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_SCROLL_FIRST)) {
+                        $url = $row;
+                        if($url){
+                        array_push($incidents, $url);
+                        }
+                    }
+                }
+
+                for ($jy=0; $jy < count($incidents); $jy++) {
+                    $iic = $incidents[$jy];
+
+                    $tas = Tache::with('sites')
+                    ->where('incident_number', '=', $iic['number'])
+                    ->where('status', '=', 'ENCOURS')
+                    ->get();
+                    
+                    for ($pt=0; $pt < count($tas); $pt++) {
+                        $pd = $tas[$pt];
+
+                        if($pd->site_id == Auth::user()->site_id){
+                            array_push($taches, $pd);
+                        }
+                    }
+                }
+        }
+
+        $incident = NULL;
+        
+        return view('taches.taskEncours', 
+        compact('taches', 'users', 'logs', 
+                'types', 'sites', 'number_incident', 'processus', 'categories',
+                'incident', 'ta'));
+    }
+
+
     public function generateUniqueCode()
     {
         do {
@@ -226,406 +284,59 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        $get_taches = $this->getTaches();
-        $users = array();
-        $site = NULL;
-        $departement = NULL;
-
-            if(
-                ($request->input('deepartes') == "AGENCE") ||
-                ($request->input('deepartes') == "MAGASIN")
-            )
-            {
-                $site = intval($request->input('site_id'));
-
-            }else{
-                $departement = intval($request->input('deepartes'));
-            }
-
+            $site = $request->input('deepartes') ? intval($request->input('deepartes')): NULL;
+            
             Tache::create([
                 'ds_number' => $request->input('ds_number') ? $request->input('ds_number') : NULL,
                 'resolution_degree' => 1,
                 'description' => $request->input('description'),
                 'status' => "ENCOURS",
                 'maturity_date' => $request->input('maturity_date'),
-                'departement_id' => $departement,
                 'site_id' => $site,
+                'site_emetteur' => Auth::user()->site_id,
                 'incident_number' => $request->number,
                 'observation_task' => $request->input('observation_task'),
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
 
-            $place_user_connecte = NULL;
-            if(Auth::user()->site_id){
-
-                $place_user_connecte = Auth::user()->site_id;
-
-                if($site){
-                    if(intval($site) != intval($place_user_connecte)){
-
-                        if(Session::has('users')){
-                        if(is_iterable(Session::get('users'))){
-                        for ($p=0; $p < count(Session::get('users')); $p++) {
-                            $us = Session::get('users')[$p];
-                            if($us->site_id == $site){
-                                array_push($users, $us);
-                            }
-                        }}}
-
-
-                        $newUser_Incidents = array();
-
-                        if(is_iterable($users)){
-                            $le_responsable = NULL;
-                            $le_first = $users[0];
-                            if($le_first->responsable){
-
-                                if(Session::has('users')){
-                                    if(is_iterable(Session::get('users'))){
-                                    for ($ss=0; $ss < count(Session::get('users')); $ss++) {
-                                        $us = Session::get('users')[$ss];
-                                        if($us->id == $le_first->responsable){
-                                            $le_responsable = $us;
-                                        }
-                                }}}
-
-                                if($le_responsable){
-                                    $user_incident_respo = DB::table('users_incidents')
-                                    ->where('incident_number', '=', $request->number)
-                                    ->where('user_id', '=', $le_responsable->id)->get()->first();
-
-                                    if($user_incident_respo == NULL){
-                                        DB::table('users_incidents')->insert([
-                                            'isTrigger' => FALSE,
-                                            'isCoordo' => FALSE,
-                                            'isTriggerPlus' => FALSE,
-                                            'incident_number' => $request->number,
-                                            'user_id' => intval($le_responsable->id),
-                                            'created_at' => Carbon::now()->format('Y-m-d'),
-                                        ]);
-                                    }
-                                }
-                            }
-                        for ($t=0; $t < count($users); $t++) {
-                            $newUser = $users[$t];
-
-                            $search_user = NULL;
-                            if(Session::has('users_incidents')){
-                            if(is_iterable(Session::get('users_incidents'))){
-                            for ($nt=0; $nt < count(Session::get('users_incidents')); $nt++) {
-                                $uincs = Session::get('users_incidents')[$nt];
-                                if(($uincs->incident_number == $request->number) && ($uincs->user_id == $newUser->id)){
-                                    $search_user = $uincs;
-                                }
-                            }}}
-
-                            if($search_user == NULL){
-                                
-                                DB::table('users_incidents')->insert([
-                                    'isTrigger' => TRUE,
-                                    'incident_number' => $request->number,
-                                    'user_id' => intval($newUser->id),
-                                    'created_at' => Carbon::now()->format('Y-m-d'),
-                                ]);
-
-                                $last_ui = DB::table('users_incidents')->get()->last();
-
-                                array_push($newUser_Incidents, $last_ui);  
-                            }
-                        }}
-
-                        if(Session::has('users_incidents')){
-                            if(is_iterable(Session::get('users_incidents'))){
-                            for ($w=0; $w < count(Session::get('users_incidents')); $w++) {
-                                $ui = Session::get('users_incidents')[$w];
-                                array_push($newUser_Incidents, $ui);
-                            }
-                            Session::put('users_incidents', $newUser_Incidents);
-                        }}
-    
+            if($site){
+                if(intval($site) != intval(Auth::user()->site_id)){
+                    $mon_uSer = User::with('sites')->where('site_id', '=', $site)->get()->first();
+                    if($mon_uSer){
+                    if($mon_uSer->responsable){
+                        $eun_ui = DB::table('users_incidents')
+                        ->where('incident_number', '=', $request->number)
+                        ->where('user_id', '=', $mon_uSer->responsable)
+                        ->get()->first();
+                        if(!$eun_ui){
+                        DB::table('users_incidents')->insert([
+                            'isTrigger' => FALSE,
+                            'isCoordo' => FALSE,
+                            'isTriggerPlus' => FALSE,
+                            'incident_number' => $request->number,
+                            'user_id' => intval($mon_uSer->responsable),
+                            'created_at' => Carbon::now()->format('Y-m-d'),
+                        ]);}
                     }
-                }elseif ($departement) {
-
-                    if(is_numeric($departement)){
-
-                            if(Session::has('users')){
-                                if(is_iterable(Session::get('users'))){
-                                for ($p=0; $p < count(Session::get('users')); $p++) {
-                                    $us = Session::get('users')[$p];
-                                    if($us->departement_id == $departement){
-                                        array_push($users, $us);
-                                    }
-                            }}}
-
-                            $newUser_Incidents = array();
-
-                            if(is_iterable($users)){
-                                $le_responsable = NULL;
-                                $le_first = $users[0];
-                                if($le_first->responsable){
-    
-                                    if(Session::has('users')){
-                                        if(is_iterable(Session::get('users'))){
-                                        for ($ss=0; $ss < count(Session::get('users')); $ss++) {
-                                            $us = Session::get('users')[$ss];
-                                            if($us->id == $le_first->responsable){
-                                                $le_responsable = $us;
-                                            }
-                                    }}}
-    
-                                    if($le_responsable){
-                                        $user_incident_respo = DB::table('users_incidents')
-                                        ->where('incident_number', '=', $request->number)
-                                        ->where('user_id', '=', $le_responsable->id)->get()->first();
-    
-                                        if($user_incident_respo == NULL){
-                                            DB::table('users_incidents')->insert([
-                                                'isTrigger' => FALSE,
-                                                'isCoordo' => FALSE,
-                                                'isTriggerPlus' => FALSE,
-                                                'incident_number' => $request->number,
-                                                'user_id' => intval($le_responsable->id),
-                                                'created_at' => Carbon::now()->format('Y-m-d'),
-                                            ]);
-                                        }
-                                    }
-                                }
-    
-                            for ($t=0; $t < count($users); $t++) {
-                                $newUser = $users[$t];
-
-                                $search_user = NULL;
-                                if(Session::has('users_incidents')){
-                                    if(is_iterable(Session::get('users_incidents'))){
-                                    for ($nt=0; $nt < count(Session::get('users_incidents')); $nt++) {
-                                        $uincs = Session::get('users_incidents')[$nt];
-                                        if(($uincs->incident_number == $request->number) && ($uincs->user_id == $newUser->id)){
-                                            $search_user = $uincs;
-                                        }
-                                }}}
-        
-                                if($search_user == NULL){
-
-                                    DB::table('users_incidents')->insert([
-                                        'isTrigger' => TRUE,
-                                        'incident_number' => $request->number,
-                                        'user_id' => intval($newUser->id),
-                                        'created_at' => Carbon::now()->format('Y-m-d'),
-                                    ]);
-
-                                    $last_ui = DB::table('users_incidents')->get()->last();
-
-                                    array_push($newUser_Incidents, $last_ui);
-                                }
-                            }}
-
-                            if(Session::has('users_incidents')){
-                                if(is_iterable(Session::get('users_incidents'))){
-                                    for ($w=0; $w < count(Session::get('users_incidents')); $w++) {
-                                        $ui = Session::get('users_incidents')[$w];
-                                        array_push($newUser_Incidents, $ui);
-                                    }
-                                    Session::put('users_incidents', $newUser_Incidents);
-                                }
-                            }
-                    }
+                    $un_ui = DB::table('users_incidents')
+                    ->where('incident_number', '=', $request->number)
+                    ->where('user_id', '=', $mon_uSer->id)
+                    ->get()->first();
+                    if(!$un_ui){
+                    DB::table('users_incidents')->insert([
+                        'isTrigger' => FALSE,
+                        'isCoordo' => FALSE,
+                        'isTriggerPlus' => FALSE,
+                        'incident_number' => $request->number,
+                        'user_id' => intval($mon_uSer->id),
+                        'created_at' => Carbon::now()->format('Y-m-d'),
+                    ]);
+                    }}
                 }
-
-            }elseif(Auth::user()->departement_id){
-
-                $place_user_connecte = Auth::user()->departement_id;
-
-                if($site){
-
-                        if(Session::has('users')){
-                            if(is_iterable(Session::get('users'))){
-                            for ($p=0; $p < count(Session::get('users')); $p++) {
-                                $us = Session::get('users')[$p];
-                                if($us->site_id == $site){
-                                    array_push($users, $us);
-                                }
-                        }}}
-
-                        $newUser_Incidents = array();
-
-                        if(is_iterable($users)){
-                            $le_responsable = NULL;
-                            $le_first = $users[0];
-                            if($le_first->responsable){
-
-                                if(Session::has('users')){
-                                    if(is_iterable(Session::get('users'))){
-                                    for ($ss=0; $ss < count(Session::get('users')); $ss++) {
-                                        $us = Session::get('users')[$ss];
-                                        if($us->id == $le_first->responsable){
-                                            $le_responsable = $us;
-                                        }
-                                }}}
-
-                                if($le_responsable){
-                                    $user_incident_respo = DB::table('users_incidents')
-                                    ->where('incident_number', '=', $request->number)
-                                    ->where('user_id', '=', $le_responsable->id)->get()->first();
-
-                                    if($user_incident_respo == NULL){
-                                        DB::table('users_incidents')->insert([
-                                            'isTrigger' => FALSE,
-                                            'isCoordo' => FALSE,
-                                            'isTriggerPlus' => FALSE,
-                                            'incident_number' => $request->number,
-                                            'user_id' => intval($le_responsable->id),
-                                            'created_at' => Carbon::now()->format('Y-m-d'),
-                                        ]);
-                                    }
-                                }
-                            }
-
-                        for ($t=0; $t < count($users); $t++) {
-                            $newUser = $users[$t];
-
-                            $search_user = NULL;
-                            if(Session::has('users_incidents')){
-                                if(is_iterable(Session::get('users_incidents'))){
-                                for ($nt=0; $nt < count(Session::get('users_incidents')); $nt++) {
-                                    $uincs = Session::get('users_incidents')[$nt];
-                                    if(($uincs->incident_number == $request->number) && ($uincs->user_id == $newUser->id)){
-                                        $search_user = $uincs;
-                                    }
-                            }}}
-
-                            if($search_user == NULL){
-
-                                DB::table('users_incidents')->insert([
-                                    'isTrigger' => TRUE,
-                                    'incident_number' => $request->number,
-                                    'user_id' => intval($newUser->id),
-                                    'created_at' => Carbon::now()->format('Y-m-d'),
-                                ]);
-
-                                $last_ui = DB::table('users_incidents')->get()->last();
-
-                                array_push($newUser_Incidents, $last_ui);
-
-                            }
-                        }}
-
-                        if(Session::has('users_incidents')){
-                            if(is_iterable(Session::get('users_incidents'))){
-                                for ($w=0; $w < count(Session::get('users_incidents')); $w++) {
-                                    $ui = Session::get('users_incidents')[$w];
-                                    array_push($newUser_Incidents, $ui);
-                                }
-                                Session::put('users_incidents', $newUser_Incidents);
-                            }
-                        }
-
-                        
-                }elseif ($departement) {
-
-                    if(is_numeric($departement)){
-
-                        if(intval($departement) != intval($place_user_connecte)){
-
-                            if(Session::has('users')){
-                                if(is_iterable(Session::get('users'))){
-                                for ($p=0; $p < count(Session::get('users')); $p++) {
-                                    $us = Session::get('users')[$p];
-                                    if($us->departement_id == $departement){
-                                        array_push($users, $us);
-                                    }
-                            }}}
-    
-                            $newUser_Incidents = array();
-                            if(is_iterable($users)){
-                                $le_responsable = NULL;
-                                $le_first = $users[0];
-                                if($le_first->responsable){
-    
-                                    if(Session::has('users')){
-                                        if(is_iterable(Session::get('users'))){
-                                        for ($ss=0; $ss < count(Session::get('users')); $ss++) {
-                                            $us = Session::get('users')[$ss];
-                                            if($us->id == $le_first->responsable){
-                                                $le_responsable = $us;
-                                            }
-                                    }}}
-    
-                                    if($le_responsable){
-                                        $user_incident_respo = DB::table('users_incidents')
-                                        ->where('incident_number', '=', $request->number)
-                                        ->where('user_id', '=', $le_responsable->id)->get()->first();
-    
-                                        if($user_incident_respo == NULL){
-                                            DB::table('users_incidents')->insert([
-                                                'isTrigger' => FALSE,
-                                                'isCoordo' => FALSE,
-                                                'isTriggerPlus' => FALSE,
-                                                'incident_number' => $request->number,
-                                                'user_id' => intval($le_responsable->id),
-                                                'created_at' => Carbon::now()->format('Y-m-d'),
-                                            ]);
-                                        }
-                                    }
-                                }
-    
-                            for ($t=0; $t < count($users); $t++) {
-                                $newUser = $users[$t];
-
-                                $search_user = NULL;
-                                if(Session::has('users_incidents')){
-                                    if(is_iterable(Session::get('users_incidents'))){
-                                    for ($nt=0; $nt < count(Session::get('users_incidents')); $nt++) {
-                                        $uincs = Session::get('users_incidents')[$nt];
-                                        if(($uincs->incident_number == $request->number) && ($uincs->user_id == $newUser->id)){
-                                            $search_user = $uincs;
-                                        }
-                                }}}
-    
-                                if($search_user == NULL){
-
-                                    DB::table('users_incidents')->insert([
-                                        'isTrigger' => TRUE,
-                                        'incident_number' => $request->number,
-                                        'user_id' => intval($newUser->id),
-                                        'created_at' => Carbon::now()->format('Y-m-d'),
-                                    ]);
-
-                                    $last_ui = DB::table('users_incidents')->get()->last();
-
-                                    array_push($newUser_Incidents, $last_ui);
-
-                                }
-                            }}
-
-                            if(Session::has('users_incidents')){
-                                if(is_iterable(Session::get('users_incidents'))){
-                                    for ($w=0; $w < count(Session::get('users_incidents')); $w++) {
-                                        $ui = Session::get('users_incidents')[$w];
-                                        array_push($newUser_Incidents, $ui);
-                                    }
-                                    Session::put('users_incidents', $newUser_Incidents);
-                                }
-                            }
-    
-                        }
-                    }
-                }
-
             }
 
-            $tache = Tache::with('departements', 'sites')->get()->last();
+            $tache = Tache::with('sites')->get()->last();
 
-            if(Session::has('tasks')){
-                $newTaches = array();
-                array_push($newTaches, $tache);
-
-                for ($w=0; $w < count($get_taches); $w++) {
-                    $tach = $get_taches[$w];
-                    array_push($newTaches, $tach);
-                }
-
-                Session::put('tasks', $newTaches);
-            }
             notify()->success('Tâche Enrégistrer Avec Succèss ! ⚡️');
 
             return response([$tache]);
@@ -643,7 +354,6 @@ class TaskController extends Controller
             return response()->json([1, 1]);
         }else{
 
-            $get_Taches = $this->getTaches();
 
             if($request->commentaire){
 
@@ -664,47 +374,6 @@ class TaskController extends Controller
                     'created_at' => Carbon::now()->format('Y-m-d'),
                 ]); 
 
-                $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-                if(Session::has('logs')){
-                    $newLogs = array();
-                    array_push($newLogs, $last_log);
-        
-                    for ($w=0; $w < count(Session::get('logs')); $w++) {
-                        $unlog = Session::get('logs')[$w];
-                        array_push($newLogs, $unlog);
-                    }
-        
-                    Session::put('logs', $newLogs);
-                }
-        
-                if(Session::has('tasks')){
-        
-                    $task_edit = NULL;
-                    $newTasks = array();
-        
-                    for ($j=0; $j < count($get_Taches); $j++) {
-                            $task_courant = $get_Taches[$j];
-                            if($task_courant->id == $request->id){
-        
-                                $task_edit = $task_courant;
-                                $task_edit->status = $request->status;
-                                $task_edit->motif_attente = NULL;
-                                $task_edit->motif_annulation = NULL;
-                                $task_edit->observation = NULL;
-                                $task_edit->commentaire = $request->commentaire;
-                                $task_edit->closure_date = Carbon::now()->format('Y-m-d');
-
-                            } else{
-                                array_push($newTasks, $task_courant);
-                            }
-                    }
-        
-                    array_push($newTasks, $task_edit);
-        
-                    Session::put('tasks', $newTasks);
-                }
-        
             }elseif ($request->observation) {
 
                 DB::table('taches')->where('id', '=', $request->id)->update([
@@ -724,47 +393,6 @@ class TaskController extends Controller
                     'created_at' => Carbon::now()->format('Y-m-d'),
                 ]);
 
-                $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-                if(Session::has('logs')){
-                    $newLogs = array();
-                    array_push($newLogs, $last_log);
-        
-                    for ($w=0; $w < count(Session::get('logs')); $w++) {
-                        $unlog = Session::get('logs')[$w];
-                        array_push($newLogs, $unlog);
-                    }
-        
-                    Session::put('logs', $newLogs);
-                }
-        
-                if(Session::has('tasks')){
-        
-                    $task_edit = NULL;
-                    $newTasks = array();
-        
-                    for ($j=0; $j < count($get_Taches); $j++) {
-                            $task_courant = $get_Taches[$j];
-                            if($task_courant->id == $request->id){
-        
-                                $task_edit = $task_courant;
-                                $task_edit->status = $request->status;
-                                $task_edit->commentaire = NULL;
-                                $task_edit->motif_attente = NULL;
-                                $task_edit->motif_annulation = NULL;
-                                $task_edit->observation = $request->observation;
-                                $task_edit->closure_date = NULL;
-                            } else{
-                                array_push($newTasks, $task_courant);
-                            }
-                    }
-        
-                    array_push($newTasks, $task_edit);
-        
-                    Session::put('tasks', $newTasks);
-                }
-
-
             }elseif($request->motif_annulation) {
 
                 DB::table('taches')->where('id', '=', $request->id)->update([
@@ -782,48 +410,7 @@ class TaskController extends Controller
                     'title' => $request->motif_annulation,
                     'created_at' => Carbon::now()->format('Y-m-d'),
                 ]);
-
-
-                $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-                if(Session::has('logs')){
-                    $newLogs = array();
-                    array_push($newLogs, $last_log);
         
-                    for ($w=0; $w < count(Session::get('logs')); $w++) {
-                        $unlog = Session::get('logs')[$w];
-                        array_push($newLogs, $unlog);
-                    }
-        
-                    Session::put('logs', $newLogs);
-                }
-        
-                if(Session::has('tasks')){
-        
-                    $task_edit = NULL;
-                    $newTasks = array();
-        
-                    for ($j=0; $j < count($get_Taches); $j++) {
-                            $task_courant = $get_Taches[$j];
-                            if($task_courant->id == $request->id){
-        
-                                $task_edit = $task_courant;
-                                $task_edit->status = $request->status;
-                                $task_edit->commentaire = NULL;
-                                $task_edit->motif_attente = NULL;
-                                $task_edit->observation = NULL;
-                                $task_edit->motif_annulation = $request->motif_annulation;
-
-                            } else{
-                                array_push($newTasks, $task_courant);
-                            }
-                    }
-        
-                    array_push($newTasks, $task_edit);
-        
-                    Session::put('tasks', $newTasks);
-                }
-
             }elseif($request->motif_attente) {
 
                 DB::table('taches')->where('id', '=', $request->id)->update([
@@ -842,45 +429,6 @@ class TaskController extends Controller
                     'title' => $request->motif_attente,
                     'created_at' => Carbon::now()->format('Y-m-d'),
                 ]);
-
-                $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-                if(Session::has('logs')){
-                    $newLogs = array();
-                    array_push($newLogs, $last_log);
-        
-                    for ($w=0; $w < count(Session::get('logs')); $w++) {
-                        $unlog = Session::get('logs')[$w];
-                        array_push($newLogs, $unlog);
-                    }
-        
-                    Session::put('logs', $newLogs);
-                }
-        
-                if(Session::has('tasks')){
-        
-                    $task_edit = NULL;
-                    $newTasks = array();
-        
-                    for ($j=0; $j < count($get_Taches); $j++) {
-                            $task_courant = $get_Taches[$j];
-                            if($task_courant->id == $request->id){
-        
-                                $task_edit = $task_courant;
-                                $task_edit->status = $request->status;
-                                $task_edit->motif_annulation = NULL;
-                                $task_edit->commentaire = NULL;
-                                $task_edit->observation = NULL;
-                                $task_edit->motif_attente = $request->motif_attente;
-                            } else{
-                                array_push($newTasks, $task_courant);
-                            }
-                    }
-        
-                    array_push($newTasks, $task_edit);
-        
-                    Session::put('tasks', $newTasks);
-                }
 
             }else {
             }
@@ -901,8 +449,6 @@ class TaskController extends Controller
     public function updateDegree(Request $request)
     {
 
-        $get_Taches = $this->getTaches();
-
         DB::table('taches')->where('id', '=', $request->id)->update([
             'resolution_degree' => $request->degree == 0 ? 1 : $request->degree
         ]);
@@ -913,42 +459,6 @@ class TaskController extends Controller
             'title' => "Modification Du Pourcentage De Réalisation De La Tâche A  ". $request->degree ." %",
             'created_at' => Carbon::now()->format('Y-m-d'),
         ]);
-
-        $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-        if(Session::has('logs')){
-            $newLogs = array();
-            array_push($newLogs, $last_log);
-
-            for ($w=0; $w < count(Session::get('logs')); $w++) {
-                $unlog = Session::get('logs')[$w];
-                array_push($newLogs, $unlog);
-            }
-
-            Session::put('logs', $newLogs);
-        }
-
-        if(Session::has('tasks')){
-
-            $task_edit = NULL;
-            $newTasks = array();
-
-            for ($j=0; $j < count($get_Taches); $j++) {
-                    $task_courant = $get_Taches[$j];
-                    if($task_courant->id == $request->id){
-
-                        $task_edit = $task_courant;
-                        $task_edit->resolution_degree = $request->degree == 0 ? 1 : $request->degree;
-
-                    } else{
-                        array_push($newTasks, $task_courant);
-                    }
-            }
-
-            array_push($newTasks, $task_edit);
-
-            Session::put('tasks', $newTasks);
-        }
 
         notify()->success('Dégré De Réalisation De La Tâche Modifier Avec Succèss ! ⚡️');
 
@@ -964,29 +474,13 @@ class TaskController extends Controller
      */
     public function update(Request $request)
     {
-
-        $get_Taches = $this->getTaches();
-        $site = NULL;
-        $departement = NULL;
-
-        if(
-            ($request->input('deepartes_edit') == "AGENCE") ||
-            ($request->input('deepartes_edit') == "MAGASIN")
-        )
-        {
-            $site = intval($request->input('sity_edit'));
-
-        }else{
-            $departement = intval($request->input('deepartes_edit'));
-        }
-
+        $site = intval($request->input('deepartes_edit'));
 
         DB::table('taches')->where('id', $request->id)->update([
             'description' => $request->description,
             'observation_task' => $request->observation_task,
             'maturity_date' => $request->maturity_date,
             'resolution_degree' => $request->resolution_degree == 0 ? 1 : $request->resolution_degree,
-            'departement_id' => $departement,
             'site_id' => $site,
         ]);
         
@@ -996,47 +490,6 @@ class TaskController extends Controller
             'title' => "Edition Des Informations De La Tâche Via Le Boutton Editer",
             'created_at' => Carbon::now()->format('Y-m-d'),
         ]);
-
-        $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-        if(Session::has('logs')){
-            $newLogs = array();
-            array_push($newLogs, $last_log);
-
-            for ($w=0; $w < count(Session::get('logs')); $w++) {
-                $unlog = Session::get('logs')[$w];
-                array_push($newLogs, $unlog);
-            }
-
-            Session::put('logs', $newLogs);
-        }
-
-
-        if(Session::has('tasks')){
-
-            $task_edit = NULL;
-            $newTasks = array();
-
-            for ($j=0; $j < count($get_Taches); $j++) {
-                    $task_courant = $get_Taches[$j];
-                    if($task_courant->id == $request->id){
-
-                        $task_edit = $task_courant;
-                        $task_edit->description = $request->description;
-                        $task_edit->observation_task = $request->observation_task;
-                        $task_edit->maturity_date = $request->maturity_date;
-                        $task_edit->resolution_degree = $request->resolution_degree == 0 ? 1 : $request->resolution_degree;
-                        $task_edit->departement_id = $departement;
-                        $task_edit->site_id = $site;
-                    } else{
-                        array_push($newTasks, $task_courant);
-                    }
-            }
-
-            array_push($newTasks, $task_edit);
-
-            Session::put('tasks', $newTasks);
-        }
 
         smilify('success', 'Tâche Modifier Avec Succèss !');
 
@@ -1054,8 +507,6 @@ class TaskController extends Controller
     public function setEcheanceDate(Request $request)
     {
 
-        $get_Taches = $this->getTaches();
-
         DB::table('taches')->where('id', $request->id)->update([
             'maturity_date' => $request->maturity_date,
         ]);
@@ -1066,43 +517,6 @@ class TaskController extends Controller
             'title' => "Modification De La Date D'échéance De La Tâche, Nouvelle Date D'échéance : ". $request->maturity_date ."",
             'created_at' => Carbon::now()->format('Y-m-d'),
         ]); 
-
-
-        $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-        if(Session::has('logs')){
-            $newLogs = array();
-            array_push($newLogs, $last_log);
-
-            for ($w=0; $w < count(Session::get('logs')); $w++) {
-                $unlog = Session::get('logs')[$w];
-                array_push($newLogs, $unlog);
-            }
-
-            Session::put('logs', $newLogs);
-        }
-
-        if(Session::has('tasks')){
-
-            $task_edit = NULL;
-            $newTasks = array();
-
-            for ($j=0; $j < count($get_Taches); $j++) {
-                    $task_courant = $get_Taches[$j];
-                    if($task_courant->id == $request->id){
-
-                        $task_edit = $task_courant;
-                        $task_edit->maturity_date = $request->maturity_date;
-
-                    } else{
-                        array_push($newTasks, $task_courant);
-                    }
-            }
-
-            array_push($newTasks, $task_edit);
-
-            Session::put('tasks', $newTasks);
-        }
 
         smilify('success', 'Echéance De La Tâche Ajuster Avec Succèss !');
 
@@ -1123,33 +537,6 @@ class TaskController extends Controller
         DB::table('taches')->where('id', $request->id)->delete();
 
         DB::table('logtaches')->where('tache_id', '=', $request->id)->delete();
-
-        if(Session::has('logs')){
-            $newLogs = array();
-            for ($w=0; $w < count(Session::get('logs')); $w++) {
-                $unlog = Session::get('logs')[$w];
-                if(intval($unlog->tache_id) != intval($request->id)){
-                    array_push($newLogs, $unlog);
-                }
-            }
-
-            Session::put('logs', $newLogs);
-        }
-
-
-        if(Session::has('tasks')){
-
-            $newTasks = array();
-
-            for ($j=0; $j < count($get_Taches); $j++) {
-                    $task_courant = $get_Taches[$j];
-                    if(intval($task_courant->id) != intval($request->id)){
-                        array_push($newTasks, $task_courant);
-                    }
-            }
-
-            Session::put('tasks', $newTasks);
-        }
 
         smilify('success', 'Tâche Supprimer Avec Succèss !');
 
@@ -1173,34 +560,6 @@ class TaskController extends Controller
             'title' => "Suppréssion D'un Fichier De La Tâche",
             'created_at' => Carbon::now()->format('Y-m-d'),
         ]);
-
-
-        $last_log = Logtache::with('users', 'tasks')->get()->last();
-
-        if(Session::has('logs')){
-            $newLogs = array();
-            array_push($newLogs, $last_log);
-
-            for ($w=0; $w < count(Session::get('logs')); $w++) {
-                $unlog = Session::get('logs')[$w];
-                array_push($newLogs, $unlog);
-            }
-
-            Session::put('logs', $newLogs);
-        }
-
-        if(Session::has('files')){
-            $newFiles = array();
-
-            for ($j=0; $j < count(Session::get('files')); $j++) {
-                $file_courant = Session::get('files')[$j];
-                if(intval($request->id) != intval($file_courant->id)){
-                    array_push($newFiles, $file_courant);
-                }
-            }
-
-            Session::put('files', $newFiles);
-        }
 
         smilify('success', 'Fichier Supprimer Avec Succèss !');
 

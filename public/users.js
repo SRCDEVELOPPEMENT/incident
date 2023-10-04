@@ -17,34 +17,9 @@ $(document).on('click', '#btnAddUser', function(){
         message+="Veuillez Renseigner Un Nom Complèt !\n";
     }
 
-    if(!$('input[name="ag"]').prop("checked")){
-        if(!$('input[name="st"]').prop("checked")){
-            if(!$('input[name="se"]').prop("checked")){
-                good = false;
-                message+="Veuillez Cochez Un Lieu De Travail !\n";
-            }
-        }
-    }
-
-    if($('input[name="ag"]').prop("checked") == true){
-        if(!$('#site_id').val()){
+    if(!$('#site').val()){
             good = false;
-            message+="Veuillez Choisir Une Agence !\n";
-        }
-    }
-
-    if($('input[name="st"]').prop("checked") == true){
-        if(!$('#magasin_id').val()){
-            good = false;
-            message+="Veuillez Choisir Un Magasin !\n";
-        }
-    }
-
-    if($('input[name="se"]').prop("checked") == true){
-        if(!$('#departement_id').val()){
-            good = false;
-            message+="Veuillez Choisir Un Département !\n";
-        }
+            message+="Veuillez Choisir Un Site !\n";
     }
 
     if(!$('#email').val().trim()){
@@ -94,10 +69,10 @@ $(document).on('click', '#btnAddUser', function(){
                     good = false;
                     message+="Veuillez Renseigner Des Mot De Passe Identique !\n";        
                 }else{
-                    if($('#password').val().trim().length < 6){
-                        good = false;
-                        message+="Votre Mot De Passe Doit Contenir Au Moins 6 Caractères !\n"; 
-                    }
+                    // if($('#password').val().trim().length < 6){
+                    //     good = false;
+                    //     message+="Votre Mot De Passe Doit Contenir Au Moins 6 Caractères !\n"; 
+                    // }
                     // else{
                     //     if(!$('#password').val().trim().match(reg)){
                     //         good = false;

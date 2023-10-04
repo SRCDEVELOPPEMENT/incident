@@ -6,13 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Incident;
 use App\Models\Categorie;
-use App\Models\Processus;
+use App\Models\Pros;
 use App\Models\Tache;
 use App\Models\User;
 use App\Models\Site;
 use App\Models\Users_Incident;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\Connection;
 use PDF;
 use DB;
 use Carbon\Carbon;
@@ -32,13 +33,15 @@ class IncidentController extends Controller
         $this->middleware('permission:supprimer-incident', ['only' => ['destroy']]);
     }
 
+    public function connect(){
 
-    public function getIncidents()
-    {
-        return Session::get('incidents');
+        $Connection = new Connection();
+
+        $conn = $Connection->connect();
+
+        return $conn;
     }
-
-
+    
     /**
      * Display a listing of the resource.
      *
@@ -46,79 +49,172 @@ class IncidentController extends Controller
      */
     public function index(Request $request)
     {
-        notify()->info('Liste Des Incidents ! ⚡️', 'Info Incident');
-        
-        $years = array();
-        $incidents = array();
+                notify()->info('Liste Des Incidents ! ⚡️', 'Info Incident');
 
-        // $u_incidents = array();
-        // $get_incidents = $this->getIncidents();
+                $years = array();
+                $incidents = array();
+                $in = $request->in;
+                $tasks = array();
+                $users = array();
+                $processus = array();
+                $types = array();
+                $sites = array();
+                
+                $conn = $this->connect();
+                $Query = "SELECT * FROM users";
+                $stmt = sqlsrv_query( $conn, $Query);
+                if ($stmt)
+                {while ($row = sqlsrv_fetch_object($stmt)) {
+                $url = $row; if($url){array_push($users, $url);}}}
 
-        // if(Session::has('users_incidents')){
-        //     if(is_iterable(Session::get('users_incidents'))){
-        //         for ($y=0; $y < count(Session::get('users_incidents')); $y++) {
-        //             $u = Session::get('users_incidents')[$y];
-        //             if($u->user_id == Auth::user()->id){
-        //                 array_push($u_incidents, $u);
-        //             }
-        //         }
-        //     }
-        // }
+                $taches = Tache::all();
+
+                $categories = Categorie::with('sites')->get();
+
+                $Query = "SELECT * FROM pros";
+                $stmt = sqlsrv_query( $conn, $Query);
+                if ($stmt)
+                {while ($row = sqlsrv_fetch_object($stmt)) {
+                $url = $row; if($url){array_push($processus, $url);}}}
+
+                $Query = "SELECT * FROM sites";
+                $stmt = sqlsrv_query( $conn, $Query);
+                if ($stmt)
+                {while ($row = sqlsrv_fetch_object($stmt)) {
+                $url = $row; if($url){array_push($sites, $url);}}}
+
+                $Query = "SELECT * FROM types";
+                $stmt = sqlsrv_query( $conn, $Query);
+                if ($stmt)
+                {while ($row = sqlsrv_fetch_object($stmt)) {
+                $url = $row; if($url){array_push($types, $url);}}}
+
+                if(
+                    (Auth::user()->roles[0]->name == "EMPLOYE")
+                ){
+                switch ($request->in) {
+                    case 1:
+                        if(Session::has('times')){
+                            $times = 1;
+                            Session::put('times', $times);
+                        }
         
-        // if(Session::has('roles')){
-        //     if(is_iterable(Session::get('roles'))){
-        //         for ($n=0; $n < count(Session::get('roles')); $n++) {
+                        $incidents = Incident::with('categories', 'processus', 'sites')
+                        ->where('status', '=', 'ENCOURS')
+                        ->where(function($query){
+                            $query->where('site_id', '=', Auth::user()->site_id)
+                                  ->orWhere('site_declarateur', '=', Auth::user()->site_id);
+                        })->get();
+                                
+                        if(is_iterable($incidents)){
+                        for ($i=0; $i < count($incidents); $i++) {
+                            $idi = $incidents[$i];
+
+                            $tas = Tache::with('sites')
+                            ->where('incident_number', '=', $idi->number)
+                            ->get();
+                            
+                            array_push($tasks, $tas);
+                        }}
+                        
+                        break;
+                    default:
+                        break;
+                }
+
+                }elseif(Auth::user()->roles[0]->name == "COORDONATEUR"){
+
+                    $incidents = Incident::with('categories', 'processus', 'sites')
+                    ->join('users_incidents', 'users_incidents.incident_number', '=', 'incidents.number')
+                    ->where('users_incidents.user_id', '=', Auth::user()->id)
+                    ->where('incidents.status', '=', "ENCOURS")
+                    ->get();
+
+                    if(is_iterable($incidents)){
+                    for ($i=0; $i < count($incidents); $i++) {
+                        $idi = $incidents[$i];
+
+                        $tas = Tache::with('sites')
+                        ->where('incident_number', '=', $idi->number)
+                        ->get();
+
+                        array_push($tasks, $tas);
+                    }}
+                }
+                elseif (
+                    (Auth::user()->roles[0]->name == "ADMINISTRATEUR") ||
+                    (Auth::user()->roles[0]->name == "CONTROLLEUR") ||
+                    (Auth::user()->roles[0]->name == "SuperAdmin")
+                ){
+                    switch ($request->in) {
+                        case 1:
+                            if(Session::has('times')){
+                                $times = 1;
+                                Session::put('times', $times);
+                            }
                     
-        //             $r = Session::get('roles')[$n];
+                            $incidents = Incident::with('categories', 'processus', 'sites')
+                            ->where('incidents.status', '=', "ENCOURS")
+                            ->get();
 
-        //             if(Auth::user()->roles[0]->name == $r->name){
-        //                     $tab = array();
+                            if(is_iterable($incidents)){
+                            for ($i=0; $i < count($incidents); $i++) { 
+                                $idi = $incidents[$i];
 
-        //                     for ($s=0; $s < count($u_incidents); $s++) {
-        //                         $uin = $u_incidents[$s];
+                                $tas = Tache::with('sites')
+                                ->where('incident_number', '=', $idi['number'])
+                                ->get();
 
-        //                         for ($nb=0; $nb < count($get_incidents); $nb++) {
-        //                             $in = $get_incidents[$nb];
-        //                             if($in->number == $uin->incident_number){
-        //                                 array_push($tab, $in);
-        //                             }
-        //                         }
-        //                     }
+                                array_push($tasks, $tas);
+                            }}
+        
+                            break;
+                        case 2:
+                            Session::put('times', $request->times);
+                            $subDays = intval($request->times) * 30;
+                            $start = Carbon::now()->subDays($subDays);
+        
+                            break;
+                        default:
+                            break;
+                    }
+    
+                }
 
-        //                     for ($h=0; $h < count($tab); $h++) {
-        //                         $indit = $tab[$h];
+                $annee = Carbon::now()->format('Y');
+                for ($m=1; $m < 5; $m++) {
+                    array_push($years, intval($annee) - $m+1);
+                }
 
-        //                         if(
-        //                         ($indit->status == "CLÔTURÉ" && intval($indit->archiver) == 0) ||
-        //                         ($indit->status != "ANNULÉ" && $indit->status != "CLÔTURÉ")
-        //                         ){
-        //                             array_push($incidents, $indit);
-        //                         }
-        //                     }
-        //             }
-        //         }
-        //     }
-        // }
+                return view('incidents.index', 
+                compact('incidents', 'types', 'processus', 'taches',
+                        'categories', 
+                        'tasks', 'sites', 'years', 'in', 'users'));
+    }
 
-        if(Session::has('incidents')){
-        if(is_iterable(Session::get('incidents'))){
-        for ($h=0; $h < count(Session::get('incidents')); $h++) {
-            $indit = Session::get('incidents')[$h];
+    public function incident_annee_encour($annee){
 
-            if(
-            ($indit->status == "CLÔTURÉ" && intval($indit->archiver) == 0) ||
-            ($indit->status != "ANNULÉ" && $indit->status != "CLÔTURÉ")
-            ){
-                array_push($incidents, $indit);
-            }
-        }}}
+        $incidents = Incident::with('categories', 'processus', 'sites')->get();
 
-        $annee = Carbon::now()->format('Y');
-        for ($m=1; $m < 5; $m++) {
-            array_push($years, intval($annee) - $m+1);
-        }
+        $incident_annee_encour = array();
 
-        return view('incidents.index', compact('incidents', 'years'));
+        if(is_iterable($incidents)){
+            for ($d=0; $d < count($incidents); $d++) {
+                $incident_courant = $incidents[$d];
+            
+                $ann = substr($incident_courant->declaration_date, 0, 4);
+    
+                if(intval($annee) == intval($ann)){
+    
+                    if(
+                        ($incident_courant->observation_rex != NULL) &&
+                        ($incident_courant->deja_pris_en_compte == NULL)){
+                        array_push($incident_annee_encour, $incident_courant);
+                    }
+                }
+            }}
+
+        return $incident_annee_encour;
     }
 
     public function tableau(Request $request){
@@ -126,12 +222,9 @@ class IncidentController extends Controller
         $regions = [
             "OUEST",
             "NORD-OUEST",
-            "SUD-OUEST",
             "CENTRE",
             "LITTORAL",
-            "EXTREME-NORD",
             "SUD",
-            "NORD",
             "ADAMAOUA",
             "EST",
         ];
@@ -149,6 +242,72 @@ class IncidentController extends Controller
         $novembre_incident = array();
         $deccembre_incident = array();
     
+        $janvier_total_year = 0;
+        $fevrier_total_year = 0;
+        $mars_total_year = 0;
+        $avril_total_year = 0;
+        $mai_total_year = 0;
+        $juin_total_year = 0;
+        $juillet_total_year = 0;
+        $aout_total_year = 0;
+        $septembre_total_year = 0;
+        $octobre_total_year = 0;
+        $novembre_total_year = 0;
+        $deccembre_total_year = 0;
+
+        $janvier_total_cloture = 0;
+        $fevrier_total_cloture = 0;
+        $mars_total_cloture = 0;
+        $avril_total_cloture = 0;
+        $mai_total_cloture = 0;
+        $juin_total_cloture = 0;
+        $juillet_total_cloture = 0;
+        $aout_total_cloture = 0;
+        $septembre_total_cloture = 0;
+        $octobre_total_cloture = 0;
+        $novembre_total_cloture = 0;
+        $deccembre_total_cloture = 0;
+
+        $janvier_total_annuler = 0;
+        $fevrier_total_annuler = 0;
+        $mars_total_annuler = 0;
+        $avril_total_annuler = 0;
+        $mai_total_annuler = 0;
+        $juin_total_annuler = 0;
+        $juillet_total_annuler = 0;
+        $aout_total_annuler = 0;
+        $septembre_total_annuler = 0;
+        $octobre_total_annuler = 0;
+        $novembre_total_annuler = 0;
+        $deccembre_total_annuler = 0;
+
+        $janvier_total_encours = 0;
+        $fevrier_total_encours = 0;
+        $mars_total_encours = 0;
+        $avril_total_encours = 0;
+        $mai_total_encours = 0;
+        $juin_total_encours = 0;
+        $juillet_total_encours = 0;
+        $aout_total_encours = 0;
+        $septembre_total_encours = 0;
+        $octobre_total_encours = 0;
+        $novembre_total_encours = 0;
+        $deccembre_total_encours = 0;
+
+        $janvier_total_enretard = 0;
+        $fevrier_total_enretard = 0;
+        $mars_total_enretard = 0;
+        $avril_total_enretard = 0;
+        $mai_total_enretard = 0;
+        $juin_total_enretard = 0;
+        $juillet_total_enretard = 0;
+        $aout_total_enretard = 0;
+        $septembre_total_enretard = 0;
+        $octobre_total_enretard = 0;
+        $novembre_total_enretard = 0;
+        $deccembre_total_enretard = 0;
+
+        ///////////////////
         $janvier_total = 0;
         $fevrier_total = 0;
         $mars_total = 0;
@@ -239,6 +398,8 @@ class IncidentController extends Controller
         $incidentSites = array();
         $incident_annee_encour = array();
         $incident_direction_generale = array();
+        $incidents = array();
+        $sites = Site::with('types')->get();
 
         $annee = Carbon::now()->format('Y');
 
@@ -247,28 +408,258 @@ class IncidentController extends Controller
             array_push($years, intval($annee) - $i+1);
         }
     
-        if(Session::has('incidents')){
-            if(is_iterable(Session::get('incidents'))){
-            for ($d=0; $d < count(Session::get('incidents')); $d++) {
-                $incident_courant = Session::get('incidents')[$d];
-        
-                $ann = substr($incident_courant->created_at, 0, 4);
+        if ((Auth::user()->roles[0]->name == "COORDONATEUR")) {
 
-                if(intval($annee) == intval($ann)){
+            $incident_annee_encour = $this->incident_annee_encour($annee);
 
-                    if(
-                        ($incident_courant->observation_rex != NULL) &&
-                        ($incident_courant->deja_pris_en_compte == NULL)){
-                        array_push($incident_annee_encour, $incident_courant);
-                    }
-                }
-        }}}
+        }elseif (
+                    (Auth::user()->roles[0]->name == "ADMINISTRATEUR") ||
+                    (Auth::user()->roles[0]->name == "CONTROLLEUR") ||
+                    (Auth::user()->roles[0]->name == "SuperAdmin")
+        ){
+            $incident_annee_encour = $this->incident_annee_encour($annee);
+        }
 
         if(is_iterable($incident_annee_encour)){
         for ($g=0; $g < count($incident_annee_encour); $g++) {
 
             $inci = $incident_annee_encour[$g];
-    
+            $mois_de_my_incident = intval(substr($inci->created_at, 5, 2));
+
+            switch ($mois_de_my_incident) {
+                case 1:
+                    
+                    $janvier_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $janvier_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $janvier_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $janvier_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $janvier_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 2:
+                    
+                    $fevrier_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $fevrier_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $fevrier_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $fevrier_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $fevrier_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 3:
+                    
+                    $mars_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $mars_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $mars_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $mars_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $mars_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 4:
+                    
+                    $avril_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $avril_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $avril_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $avril_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $avril_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 5:
+                    
+                    $mai_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $mai_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $mai_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $mai_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $mai_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 6:
+                    
+                    $juin_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $juin_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $juin_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $juin_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $juin_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 7:
+                    
+                    $juillet_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $juillet_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $juillet_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $juillet_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $juillet_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 8:
+                    
+                    $aout_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $aout_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $aout_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $aout_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $aout_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 9:
+                    
+                    $septembre_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $septembre_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $septembre_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $septembre_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $septembre_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 10:
+                    
+                    $octobre_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $octobre_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $octobre_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $octobre_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $octobre_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 11:
+                    
+                    $novembre_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $novembre_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $novembre_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $novembre_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $novembre_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+                case 12:
+                    
+                    $deccembre_total_year +=1;
+
+                    if($inci->status == "CLÔTURÉ"){
+                        $deccembre_total_cloture +=1;
+                    }elseif($inci->status == "ENCOURS"){
+                        $deccembre_total_encours +=1;
+                    }elseif ($inci->status == "ANNULÉ") {
+                        $deccembre_total_annuler +=1;
+                    }
+                    
+                    if($inci->due_date){
+                        if(intval(str_replace("-", "", $inci->due_date)) < intval(str_replace("-", "", date('Y-m-d')))){
+                            $deccembre_total_enretard +=1;
+                        }
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+
             if($inci->site_id){
                 switch ($inci->sites->region) {
                     case 'OUEST':
@@ -575,11 +966,9 @@ class IncidentController extends Controller
             }
         }}
 
-        
-        if(Session::has('sites')){
-            if(is_iterable(Session::get('sites'))){
-            for ($z=0; $z < count(Session::get('sites')); $z++) {
-                $siteCourant = Session::get('sites')[$z];
+        if(is_iterable($sites)){
+            for ($z=0; $z < count($sites); $z++) {
+                $siteCourant = $sites[$z];
         
                 $incidentDunSite = array();
         
@@ -593,15 +982,80 @@ class IncidentController extends Controller
                             }
                         }
                     }
-                }
+            }
         
-                array_push($incidentSites, $incidentDunSite);
-        }}}
+            array_push($incidentSites, $incidentDunSite);
+        }}
         
         return view('incidents.tableau_statistique', [
 
-            'regions' => $regions,
+            'sites' => $sites,
+            'janvier_total_year' => $janvier_total_year,
+            'fevrier_total_year' => $fevrier_total_year,
+            'mars_total_year' => $mars_total_year,
+            'avril_total_year' => $avril_total_year,
+            'mai_total_year' => $mai_total_year,
+            'juin_total_year' => $juin_total_year,
+            'juillet_total_year' => $juillet_total_year,
+            'aout_total_year' => $aout_total_year,
+            'septembre_total_year' => $septembre_total_year,
+            'octobre_total_year' => $octobre_total_year,
+            'novembre_total_year' => $novembre_total_year,
+            'deccembre_total_year' => $deccembre_total_year,
 
+            'janvier_total_cloture' => $janvier_total_cloture,
+            'fevrier_total_cloture' => $fevrier_total_cloture,
+            'mars_total_cloture' => $mars_total_cloture,
+            'avril_total_cloture' => $avril_total_cloture,
+            'mai_total_cloture' => $mai_total_cloture,
+            'juin_total_cloture' => $juin_total_cloture,
+            'juillet_total_cloture' => $juillet_total_cloture,
+            'aout_total_cloture' => $aout_total_cloture,
+            'septembre_total_cloture' => $septembre_total_cloture,
+            'octobre_total_cloture' => $octobre_total_cloture,
+            'novembre_total_cloture' => $novembre_total_cloture,
+            'deccembre_total_cloture' => $deccembre_total_cloture,
+    
+            'janvier_total_annuler' => $janvier_total_annuler,
+            'fevrier_total_annuler' => $fevrier_total_annuler,
+            'mars_total_annuler' => $mars_total_annuler,
+            'avril_total_annuler' => $avril_total_annuler,
+            'mai_total_annuler' => $mai_total_annuler,
+            'juin_total_annuler' => $juin_total_annuler,
+            'juillet_total_annuler' => $juillet_total_annuler,
+            'aout_total_annuler' => $aout_total_annuler,
+            'septembre_total_annuler' => $septembre_total_annuler,
+            'octobre_total_annuler' => $octobre_total_annuler,
+            'novembre_total_annuler' => $novembre_total_annuler,
+            'deccembre_total_annuler' => $deccembre_total_annuler,
+
+            'janvier_total_encours' => $janvier_total_encours,
+            'fevrier_total_encours' => $fevrier_total_encours,
+            'mars_total_encours' => $mars_total_encours,
+            'avril_total_encours' => $avril_total_encours,
+            'mai_total_encours' => $mai_total_encours,
+            'juin_total_encours' => $juin_total_encours,
+            'juillet_total_encours' => $juillet_total_encours,
+            'aout_total_encours' => $aout_total_encours,
+            'septembre_total_encours' => $septembre_total_encours,
+            'octobre_total_encours' => $octobre_total_encours,
+            'novembre_total_encours' => $novembre_total_encours,
+            'deccembre_total_encours' => $deccembre_total_encours,
+
+            'janvier_total_enretard' => $janvier_total_enretard,
+            'fevrier_total_enretard' => $fevrier_total_enretard,
+            'mars_total_enretard' => $mars_total_enretard,
+            'avril_total_enretard' => $avril_total_enretard,
+            'mai_total_enretard' => $mai_total_enretard,
+            'juin_total_enretard' => $juin_total_enretard,
+            'juillet_total_enretard' => $juillet_total_enretard,
+            'aout_total_enretard' => $aout_total_enretard,
+            'septembre_total_enretard' => $septembre_total_enretard,
+            'octobre_total_enretard' => $octobre_total_enretard,
+            'novembre_total_enretard' => $novembre_total_enretard,
+            'deccembre_total_enretard' => $deccembre_total_enretard,
+        
+            'regions' => $regions,
             'ouest' => $ouest,
             'nord_ouest' => $nord_ouest,
             'sud_ouest' => $sud_ouest,
@@ -626,6 +1080,7 @@ class IncidentController extends Controller
     
             'years' => $years,
             'incidentSites' => $incidentSites,
+            'incidents' => $incident_annee_encour,
 
             'janvier_total' =>  $janvier_total,
             'fevrier_total' => $fevrier_total,
@@ -713,127 +1168,181 @@ class IncidentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function archive()
+    public function archive(Request $request)
     {
         notify()->info('Liste Des Incidents Archivés ! ⚡️', 'Info Incident');
-
+       
+        $users = array();
+        $sites = array();
         $years = array();
+        $tasks = array();
+        $taches = array();
+        $categories = array();
+
+        $conn = $this->connect();
+        $Query = "SELECT * FROM categories";
+        $stmt = sqlsrv_query( $conn, $Query);
+        if ($stmt)
+        {while ($row = sqlsrv_fetch_object($stmt)) {
+        $url = $row; if($url){array_push($categories, $url);}}}
+
+        $Query = "SELECT * FROM sites";
+        $stmt = sqlsrv_query( $conn, $Query);
+        if ($stmt)
+        {while ($row = sqlsrv_fetch_object($stmt)) {
+        $url = $row; if($url){array_push($sites, $url);}}}
+
+        $Query = "SELECT * FROM users";
+        $stmt = sqlsrv_query( $conn, $Query);
+        if ($stmt)
+        {while ($row = sqlsrv_fetch_object($stmt)) {
+        $url = $row; if($url){array_push($users, $url);}}}
+
+        $Query = "SELECT * FROM taches";
+        $stmt = sqlsrv_query( $conn, $Query);
+        if ($stmt)
+        {while ($row = sqlsrv_fetch_object($stmt)) {
+        $url = $row; if($url){array_push($taches, $url);}}}
+
+        if(
+            (Auth::user()->roles[0]->name == "EMPLOYE")
+        ){
+
+        switch ($request->arc) {
+            case 1:
+                if(Session::has('times')){
+                    $times = 1;
+                    Session::put('times', $times);
+                }
         
-        $incidents = array();
-                   
-        if(Session::has('roles')){
-        if(is_iterable(Session::get('roles'))){
-        for ($n=0; $n < count(Session::get('roles')); $n++) {
-            $r = Session::get('roles')[$n];
-            if(Auth::user()->roles[0]->name == $r->name){
-                $tab = array();
+                $incidents = Incident::with('categories', 'processus', 'sites')
+                ->where('status', '=', 'CLÔTURÉ')
+                ->where(function($query){
+                    $query->where('site_id', '=', Auth::user()->site_id)
+                          ->orWhere('site_declarateur', '=', Auth::user()->site_id);
+                })->get();
+                
+                if(is_iterable($incidents)){
+                for ($i=0; $i < count($incidents); $i++) {
+                    $idi = $incidents[$i];
 
-                if(Auth::user()->departement_id){
+                    $tas = Tache::with('sites')
+                    ->where('incident_number', '=', $idi->number)
+                    ->count();
 
-                    if($r->name == "COORDONATEUR"){
+                    array_push($tasks, $tas);
+                }}
+                
+                break;
+            case 2:
+                Session::put('times', $request->times);
+                $subDays = intval($request->times) * 10;
+                $start = Carbon::now()->subDays($subDays);
+
+                break;
+            default:
+                break;
+        }
+
+        }elseif ((Auth::user()->roles[0]->name == "COORDONATEUR")) {
+
+            switch ($request->arc) {
+                case 1:
+                    if(Session::has('times')){
+                        $times = 1;
+                        Session::put('times', $times);
+                    }
+
+                $incidents = Incident::with('categories', 'processus', 'sites')
+                ->join('users_incidents', 'users_incidents.incident_number', '=', 'incidents.number')
+                ->where('users_incidents.user_id', '=', Auth::user()->id)
+                ->where('incidents.status', '=', "CLÔTURÉ")
+                ->orWhere('incidents.status', '=', "ANNULÉ")
+                ->get();
+
+                
+                if(is_iterable($incidents)){
+                for ($i=0; $i < count($incidents); $i++) {
+                    $idi = $incidents[$i];
                         
-                        $u_incidents = DB::table('users_incidents')->where('user_id', '=', Auth::user()->id)->get();
+                    $tas = Tache::with('sites')
+                    ->where('incident_number', '=', $idi['number'])
+                    ->count();
 
-                        for ($s=0; $s < count($u_incidents); $s++) {
-                            $uin = $u_incidents[$s];
-    
-                            $incid = Incident::with('categories', 'processus')->where('number', '=', $uin->incident_number)->get()->first();
-                            
-                            array_push($tab, $incid);
-                        }
-    
-                        for ($h=0; $h < count($tab); $h++) {
-                            $indit = $tab[$h];
-    
-                            if(
-                               ($indit->status == "CLÔTURÉ" && intval($indit->archiver) == 1) ||
-                               ($indit->status == "ANNULÉ")
-                            ){
-                                array_push($incidents, $indit);
-                            }
-                        }
+                    array_push($tasks, $tas);
+                }}
+                        break;
+                case 2:
+                    Session::put('times', $request->times);
+                    $subDays = intval($request->times) * 10;
+                    
+                    $start = Carbon::now()->subDays($subDays);
 
-                    }else{
+                    break;
 
-                        $uis = DB::table('users_incidents')
-                        ->where('user_id', '=', Auth::user()->id)
+                default:
+                    break;
+            }
+        }elseif (
+            (Auth::user()->roles[0]->name == "ADMINISTRATEUR") ||
+            (Auth::user()->roles[0]->name == "CONTROLLEUR") ||
+            (Auth::user()->roles[0]->name == "SuperAdmin")
+        ){
+            switch ($request->arc) {
+                case 1:
+                    if(Session::has('times')){
+                        $times = 1;
+                        Session::put('times', $times);
+                    }
+            
+                    $incidents = Incident::with('categories', 'processus', 'sites')
+                    ->where('incidents.status', '=', "CLÔTURÉ")
+                    ->orWhere('incidents.status', '=', "ANNULÉ")
+                    ->get();
+                    
+                    if(is_iterable($incidents)){
+                    for ($i=0; $i < count($incidents); $i++) { 
+                        $idi = $incidents[$i];
+
+                        $tas = Tache::with('sites')
+                        ->where('incident_number', '=', $idi['number'])
                         ->get();
 
-                        for ($x=0; $x < count($uis); $x++) {
-                            $uinci = $uis[$x];
+                        array_push($tasks, $tas);
+                    }}
 
-                            $ini = Incident::with('categories', 'processus')
-                            ->where('number', '=', $uinci->incident_number)
-                            ->get()->first();
+                    break;
+                case 2:
+                    Session::put('times', $request->times);
+                    $subDays = intval($request->times) * 30;
+                    $start = Carbon::now()->subDays($subDays);
 
-                            array_push($tab, $ini);
-                        }
+                    for ($t=0; $t < $subDays; $t++) {
 
-                        for ($t=0; $t < count($tab); $t++) {
-
-                            $incident = $tab[$t];
+                        $date_courant = $start->addDays(1)->format('Y-m-d');
+                        $problems = Incident::with('categories', 'processus', 'sites')
+                        ->where('created_at', '=', $date_courant)
+                        ->get();
+                        
+                        for ($ju=0; $ju < count($problems); $ju++) {
+                            $inci = $problems[$ju];
 
                             if(
-                                ($incident->status == "CLÔTURÉ" && intval($incident->archiver) == 1) ||
-                                ($incident->status == "ANNULÉ")
+                                ($inci->status != "ANNULÉ" && $inci->status != "CLÔTURÉ")
                             ){
-                                array_push($incidents, $incident);
+                                array_push($incidents, $inci);
                             }
-                            
-                        }
-        
-                    }
-                    
-                }elseif(Auth::user()->site_id){
-
-                    $u_incidents = DB::table('users_incidents')->where('user_id', '=', Auth::user()->id)->get();
-
-                    for ($s=0; $s < count($u_incidents); $s++) {
-                        $uin = $u_incidents[$s];
-
-                        $incid = Incident::with('categories', 'processus')->where('number', '=', $uin->incident_number)->get()->first();
-                        
-                        array_push($tab, $incid);
-                    }
-
-                    for ($h=0; $h < count($tab); $h++) {
-                        $indit = $tab[$h];
-
-                        if(
-                           ($indit->status == "CLÔTURÉ" && intval($indit->archiver) == 1) ||
-                           ($indit->status == "ANNULÉ")
-                        ){
-                            array_push($incidents, $indit);
+                
                         }
                     }
 
-                }else{
-
-                    $u_incidents = DB::table('users_incidents')->where('user_id', '=', Auth::user()->id)->get();
-
-                    for ($s=0; $s < count($u_incidents); $s++) {
-                        $uin = $u_incidents[$s];
-
-                        $incid = Incident::with('categories', 'processus')->where('number', '=', $uin->incident_number)->get()->first();
-                        
-                        array_push($tab, $incid);
-                    }
-
-                    for ($h=0; $h < count($tab); $h++) {
-                        $indit = $tab[$h];
-
-                        if(
-                           ($indit->status == "CLÔTURÉ" && intval($indit->archiver) == 1) ||
-                           ($indit->status == "ANNULÉ")
-                        ){
-                            array_push($incidents, $indit);
-                        }
-                    }
-
-                }
-
+                    break;
+                default:
+                    break;
             }
-        }}}
+
+        }
+
 
         $annee = Carbon::now()->format('Y');
     
@@ -842,9 +1351,17 @@ class IncidentController extends Controller
         }
     
         return view('incidents.archive',
-            compact('incidents', 'years'));
+            compact('incidents', 'years', 'tasks', 
+                    'taches', 'categories', 'sites', 
+                    'users'));
     }
 
+    public function get_un_incident(Request $request){
+
+        $incident = Incident::with('categories', 'processus', 'sites')->where('number', '=', $request->number)->get()->first();
+
+        return response()->json($incident);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -852,8 +1369,6 @@ class IncidentController extends Controller
      */
     public function cloture(Request $request)
     {
-
-        $incidents = $this->getIncidents();
 
         DB::table('incidents')->where('number', $request->number)->update([
             'closure_date' => Carbon::now()->format('Y-m-d'),
@@ -863,32 +1378,6 @@ class IncidentController extends Controller
             'archiver' => TRUE,
         ]);
         
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            if(is_iterable($incidents)){
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incident_courant;
-                        $incident_edit->closure_date = Carbon::now()->format('Y-m-d');
-                        $incident_edit->status = $request->status;
-                        $incident_edit->valeur = $request->valeur ? intval($request->valeur) : NULL;
-                        $incident_edit->comment = $request->comment ? $request->comment : NULL;
-                        $incident_edit->archiver = TRUE;
-
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }}
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
 
         smilify('success', 'Incident Clôturé Avec Succèss !');
         
@@ -902,34 +1391,11 @@ class IncidentController extends Controller
      */
     public function setCategorieIncident(Request $request){
         
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', $request->number)->update([
 
             'categorie_id' => $request->categorie
         ]);
         
-        $incident = Incident::with('categories.departements', 'processus', 'sites')
-        ->where('number', $request->number)->get()->first();
-
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            if(is_iterable($incidents)){
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number != $incident_courant->number){
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }}
-
-            array_push($newIncidents, $incident);
-
-            Session::put('incidents', $newIncidents);
-        }
-
         smilify('success', 'Incident Assigner A Un Département Avec Succèss !');
         
         return response()->json([1]);
@@ -944,35 +1410,10 @@ class IncidentController extends Controller
     public function setDueDate(Request $request)
     {
 
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', $request->number)->update([
             'due_date' => $request->date,
         ]);
         
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            if(is_iterable($incidents)){
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incident_courant;
-                        $incident_edit->due_date = $request->date;
-
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }}
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
-
         notify()->success('Date D\'échéance De L\'Incident Définis Avec Succèss ! ⚡️');
 
         return response()->json([1]);
@@ -987,10 +1428,11 @@ class IncidentController extends Controller
         if(count($incidents) > 0){
             $tab = array();
         
+            if(is_iterable($incidents)){
             for ($i=0; $i < count($incidents); $i++) {
                 $incident = $incidents[$i];
                 array_push($tab, intval(substr($incident->number, 3)));
-            }
+            }}
 
             $value = max($tab);
 
@@ -1011,34 +1453,9 @@ class IncidentController extends Controller
      */
     public function setArchive(Request $request){
 
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', '=', $request->number)->update([
             'archiver' => 1,
         ]);
-
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            if(is_iterable($incidents)){
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incident_courant;
-                        $incident_edit->archiver = 1;
-
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }}
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
 
         notify()->success('Incident Archivé Avec Succèss ! ⚡️');
 
@@ -1053,34 +1470,9 @@ class IncidentController extends Controller
      */
     public function setDesarchive(Request $request){
 
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', '=', $request->number)->update([
             'archiver' => 0,
         ]);
-
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            if(is_iterable($incidents)){
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incident_courant;
-                        $incident_edit->archiver = 0;
-
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }}
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
 
         notify()->success('Incident Désarchivé Avec Succèss ! ⚡️');
 
@@ -1095,8 +1487,6 @@ class IncidentController extends Controller
      */
     public function setRestoration(Request $request){
 
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', '=', $request->number)->update([
 
             'status' => "ENCOURS",
@@ -1104,29 +1494,6 @@ class IncidentController extends Controller
 
         ]);
 
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            if(is_iterable($incidents)){
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incident_courant;
-                        $incident_edit->motif_annulation = NULL;
-                        $incident_edit->status = "ENCOURS";
-                        
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }}
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
 
         notify()->success('Incident Désarchivé Avec Succèss ! ⚡️');
 
@@ -1141,11 +1508,10 @@ class IncidentController extends Controller
     */
     public function incident_encompte(Request $request){
 
-        $get_incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', '=', $request->number)->update([
 
             'status' => "CLÔTURÉ",
+            'archiver' => TRUE,
             'due_date' => Carbon::now()->format('Y-m-d'),
             'closure_date' => Carbon::now()->format('Y-m-d'),
             'observation_rex' => $request->observation,
@@ -1153,33 +1519,9 @@ class IncidentController extends Controller
             'comment' => "Incident Pris En Compte ( Déja Déclaré Par Un Autre Site )"
         ]);
 
-        $newIncidents = array();
-        $incident_editer = NULL;
-
-        if(is_iterable($get_incidents)){
-        for ($w=0; $w < count($get_incidents); $w++) {
-            $incidou = $get_incidents[$w];
-            if($incidou->number == $request->number){
-
-                $incident_editer = $incidou;
-                
-                $incident_editer->status = "CLÔTURÉ";
-                $incident_editer->due_date = Carbon::now()->format('Y-m-d');
-                $incident_editer->closure_date = Carbon::now()->format('Y-m-d');
-                $incident_editer->observation_rex = $request->observation;
-                $incident_editer->deja_pris_en_compte = TRUE;
-
-            }else{
-                array_push($newIncidents, $incidou);
-            }
-        }}
-
-        array_push($newIncidents, $incident_editer);
-
-        Session::put('incidents', $newIncidents);
-
         return response()->json([1]);
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -1188,14 +1530,21 @@ class IncidentController extends Controller
      */
     public function store(Request $request)
     {
-            $users = array();
-            $get_incidents = $this->getIncidents();
             $incident_tasks = $request->all();
+
+            $doublon = DB::table('incidents')->where('description', '=', $incident_tasks['description'])->get()->first();
+            if(!$doublon){
+            $usings = NULL;
+            $users = User::with('sites')->get();
             $number = $this->generateUniqueCode();
 
             DB::table('incidents')->insert(
                 [
                 'archiver' => 0,
+                'fullname_declarateur' => $incident_tasks['fullname'],
+                'due_date' => $incident_tasks['due_date'],
+                'observation' => $incident_tasks['observation'] ? $incident_tasks['observation'] : NULL,
+                'categorie_id' => $incident_tasks['categorie'],
                 'battles' => $incident_tasks['battles'] ? $incident_tasks['battles'] : NULL,
                 'perimeter' => $incident_tasks['perimeter'] ? $incident_tasks['perimeter'] : NULL,
                 'description' => $incident_tasks['description'],
@@ -1205,146 +1554,101 @@ class IncidentController extends Controller
                 'priority' => $incident_tasks['priority'],
                 'number' => $number,
                 'created_at' => Carbon::now()->format('Y-m-d'),
-                'site_id' => Auth::user()->site_id ? intval(Auth::user()->site_id) : NULL,
+                'declaration_date' => Carbon::now()->format('Y-m-d'),
+                'site_declarateur' => intval(Auth::user()->site_id),
+                'site_id' => intval($request->domaine),
+                'site_incident' => intval($incident_tasks['site_incident']),
+                'observation_rex' => 'Incident Assigné Avec Succèss !'
                 ]
             );
 
-            $incident = Incident::with('categories.departements', 'processus', 'sites')
-            ->where('number', '=', $number)
-            ->get()->first();
-
-            if(Session::has('incidents')){
-                $newIncidents = array();
-                array_push($newIncidents, $incident);
-
-                for ($w=0; $w < count($get_incidents); $w++) {
-                    $incidou = $get_incidents[$w];
-                    array_push($newIncidents, $incidou);
+            if(is_iterable($users)){
+            for ($dr=0; $dr < count($users); $dr++) {
+                $usi = $users[$dr];
+                if($usi->site_id){
+                    if(intval($usi->site_id) == intval(Auth::user()->site_id)){
+                            $usings = $usi;
+                    }
                 }
+            }}
 
-                Session::put('incidents', $newIncidents);
-            }
+            if((Auth::user()->roles[0]->name == "EMPLOYE") ||
+               (Auth::user()->roles[0]->name == "COORDONATEUR") ||
+               (Auth::user()->roles[0]->name == "CONTROLLEUR")){
+                
+                if(intval(Auth::user()->site_id) == intval($request->domaine)){
+                    DB::table('users_incidents')->insert([
+                        'created_at' => Carbon::now()->format('Y-m-d'),
+                        'incident_number' => $number,
+                        'user_id' => Auth::user()->id,
+                        'isCoordo' => TRUE,
+                        'isDeclar' => TRUE,
+                        'isTrigger' => TRUE,
+                    ]);
+                }else{
 
-            if(Auth::user()->site_id){
-                if(Session::has('users')){
-                    if(is_iterable(Session::get('users'))){
-                        for ($dr=0; $dr < count(Session::get('users')); $dr++) {
-                            $usi = Session::get('users')[$dr];
-                            if($usi->site_id){
-                                if(intval($usi->site_id) == intval(Auth::user()->site_id)){
-                                    array_push($users, $usi);
-                                }
+                    $users_assigneur = NULL;
+                    if(is_iterable($users)){
+                    for ($dr=0; $dr < count($users); $dr++) {
+                        $usi = $users[$dr];
+                        if($usi->site_id){
+                        if(intval($usi->site_id) == intval($request->domaine)){
+                            $users_assigneur = $usi;
                             }
                         }
+                    }}
+
+                    DB::table('users_incidents')->insert([
+                        'created_at' => Carbon::now()->format('Y-m-d'),
+                        'incident_number' => $number,
+                        'user_id' => Auth::user()->id,
+                        'isCoordo' => TRUE,
+                        'isDeclar' => TRUE,
+                        'isTrigger' => TRUE,
+                    ]);
+
+                    if($users_assigneur){
+                    DB::table('users_incidents')->insert([
+                        'created_at' => Carbon::now()->format('Y-m-d'),
+                        'incident_number' => $number,
+                        'user_id' => $users_assigneur->id,
+                        'isTrigger' => FALSE,
+                        'isCoordo' => FALSE,
+                    ]);
                     }
                 }
-            }elseif (Auth::user()->departement_id) {
-                if(Session::has('users')){
-                    if(is_iterable(Session::get('users'))){
-                        for ($dr=0; $dr < count(Session::get('users')); $dr++) {
-                            $usi = Session::get('users')[$dr];
-                            if($usi->departement_id){
-                                if(intval($usi->departement_id) == intval(Auth::user()->departement_id)){
-                                    array_push($users, $usi);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if(Auth::user()->roles[0]->name == "EMPLOYE"){
                     
-                    $newUser_Incidents = array();
-
-                    for ($r=0; $r < count($users); $r++){
-                        $utili = $users[$r];
-
-                        DB::table('users_incidents')->insert([
-                            'created_at' => Carbon::now()->format('Y-m-d'),
-                            'incident_number' => $incident->number,
-                            'user_id' => $utili->id,
-                            'isCoordo' => 1,
-                            'isDeclar' => 1,
-                        ]);
-        
-                        $user_incide = DB::table('users_incidents')
-                        ->where('user_id', '=', $utili->id)
-                        ->where('incident_number', '=', $incident->number)
-                        ->get()->first();
-
-                        array_push($newUser_Incidents, $user_incide);
-                    }
-                    
-                    $responsable_user_logger = NULL;
-                    if(Auth::user()->responsable){
-                    for ($to=0; $to < count(Session::get('users')); $to++) {
-                        $ux = Session::get('users')[$to];
+                $responsable_user_logger = NULL;
+                if(Auth::user()->responsable){
+                    if(is_iterable($users)){
+                    for ($to=0; $to < count($users); $to++) {
+                        $ux = $users[$to];
                         
                         if(intval($ux->id) == intval(Auth::user()->responsable)){
                             $responsable_user_logger = $ux;
                         }
                     }}
+                }
 
-                    if($responsable_user_logger){
-                        if($responsable_user_logger->roles[0]->name == "COORDONATEUR"){
+                if($responsable_user_logger){
+                    if($responsable_user_logger->roles[0]->name == "COORDONATEUR"){
                             
-                            DB::table('users_incidents')->insert([
-                                'created_at' => Carbon::now()->format('Y-m-d'),
-                                'incident_number' => $incident->number,
-                                'user_id' => $responsable_user_logger->id,
-                            ]);
-
-                            $userincid = DB::table('users_incidents')->get()->last();
-
-                            array_push($newUser_Incidents, $userincid);
-                            
-                            if(Session::has('users_incidents')){
-                            if(is_iterable(Session::get('users_incidents'))){
-
-                                for ($w=0; $w < count(Session::get('users_incidents')); $w++) {
-                                    $ui = Session::get('users_incidents')[$w];
-                                    array_push($newUser_Incidents, $ui);
-                                }
-
-                                Session::put('users_incidents', $newUser_Incidents);
-                            }}
-                        }
-                    }
-            }elseif (Auth::user()->roles[0]->name == "COORDONATEUR") {
-
-                    $newUser_Incidents = array();
-
-                    for ($o=0; $o < count($users); $o++) {
-                        $user = $users[$o];
-        
                         DB::table('users_incidents')->insert([
                             'created_at' => Carbon::now()->format('Y-m-d'),
-                            'incident_number' => $incident->number,
-                            'user_id' => $user->id,
-                            'isTriggerPlus' => TRUE,
-                            'isTrigger' => TRUE,
+                            'incident_number' => $number,
+                            'user_id' => $responsable_user_logger->id,
                             'isCoordo' => TRUE,
-                            'isDeclar' => 1,
+                            'isDeclar' => TRUE,
+                            'isTrigger' => TRUE,
                         ]);
-
-                        $user_incide = DB::table('users_incidents')->get()->last();
-
-                        array_push($newUser_Incidents, $user_incide);
                     }
-
-                    if(Session::has('users_incidents')){
-                        $using_inci = Session::get('users_incidents');
-                        for ($w=0; $w < count($using_inci); $w++) {
-                            $ui = $using_inci[$w];
-                            array_push($newUser_Incidents, $ui);
-                        }
-                        Session::put('users_incidents', $newUser_Incidents);
-                    }
+                }
 
             }
-
-            return response()->json([$incident]);
+            }else{
+                return response()->json([1, 0]);
+            }
+            return response()->json([1]);
     }
 
     /**
@@ -1372,40 +1676,16 @@ class IncidentController extends Controller
      */
     public function updatePriorite(Request $request)
     {
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', '=', $request->number)->update([
             'priority' => $request->priorite,
         ]);
-
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incidetn_courant;
-                        $incident_edit->priority = $request->priorite;
-
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
 
         smilify('success', 'Priorité De L\'Incident Modifier Avec Succèss !');
 
         return response()->json([1]);
     }
 
-        /**
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
@@ -1416,47 +1696,22 @@ class IncidentController extends Controller
 
         $all_tasks = DB::table('taches')->where('incident_number', '=', $request->number)->get();
 
+        if(is_iterable($all_tasks)){
         for ($fb=0; $fb < count($all_tasks); $fb++) {
             $ta = $all_tasks[$fb];
             DB::table('logtaches')->where('tache_id', '=', $ta->id)->delete();
-        }
+        }}
 
+        if(is_iterable($all_tasks)){
         for ($sc=0; $sc < count($all_tasks); $sc++) {
             $ach = $all_tasks[$sc];
             DB::table('taches')->where('id', '=', $ach->id)->delete();
-        }
+        }}
 
         DB::table('users_incidents')->where('incident_number', '=', $request->number)->delete();
 
         DB::table('incidents')->where('number', '=', $request->number)->delete();
 
-        if(Session::has('incidents')){
-            $newIncidents = array();
-            $incidents = $this->getIncidents();
-
-            for ($j=0; $j < count($incidents); $j++) {
-                $incident_courant = $incidents[$j];
-                if($request->number != $incident_courant->number){
-                    array_push($newIncidents, $incident_courant);
-                }
-            }
-
-            Session::put('incidents', $newIncidents);
-        }
-
-        $newUsers_incidents = array();
-        if(Session::has('users_incidents')){
-        if(is_iterable(Session::get('users_incidents'))){
-        for ($pi=0; $pi < count(Session::get('users_incidents')); $pi++) {
-
-            $ui = Session::get('users_incidents')[$pi];
-
-            if($request->number != $ui->incident_number){
-                array_push($newUsers_incidents, $ui);
-            }
-        }}}
-
-        Session::put('users_incidents', $newUsers_incidents);
         
         smilify('danger', 'Incident Supprimer Avec Succèss !');
 
@@ -1473,9 +1728,12 @@ class IncidentController extends Controller
      */
     public function update(Request $request)
     {
-            $incidents = $this->getIncidents();
+            $users = User::with('sites')->get();
 
             DB::table('incidents')->where('number', $request->number)->update([
+                'fullname_declarateur' => $request->fullname,
+                'site_id' => intval($request->esperanceEdit),
+                'observation' => $request->observation ? $request->observation : NULL,
                 'due_date' => $request->due_date ? $request->due_date : NULL,
                 'battles' => $request->battles ? $request->battles : NULL,
                 'description' => $request->description,
@@ -1484,43 +1742,80 @@ class IncidentController extends Controller
                 'categorie_id' => $request->categorie_id ? intval($request->input('categorie_id')) : NULL,
                 'proces_id' => $request->processus_id,
                 'priority' => $request->priority,
+                'site_incident' => intval($request->site_incident),
             ]);
             
-            if(Session::has('incidents')){
+            DB::table('users_incidents')
+            ->where('incident_number', '=', $request->number)
+            ->delete();
 
-                $incident_edit = NULL;
-                $newIncidents = array();
-    
-                for ($j=0; $j < count($incidents); $j++) {
-                        $incident_courant = $incidents[$j];
-                        if($incident_courant->number == $request->number){
+            if(intval(Auth::user()->site_id) == intval($request->input('esperanceEdit'))){
+                DB::table('users_incidents')->insert([
+                    'created_at' => Carbon::now()->format('Y-m-d'),
+                    'incident_number' => $request->number,
+                    'user_id' => Auth::user()->id,
+                    'isCoordo' => TRUE,
+                    'isDeclar' => TRUE,
+                    'isTrigger' => TRUE,
+                ]);
+            }else{
 
-                            $incident_edit = $incident_courant;
-                            $incident_edit->due_date = $request->due_date ? $request->due_date : NULL;
-                            $incident_edit->battles = $request->battles ? $request->battles : NULL;
-                            $incident_edit->description = $request->description;
-                            $incident_edit->cause = $request->cause;
-                            $incident_edit->perimeter = $request->perimeter ? $request->perimeter : NULL;
-                            $incident_edit->categorie_id = intval($request->input('categorie_id'));
-                            $incident_edit->proces_id = $request->processus_id;
-                            $incident_edit->priority = $request->priority;
-
-                        } else{
-                            array_push($newIncidents, $incident_courant);
+                $users_assigneur = NULL;
+                if(is_iterable($users)){
+                for ($dr=0; $dr < count($users); $dr++) {
+                    $usi = $users[$dr];
+                    if($usi->site_id){
+                    if(intval($usi->site_id) == intval($request->input('esperanceEdit'))){
+                        $users_assigneur = $usi;
                         }
-                }
+                    }
+                }}
 
-                array_push($newIncidents, $incident_edit);
+                DB::table('users_incidents')->insert([
+                    'created_at' => Carbon::now()->format('Y-m-d'),
+                    'incident_number' => $request->number,
+                    'user_id' => Auth::user()->id,
+                    'isCoordo' => TRUE,
+                    'isDeclar' => TRUE,
+                    'isTrigger' => TRUE,
+                ]);
 
-                Session::put('incidents', $newIncidents);
+                if($users_assigneur){
+                DB::table('users_incidents')->insert([
+                    'created_at' => Carbon::now()->format('Y-m-d'),
+                    'incident_number' => $request->number,
+                    'user_id' => $users_assigneur->id,
+                    'isTrigger' => FALSE,
+                    'isCoordo' => FALSE,
+                ]);}
+            }
+                
+            $responsable_user_logger = NULL;
+            if(Auth::user()->responsable){
+            if(is_iterable($users)){
+            for ($to=0; $to < count($users); $to++) {
+                    $ux = $users[$to];
+                    
+                    if(intval($ux->id) == intval(Auth::user()->responsable)){
+                        $responsable_user_logger = $ux;
+                    }
+            }}}
+
+            if($responsable_user_logger){
+                    if($responsable_user_logger->roles[0]->name == "COORDONATEUR"){
+                        
+                        DB::table('users_incidents')->insert([
+                            'created_at' => Carbon::now()->format('Y-m-d'),
+                            'incident_number' => $request->number,
+                            'user_id' => $responsable_user_logger->id,
+                        ]);
+                    }
             }
 
             smilify('success', 'Incident Modifier Avec Succèss !');
 
             return response()->json([1]);
     }
-
-
 
     /**
      * Remove the specified resource from storage.
@@ -1531,36 +1826,12 @@ class IncidentController extends Controller
     public function setMotifAnnul(Request $request)
     {
 
-        $incidents = $this->getIncidents();
-
         DB::table('incidents')->where('number', $request->number)->update([
             'motif_annulation' => $request->motif,
-            'status' => "ANNULÉ"
+            'status' => "ANNULÉ",
+            'archiver' => TRUE,
         ]);
         
-        if(Session::has('incidents')){
-
-            $incident_edit = NULL;
-            $newIncidents = array();
-
-            for ($j=0; $j < count($incidents); $j++) {
-                    $incident_courant = $incidents[$j];
-                    if($request->number == $incident_courant->number){
-
-                        $incident_edit = $incident_courant;
-                        $incident_edit->motif_annulation = $request->motif;
-                        $incident_edit->status = "ANNULÉ";
-
-                    } else{
-                        array_push($newIncidents, $incident_courant);
-                    }
-            }
-
-            array_push($newIncidents, $incident_edit);
-
-            Session::put('incidents', $newIncidents);
-        }
-
         smilify('success', 'Incident Annulé Avec Succèss !');
 
         return response()->json([1]);
@@ -1575,19 +1846,277 @@ class IncidentController extends Controller
      */
     public function print(Request $request){
 
-        $incident = NULL;
-        $incidents = $this->getIncidents();
+        $incident = Incident::with('categories', 'processus', 'sites')
+        ->where('number', '=', $request->number)
+        ->get()->first();
 
-        for ($i=0; $i < count($incidents); $i++) {
-            $inci = $incidents[$i];
-            if($inci->number == $request->number){
-                $incident = $inci;
+        $pdf = PDF::loadView("PDF/incident", ['incident' => $incident])->setPaper('a4', 'portrait');
+        
+        return $pdf->download("incident$request->number.pdf", array('Attachment'=> false));
+    }
+
+    public function print_annee_specifique(Request $request){
+
+        $incident_annee_choisit = array();
+        $incidents = Incident::with('categories', 'processus', 'sites')->get();
+
+        if(is_iterable($incidents)){
+            for ($d=0; $d < count($incidents); $d++) {
+                $incident_courant = $incidents[$d];
+                $ann = substr($incident_courant['declaration_date'], 0, 4);
+
+                if(intval($request->annee) == intval($ann)){
+
+                    if(
+                        ($incident_courant['observation_rex'] != NULL) &&
+                        ($incident_courant['deja_pris_en_compte'] == NULL)){
+                        array_push($incident_annee_choisit, $incident_courant);
+                    }
+                }
+        }}
+
+        $pdf = PDF::loadView('PDF/tableau', ['incidents' => $incident_annee_choisit, 'annee' => $request->annee, 'Du' => NULL]);
+        
+        return $pdf->download("QteIncident$request->annee.pdf", array('Attachmnet'=> false));
+
+    }
+
+    public function print_entre_date(Request $request){
+
+        $incident_dates_choisit = array();
+        $date_debut = intval(str_replace("-", "", $request->date_debut));
+        $date_fin = intval(str_replace("-", "", $request->date_fin));
+        $sites = DB::table('sites')->get();
+        $site_id = $request->site_id;
+        $incidentSites = array();
+        $site_choisit = NULL;
+
+        if($request->site_id && $request->date_debut && $request->date_fin){
+            if(is_iterable($sites)){
+                for ($mg=0; $mg < count($sites); $mg++) { 
+                    $site_courant = $sites[$mg];
+                        if($site_courant->id == $site_id){
+                        $site_choisit = $site_courant;
+                        break;
+                    }
+                }
+            }
+
+            $incidents = Incident::with('categories', 'processus', 'sites')
+            ->where('site_id', '=', $site_id)
+            ->orWhere('site_declarateur', '=', $site_id)
+            ->get();
+
+            if(is_iterable($incidents)){
+                for ($d=0; $d < count($incidents); $d++) {
+                    $incident_courant = $incidents[$d];
+                                        
+                    if(
+                        ($incident_courant->observation_rex != NULL) &&
+                        ($incident_courant->deja_pris_en_compte == NULL)
+                    ){
+                        $date_declaration = intval(str_replace("-", "", substr($incident_courant->declaration_date, 0, 10)));
+
+                        if(
+                            (($date_declaration == $date_debut) && ($date_declaration < $date_fin)) ||
+                            (($date_declaration > $date_debut) && ($date_declaration < $date_fin)) ||
+                            (($date_declaration > $date_debut) && ($date_declaration == $date_fin)) ||
+                            (($date_declaration == $date_debut) && ($date_declaration == $date_fin))
+                        )
+                        {
+                            array_push($incident_dates_choisit, $incident_courant);
+                        }
+                    }
+            }}
+
+            $pdf = PDF::loadView('PDF/tableau_entre_date',
+            [
+                'incidents' => count($incident_dates_choisit) > 0 ? $incident_dates_choisit : $incidentSites,
+                'Du' => $request->date_debut,
+                'Au' => $request->date_fin,
+                'name' => $site_id ? $site_choisit->name : NULL,
+                'sites' => $sites,
+            ]);
+    
+            return $pdf->download("QteIncident_Du_$request->date_debut._Au_$request->date_fin.pdf", array('Attachment'=> false));
+    
+        }elseif($request->date_debut && $request->date_fin){
+
+            $incidents = Incident::with('categories', 'processus', 'sites')->get();
+
+            if(is_iterable($sites)){
+                for ($z=0; $z < count($sites); $z++) {
+                    $siteCourant = $sites[$z];
+            
+                    $incidentDunSite = array();
+            
+                    if(is_iterable($incidents)){
+                        for ($b=0; $b < count($incidents); $b++) {
+                            $incident = $incidents[$b];
+                
+                            if(
+                                ($incident->observation_rex != NULL) &&
+                                ($incident->deja_pris_en_compte == NULL)
+                            ){
+                                if($incident->site_id){
+                                    if(($incident->site_id == $siteCourant->id) || ($incident->site_declarateur == $siteCourant->id)){
+                                        
+                                        $date_declaration = intval(str_replace("-", "", substr($incident->declaration_date, 0, 10)));
+
+                                        if(
+                                            (($date_declaration == $date_debut) && ($date_declaration < $date_fin)) ||
+                                            (($date_declaration > $date_debut) && ($date_declaration < $date_fin)) ||
+                                            (($date_declaration > $date_debut) && ($date_declaration == $date_fin)) ||
+                                            (($date_declaration == $date_debut) && ($date_declaration == $date_fin))
+                                        )
+                                        {
+                                            array_push($incidentDunSite, $incident);
+                                        }
+                                    }
+                                }
+    
+                            }
+                        }
+                    }
+    
+                    array_push($incidentSites, $incidentDunSite);
+                }
+            }
+    
+            $pdf = PDF::loadView('PDF/tableau_entre_date',
+            [
+                'incidents' => count($incident_dates_choisit) > 0 ? $incident_dates_choisit : $incidentSites,
+                'Du' => $request->date_debut,
+                'Au' => $request->date_fin,
+                'name' => $site_id ? $site_choisit->name : NULL,
+                'sites' => $sites,
+            ]);
+    
+            return $pdf->download("QteIncident_Du_$request->date_debut._Au_$request->date_fin.pdf", array('Attachment'=> false));    
+        }
+    }
+
+    public function print_region_date(Request $request){
+
+        $ouest = 0;
+        $nord_ouest = 0;
+        $sud_ouest = 0;
+        $centre = 0;
+        $littoral = 0;
+        $extreme_nord = 0;
+        $sud = 0;
+        $nord = 0;
+        $adamaoua = 0;
+        $est = 0;
+        
+        $incident_annee_choisit = array();
+        $incidents = Incident::with('categories', 'processus', 'sites')->get();
+
+        if(is_iterable($incidents)){
+            for ($d=0; $d < count($incidents); $d++) {
+                $incident_courant = $incidents[$d];
+                $ann = substr($incident_courant['declaration_date'], 0, 4);
+
+                if(intval($request->annee) == intval($ann)){
+
+                    if(
+                        ($incident_courant['observation_rex'] != NULL) &&
+                        ($incident_courant['deja_pris_en_compte'] == NULL)){
+                        
+                        array_push($incident_annee_choisit, $incident_courant);
+
+                        if($incident_courant->site_id){
+                        switch ($incident_courant->sites->region) {
+                            case 'OUEST':
+                                $ouest +=1;
+                                break;
+                            case 'NORD-OUEST':
+                                $nord_ouest +=1;
+                                break;
+                            case 'SUD-OUEST':
+                                $sud_ouest +=1;
+                                break;
+                            case 'CENTRE':
+                                $centre +=1;
+                                break;
+                            case 'LITTORAL':
+                                $littoral +=1;
+                                break;
+                            case 'EXTREME-NORD':
+                                $extreme_nord +=1;
+                                break;
+                            case 'SUD':
+                                $sud +=1;
+                                break;
+                            case 'NORD':
+                                $nord +=1;
+                                break;
+                            case 'ADAMAOUA':
+                                $adamaoua +=1;
+                                break;
+                            case 'EST':
+                                $est +=1;
+                                break;
+                       
+                            default:
+                                break;
+                        }}
+                    }
+                }
+        }}
+        //dd($est);
+        $pdf = PDF::loadView('PDF/regions', 
+
+        ['incidents' => $incident_annee_choisit,
+        'annee' => $request->annee,
+        'ouest' => $ouest,
+        'nord_ouest' => $nord_ouest,
+        'centre' => $centre,
+        'littoral' => $littoral,
+        'sud' => $sud,
+        'adamaoua' => $adamaoua,
+        'est' => $est,
+        ]);
+        
+        return $pdf->download("QteIncidentParRegion.$request->annee.pdf", array('Attachment'=> false));
+
+    }
+
+    public function generation_incidents_par_site(Request $request){
+        $sites = DB::table('sites')->get();
+        $incident_annee_encour = $this->incident_annee_encour($request->annee);
+        $incidentSites = array();
+
+        if(is_iterable($sites)){
+            for ($z=0; $z < count($sites); $z++) {
+                $siteCourant = $sites[$z];
+        
+                $incidentDunSite = array();
+        
+                if(is_iterable($incident_annee_encour)){
+                    for ($b=0; $b < count($incident_annee_encour); $b++) {
+                        $incident = $incident_annee_encour[$b];
+            
+                        if($incident->site_id){
+                            if(($incident->site_id == $siteCourant->id) || ($incident->site_declarateur == $siteCourant->id)){
+                                array_push($incidentDunSite, $incident);
+                            }
+                        }
+                    }
+                }
+
+                array_push($incidentSites, $incidentDunSite);
             }
         }
 
-        $pdf = PDF::loadView('PDF/incident', ['incident' => $incident]);
-        
-        return $pdf->stream('incident.pdf', array('Attachment'=> false));
-    }
+        $pdf = PDF::loadView('PDF/incidentParSite',
 
+        [
+            'incidentSites' => $incidentSites,
+            'annee' => $request->annee,
+            'sites' => $sites,
+        ]);
+        
+        return $pdf->download("QteIncidentParSite.$request->annee.pdf", array('Attachment'=> false));
+    }
 }

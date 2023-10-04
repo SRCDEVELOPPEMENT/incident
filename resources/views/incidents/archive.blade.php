@@ -25,32 +25,21 @@
                                 <div class="card shadow">
                                     <div class="card-body">  
                                         <div class="row ml-1 mt-4 my-4">
-                                            <div class="col-xs-2">
+                                            <div class="col-xs-2 mr-4">
                                                 <select class="custom-select border-primary" id="emis_recus">
                                                         <option value="">Incident</option>
                                                         <option value="Emis">Emis</option>
                                                         <option value="Reçus">Reçus</option>
                                                 </select>
                                             </div>
-                                            <div class="col-sm-2 text-left">
-                                                <select class="form-control select2" data-categories="{{ json_encode(Session::get('categories')) }}" id="validationCustom04">
-                                                    <option selected value="">Catégorie...</option>
-                                                    @if(Session::has('categories'))
-                                                    @if(is_iterable(Session::get('categories')))
-                                                    @foreach(Session::get('categories') as $categorie)
-                                                    <option value="{{ $categorie->name }}">{{ $categorie->name }}</option>
-                                                    @endforeach
-                                                    @endif
-                                                    @endif
-                                                </select>
-                                                <div class="invalid-feedback"> Please select a valid state. </div>
-                                            </div>
                                             <div class="col-xs-2">
                                                 <select class="custom-select border-primary" id="year_courant_incident">
                                                         <option selected value="">Année</option>
+                                                        @if(is_iterable($years))
                                                         @foreach($years as $year)
                                                         <option value="{{ $year }}">{{ $year }}</option>
                                                         @endforeach
+                                                        @endif
                                                 </select>
                                                 <div class="invalid-feedback"> Please select a valid state. </div>
                                             </div>
@@ -59,9 +48,7 @@
                                                     <input type="date" class="form-control border-primary" id="searchDate">
                                                 </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                <input class="form-control border-primary" id="searchMonth" type="month">
-                                            </div>
+
                                             <div class="text-right col-md-2">
                                                 <input type="text" name="" id="search_text_simple" class="form-control border-primary" placeholder="Search...">
                                             </div>
@@ -73,10 +60,9 @@
                                                     <th>Numéro</th>
                                                     <th></th>
                                                     <th>Description Incident</th>
-                                                    <th>Déclaration</th>
-                                                    <th>Echéance</th>
-                                                    <th>Clôture</th>
-                                                    <th>Catégorie</th>
+                                                    <th>Date Déclaration</th>
+                                                    <th>Date Echéance</th>
+                                                    <th>Date Clôture</th>
                                                     <th>Priorité</th>
                                                     <th></th>
                                                     <th>Tâches</th>
@@ -86,17 +72,18 @@
                                                 </tr>
                                             </thead>
                                             <tbody class="agencies">
+                                                @if(is_iterable($incidents))
                                                 @foreach($incidents as $key => $incident)
                                                     <?php
                                                         $nombre_taches = 0;
-                                                        if(Session::has('tasks')){
-                                                        if(is_iterable(Session::get('tasks'))){
-                                                        for ($i=0; $i < count(Session::get('tasks')); $i++) {
-                                                            $task = Session::get('tasks')[$i];
+                                                        $created = strval(substr($incident->created_at, 0, 10));
+                                                        if(is_iterable($taches)){
+                                                        for ($i=0; $i < count($taches); $i++) {
+                                                            $task = $taches[$i];
                                                             if($task->incident_number == $incident->number){
                                                                 $nombre_taches +=1;
                                                             }
-                                                        }}}
+                                                        }}
                                                     ?>
                                                     <!-- <span class="dot dot-lg bg-primary ml-2"></span> -->
                                                     <tr id="myInc" data-incident="{{ json_encode($incident) }}">
@@ -105,7 +92,7 @@
 
                                                         </td>
                                                         <td>{{ $incident->description }}</td>
-                                                        <td id="createcolumn">{{ substr($incident->created_at, 0, 10) }}</td>
+                                                        <td id="createcolumn">{{ $incident->declaration_date }}</td>
                                                         <td>
                                                             @if($incident->due_date)
                                                             <a  
@@ -124,7 +111,6 @@
                                                             @endif
                                                         </td>
                                                         <td>{{ $incident->closure_date ? $incident->closure_date : '' }}</td>
-                                                        <td>{{ $incident->categories->name }}</td>
                                                         <td>
                                                             <a 
                                                                 @if($incident->priority == 'URGENT')
@@ -149,7 +135,17 @@
                                                                 <span class="fe fe-check"></span>
                                                             </a>
                                                         </td>
-                                                        <td></td>
+                                                        <td>
+                                                                <a 
+                                                                    style="text-decoration:none;" 
+                                                                    type="button" 
+                                                                    href="{{ route('printIncident', ['number' => $incident['number']]) }}"
+                                                                    data-toggle="modal"
+                                                                    data-original-title="Imprimer Cet Incident"
+                                                                    class="fe fe-printer fe-32">
+                                                                </a>
+                                                        </td>
+
                                                         <td></td>
                                                         <td>
                                                             <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -206,12 +202,10 @@
 
                                                                 <a
                                                                     id="infos_incident"
-                                                                    data-sites="{{ json_encode(Session::get('sites')) }}"
-                                                                    data-departements="{{ json_encode(Session::get('departements')) }}"
-                                                                    data-users="{{ json_encode(Session::get('users')) }}"
-                                                                    data-users_incidents="{{ json_encode(Session::get('users_incidents')) }}"
-                                                                    data-number="{{ json_encode($incident) }}"
-                                                                    data-task="{{ json_encode(Session::get('tasks')) }}"
+                                                                    data-sites="{{ json_encode($sites) }}"
+                                                                    data-users="{{ json_encode($users) }}"
+                                                                    data-incident="{{ json_encode($incident) }}"
+                                                                    data-task="{{ $nombre_taches }}"
                                                                     class="dropdown-item mb-1" 
                                                                     href="#!"
                                                                     data-backdrop="static"
@@ -223,7 +217,11 @@
 
                                                                 @if($incident->status == "CLÔTURÉ")
                                                                 <a 
-                                                                    id="commentaire_cloture" 
+                                                                    id="commentaire_cloture"
+                                                                    data-backdrop="static"
+                                                                    data-keyboard="false" 
+                                                                    data-toggle="modal" 
+                                                                    data-target="#modal_commentaire_cloture"
                                                                     data-incident="{{ json_encode($incident) }}" 
                                                                     class="dropdown-item mb-1" 
                                                                     href="#!"><span class="fe fe-message-square mr-4"></span> Commentaire De Clôture
@@ -240,6 +238,7 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
+                                                @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -388,6 +387,32 @@
                                   </div>
     </div>
 
+    <!-- Modal Infos Commentaire De Cloture D'un Incident -->
+    <div id="modal_commentaire_cloture" style="font-family: Century Gothic;" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xs modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-xl" id="verticalModalTitle">
+                                        <i class="fe fe-pocket mr-3" style="font-size:20px;"></i>
+                                    Commentaire De Clôture De L'Incident</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-lg">
+                                    <div class="row mb-4" style="text-align:center">
+                                        <div class=" col-md-6 text-left"><strong>Numéro Incident</strong> </div>
+                                        <div class=" col-md-6 text-right"><span id="comment_num_i"></span></div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="commix"> <span class="fe fe-info mr-1"></span> Commentaire De Clôture De Cet Incident !</label>
+                                        <textarea style="resize:none;" disabled rows="6" class="form-control text-xl" id="commix"></textarea>
+                                        <div class="invalid-feedback"> Please enter a message in the textarea. </div>
+                                    </div>
+                            </div>
+                          </div>
+                        </div>
+    </div> <!-- small modal -->
 
     <!-- MODAL INFO INCIDENT -->
     <div style="font-family: Century Gothic;" id="modal_infos_incidant" class="modal bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -408,12 +433,23 @@
                                                 <div class="row text-xl">
                                                     <div class="text-left col-md-6">Incident Numéro</div>
                                                     <div class="text-right col-md-6">
-                                                    <strong class="card-title"><span id="inf_number"></span></strong>
+                                                    <strong><span class="inf_numbers"></span></strong>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="card-body">
                                             <div class="list-group list-group-flush my-n3">
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
+                                                        <div class="col">
+                                                            <small><strong></strong></small>
+                                                            <div class="my-0 big"><span class="declarateur"></span></div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <small class="badge badge-pill badge-light text-uppercase">Déclarateur De L'incident</small>
+                                                        </div>
+                                                    </div>
+                                                </div> <!-- / .row -->
 
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
@@ -447,6 +483,28 @@
                                                     <small class="badge badge-pill badge-light text-uppercase">Date D'échéance</small>
                                                     </div>
                                                 </div>
+                                                </div> <!-- / .row -->
+                                                <div class="list-group-item">
+                                                    <div class="row align-items-center">
+                                                    <div class="col">
+                                                    <small><strong></strong></small>
+                                                    <div class="my-0 big"><span class="cloture_daaaate"></span></div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                    <small class="badge badge-pill badge-light text-uppercase">Date De Clôture</small>
+                                                    </div>
+                                                </div>
+                                                </div> <!-- / .row -->
+                                                <div class="list-group-item">
+                                                  <div class="row align-items-center">
+                                                    <div class="col">
+                                                        <small><strong></strong></small>
+                                                        <div class="my-0 big"><span class="stat_inci"></span></div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <small class="badge badge-pill badge-light text-uppercase">Statut</small>
+                                                    </div>
+                                                  </div>
                                                 </div> <!-- / .row -->
                                                 <div class="list-group-item">
                                                     <div class="row align-items-center">
@@ -511,28 +569,6 @@
                                                         </div>
                                                         <div class="col-auto">
                                                             <small class="badge badge-pill badge-light text-uppercase">Tâches</small>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- / .row -->
-                                                <div class="list-group-item">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <small><strong></strong></small>
-                                                            <div class="my-0 big"><span class="site_emeter"></span></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                            <small class="badge badge-pill badge-light text-uppercase">Entité Emétteur</small>
-                                                        </div>
-                                                    </div>
-                                                </div> <!-- / .row -->
-                                                <div class="list-group-item">
-                                                    <div class="row align-items-center">
-                                                        <div class="col">
-                                                            <small><strong></strong></small>
-                                                            <div class="my-0 big"><span class="syte_receppt"></span></div>
-                                                        </div>
-                                                        <div class="col-auto">
-                                                          <small class="badge badge-pill badge-light text-uppercase">Entité Récèpteur</small>
                                                         </div>
                                                     </div>
                                                 </div> <!-- / .row -->

@@ -13,7 +13,7 @@
                         <div class="row my-4"> 
                                 <div class="col-md-6 text-left text-xl">
                                     <h1 class="mb-2">
-                                        <span class="fe fe-info mr-2"></span>    
+                                        <span class="fe fe-info mr-2"></span>
                                         Liste Des Utilisateurs De L'application
                                     </h1>
                                 </div>
@@ -88,7 +88,6 @@
                                                                             href="#"
                                                                             class="dropdown-item"
                                                                             id="btnEdit"
-                                                                            data-departements="{{ $departements }}"
                                                                             data-sites="{{ $sites }}"
                                                                             data-user="{{ $user }}"
                                                                             data-password="{{ $user->password }}"
@@ -173,7 +172,7 @@
                                                             <div class="form-group">
                                                                 <label for=""><i class="fe fe-map-pin mr-2"></i>Lieu De Travail </label>
                                                             </div>
-                                                            <fieldset class="my-4" style="border: 1px solid silver; padding: 3px; border-radius: 4px; font-size: 1em;">
+                                                            <!-- <fieldset class="my-4" style="border: 1px solid silver; padding: 3px; border-radius: 4px; font-size: 1em;">
                                                             <div style="margin-left:1em; margin-top:1em;" class="row mb-4">
                                                                 <div class="form-group mr-4">
                                                                     <input checked="checked" style="width:1em; height:1em; font-family: Century Gothic;" type="checkbox" name="ag" id="agency">
@@ -192,8 +191,17 @@
                                                                     <label for="service">DANS UN LDI</label>
                                                                 </div>
                                                             </div>
-                                                            </fieldset>
-                                                            <div data-sites="{{ $sites }}" data-departements="{{ $departements }}" class="camer form-group mb-4">
+                                                            </fieldset> -->
+                                                            <div class="form-group">
+                                                                <label for="role"><i class="fe fe-user mr-2"></i>Site<span style="color:red;"></span></label>
+                                                                <select style="font-size:20px;" class="form-control select2" id="site" name="site_id">
+                                                                    <option value="">Choisissez...</option>
+                                                                    @foreach($sites as $site)
+                                                                        <option value="{{ $site->id }}">{{ $site->name }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <div data-sites="{{ $sites }}" class="camer form-group mb-4">
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="email"><i class="fe fe-mail mr-2"></i> Email <span style="color:red;"> *</span></label>

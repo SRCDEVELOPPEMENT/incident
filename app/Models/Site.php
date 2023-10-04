@@ -8,6 +8,8 @@ use App\Models\Incident;
 use App\Models\User;
 use App\Models\Type;
 use App\Models\Tache;
+use App\Models\Categorie;
+
 
 class Site extends Model
 {
@@ -16,7 +18,8 @@ class Site extends Model
     protected $fillable = [
         'id',
         'name',
-        'type_id'
+        'type_id',
+        'region'
     ];
 
     public function incidents()
@@ -38,5 +41,11 @@ class Site extends Model
     {
         return $this->hasMany(Tache::class);
     }
+
+    public function categories()
+    {
+        return $this->hasMany(Categorie::class);
+    }
+
 
 }

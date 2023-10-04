@@ -3,8 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="{{ url('assets/images/sorepco.jpg') }}" type="image/x-icon"/>
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>{{ config('app.name', 'TRACKING-INCIDENT') }}</title>
+        <title>TRACKING-INCIDENT</title>
         
         <!-- Font Awesome Link Icon -->
         <link href="{{ url('fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
@@ -24,14 +25,14 @@
 
         <!-- Scripts -->
         <script src="{{ asset('js/app.js') }}" defer></script>
-        @toastr_css
+        <!-- @toastr_css -->
     </head>
     <body>
         <div id="cent" class="font-sans text-gray-900 antialiased">
             {{ $slot }}
         </div>
     </body>
-@jquery
+<!-- @jquery
 @toastr_js
-@toastr_render
+@toastr_render -->
 </html>

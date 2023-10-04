@@ -21,7 +21,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | if true you can access to the demo documentation of the notify package
-    | here: http://localhost:8000/notify/demo, by default is true
+    | here: ://localhost:8000/notify/demo, by default is true
     |
     */
 

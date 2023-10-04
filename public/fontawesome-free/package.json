@@ -8,40 +8,40 @@
     "svg",
     "bootstrap"
   ],
-  "homepage": "https://fontawesome.com",
+  "homepage": "fontawesome.com",
   "bugs": {
-    "url": "http://github.com/FortAwesome/Font-Awesome/issues"
+    "url": "github.com/FortAwesome/Font-Awesome/issues"
   },
   "author": {
     "name": "Dave Gandy",
     "email": "dave@fontawesome.com",
-    "web": "http://twitter.com/davegandy"
+    "web": "twitter.com/davegandy"
   },
   "contributors": [
     {
       "name": "Brian Talbot",
-      "web": "http://twitter.com/talbs"
+      "web": "twitter.com/talbs"
     },
     {
       "name": "Travis Chase",
-      "web": "http://twitter.com/supercodepoet"
+      "web": "twitter.com/supercodepoet"
     },
     {
       "name": "Rob Madole",
-      "web": "http://twitter.com/robmadole"
+      "web": "twitter.com/robmadole"
     },
     {
       "name": "Geremia Taglialatela",
-      "web": "http://twitter.com/gtagliala"
+      "web": "twitter.com/gtagliala"
     },
     {
       "name": "Mike Wilkerson",
-      "web": "http://twitter.com/mw77"
+      "web": "twitter.com/mw77"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/FortAwesome/Font-Awesome"
+    "url": "github.com/FortAwesome/Font-Awesome"
   },
   "engines": {
     "node": ">=6"

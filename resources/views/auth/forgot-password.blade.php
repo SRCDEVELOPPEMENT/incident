@@ -102,7 +102,7 @@
                     },
                     success: function(data){
                         if(data.length == 2){
-                        window.location.href = 'http://localhost:8000/login';
+                        //window.location.href = 'http://localhost:8000/login';
                         }
                     } 
                 })

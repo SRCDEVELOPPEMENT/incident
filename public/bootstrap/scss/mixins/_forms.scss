@@ -27,7 +27,6 @@
 }
 
 // This mixin uses an `if()` technique to be compatible with Dart Sass
-// See https://github.com/sass/sass/issues/1873#issuecomment-152293725 for more details
 @mixin form-validation-state-selector($state) {
   @if ($state == "valid" or $state == "invalid") {
     .was-validated #{if(&, "&", "")}:#{$state},
@@ -65,7 +64,6 @@
     background-color: rgba($color, $form-feedback-tooltip-opacity);
     @include border-radius($form-feedback-tooltip-border-radius);
 
-    // See https://github.com/twbs/bootstrap/pull/31557
     // Align tooltip to form elements
     .form-row > .col > &,
     .form-row > [class*="col-"] > & {

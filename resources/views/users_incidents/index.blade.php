@@ -7,7 +7,7 @@
                 <div class="col-12">
                     <div class="row" style="font-family: Century Gothic;">
                         <div class="col-md-7 text-left my-4">
-                            <a title="Retour A La Liste Des Incidents" href="{{ URL::to('incidents') }}" style="border-radius: 3em;" class="btn btn-outline-primary"><span class="fe fe-corner-up-left fe-16 mr-2"></span><span class="text">Retour</span></a>
+                            <a title="Retour A La Liste Des Incidents" href="{{ route('incidents', ['in' => $in]) }}" style="border-radius: 3em;" class="btn btn-outline-primary"><span class="fe fe-corner-up-left fe-16 mr-2"></span><span class="text">Retour</span></a>
                         </div>
                         <div class="col-md-5 text-right my-4">
                             <span class="mr-4">NUMERO INCIDENT</span>
@@ -138,7 +138,6 @@
                                             </label>
                                             <select 
                                                     style="font-size: 1.2em;" 
-                                                    data-departements="{{ $departements }}" 
                                                     data-types="{{ $types }}" 
                                                     data-sites="{{ $sites }}" 
                                                     class="custom-select border-success my-4" 
@@ -149,11 +148,6 @@
 
                                                 <optgroup label="Liste Département">
                                                             <option selected value="">Choisissez...</option>
-                                                            @if(is_iterable($departements))
-                                                            @foreach($departements as $departement)
-                                                            <option value="{{ $departement->id }}">{{ $departement->name }}</option>
-                                                            @endforeach
-                                                            @endif
                                                 </optgroup>
                                                 <optgroup label="Liste Type Site">
                                                             @if(is_iterable($types))

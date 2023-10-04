@@ -17,6 +17,7 @@ $(document).on('click', '#btnType_Site', function(){
                     $('#dataTable-1').append(`
                     <tr style="font-size:15px;">
                         <td><label>${type.name}</label></td>
+                        <td><label>${type.description ? type.description : ""}</label></td>
                         <td>
                             <button class="btn btn-sm dropdown-toggle more-horizontal" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="text-muted sr-only">Action</span>
@@ -45,6 +46,7 @@ $(document).on('click', '#btnType_Site', function(){
                     </tr>
                     `)
                     $('#type_site').val('');
+                    $('#descr').val('');
                 }else{
                     //alert("Veuillez Modifier Votre Site Car Déja Existant !");
                 }

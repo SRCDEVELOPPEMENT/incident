@@ -17,12 +17,13 @@
                         $id_tache = intval($_POST['id']);
                         $user_id = $_POST['user_id'];
                         $numero = $_POST['numero'];
+                        $ta = $_POST['ta'];
                         $date = date("Y-m-d");
                         $datetime = date("Y-m-d");
 
-                        $serverName = "DEFFO-ARMEL\MSSQL2";
+                        $serverName = "SRVALFRESCO";
                         $uid = "sa";
-                        $pwd = "Password01*";
+                        $pwd = "dir@SIEX!1989";
                         $databaseName = "incident";
                         $connectionInfo = array( "UID"=>$uid,                
                                                         "PWD"=>$pwd,
@@ -43,41 +44,8 @@
 
                         if ($stmt && $stmt2)
                         {
-                            // $Query_select = "SELECT * FROM dbo.fichiers WHERE filename = ? AND tache_id = ?";
-                            // $parameters = array($target_file, $id_tache);
 
-                            // $tab_files = array();
-                            // $stmt3 = sqlsrv_query($conn, $Query_select, $parameters);
-
-                            // if($stmt3){
-                            //     while($row = sqlsrv_fetch_array($stmt3, SQLSRV_FETCH_NUMERIC))
-                            //     {
-                            //         $url = $row;
-                            //         array_push($tab_files, $url);
-                            //     }
-                                
-                            //     if(count($tab_files) > 0){
-
-                            //         if(Session::has('files')){
-                            //             $newFiles = array();
-                        
-                            //             for ($w=0; $w < count(Session::get('files')); $w++) {
-                            //                 $fil = Session::get('files')[$w];
-                            //                 array_push($newFiles, $fil);
-                            //             }
-
-                            //             for ($t=0; $t < count($tab_files); $t++) {
-                            //                 $f = $tab_files[$t];
-                            //                 array_push($newFiles, $f);
-                            //             }
-                                        
-                            //             Session::put('files', $newFiles);
-                            //             dd($tab_files);
-                            //         }
-                            //     }
-                            // }
-
-                            header("Location: tasks");
+                            header("Location: tasks?ta=$ta");
                             
                         }else{
                             //die( print_r( sqlsrv_errors(), true));
@@ -92,9 +60,9 @@
             $number = $_POST['numero_down'];
             $idFile = $_POST['grant'];
 
-            $serverName = "DEFFO-ARMEL\MSSQL2"; 
+            $serverName = "SRVALFRESCO";
             $uid = "sa";   
-            $pwd = "Password01*";  
+            $pwd = "dir@SIEX!1989";
             $databaseName = "incident"; 
             $connectionInfo = array( "UID"=>$uid,                            
                                             "PWD"=>$pwd,                            

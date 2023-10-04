@@ -15,6 +15,8 @@ class Incident extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'number', 
         'description',
@@ -29,9 +31,12 @@ class Incident extends Model
         'created_at',
         'battles',
         'site_id',
+        'site_declarateur',
+        'site_incident',
         'deja_pris_en_compte',
         'observation_rex',
         'comment',
+        'fullname_declarateur',
     ];
 
     public function categories()
@@ -44,6 +49,10 @@ class Incident extends Model
         return $this->belongsTo(Site::class, 'site_id');
     }
 
+    public function siteDeclarateurs()
+    {
+        return $this->belongsTo(Site::class, 'site_declarateur');
+    }
 
     public function processus()
     {
